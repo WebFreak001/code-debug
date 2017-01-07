@@ -18,6 +18,7 @@
 	"main": "./out/src/frontend/extension",
 	"activationEvents": [
 		"onCommand:code-debug.examineMemoryLocation",
+		"onCommand:code-debug.dockerName",
 		"onCommand:code-debug.getFileNameNoExt",
 		"onCommand:code-debug.getFileBasenameNoExt"
 	],
@@ -62,7 +63,9 @@
 				},
 				"variables": {
 					"FileBasenameNoExt": "code-debug.getFileBasenameNoExt",
-					"FileNameNoExt": "code-debug.getFileNameNoExt"
+					"FileNameNoExt": "code-debug.getFileNameNoExt",
+					"DockerName": "code-debug.dockerName",
+					"DockerPid": "code-debug.dockerPid"
 				},
 				"configurationAttributes": {
 					"launch": {

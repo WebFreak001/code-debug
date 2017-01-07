@@ -3,10 +3,16 @@ import * as net from "net";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
+import * as picker from "./picker";
 
 export function activate(context: vscode.ExtensionContext) {
+	var dockerPicker = new picker.DockerPicker();
+	var dockerPidPicker = new picker.DockerPidPicker();
+
 	context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("debugmemory", new MemoryContentProvider()));
 	context.subscriptions.push(vscode.commands.registerCommand("code-debug.examineMemoryLocation", examineMemory));
+	context.subscriptions.push(vscode.commands.registerCommand("code-debug.dockerName", function (launchConfig) {return dockerPicker.pickItem(launchConfig);}));
+	context.subscriptions.push(vscode.commands.registerCommand("code-debug.dockerPid", function (launchConfig) {return dockerPidPicker.pickItem(launchConfig);}));
 	context.subscriptions.push(vscode.commands.registerCommand("code-debug.getFileNameNoExt", () => {
 		if (!vscode.window.activeTextEditor || !vscode.window.activeTextEditor.document || !vscode.window.activeTextEditor.document.fileName) {
 			vscode.window.showErrorMessage("No editor with valid file name active");
