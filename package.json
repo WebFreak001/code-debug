@@ -218,7 +218,12 @@
 							},
 							"autorun": {
 								"type": "array",
-								"description": "GDB commands to run when starting to debug",
+								"description": "GDB commands to be run after connection",
+								"default": []
+							},
+							"autorunBefore": {
+								"type": "array",
+								"description": "GDB commands to be run before connection",
 								"default": []
 							},
 							"ssh": {

@@ -24,6 +24,7 @@ export interface AttachRequestArguments {
 	debugger_args: string[];
 	executable: string;
 	remote: boolean;
+	autorunBefore : string[];
 	autorun: string[];
 	ssh: SSHArguments;
 	printCalls: boolean;
@@ -150,7 +151,7 @@ class GDBDebugSession extends MI2DebugSession {
 		}
 		else {
 			if (args.remote) {
-				this.miDebugger.connect(args.cwd, args.executable, args.target).then(() => {
+				this.miDebugger.connect(args.cwd, args.executable, args.target, args.autorunBefore).then(() => {
 					if (args.autorun)
 						args.autorun.forEach(command => {
 							this.miDebugger.sendUserInput(command);

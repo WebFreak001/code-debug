@@ -211,8 +211,9 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	connect(cwd: string, executable: string, target: string): Thenable<any> {
+	connect(cwd: string, executable: string, target: string, autorunBeforeCmds: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
+			let commands = [];
 			let args = [];
 			if (executable && !nativePath.isAbsolute(executable))
 				executable = nativePath.join(cwd, executable);
@@ -220,15 +221,20 @@ export class MI2 extends EventEmitter implements IBackend {
 				args = args.concat([executable], this.preargs);
 			else
 				args = this.preargs;
+				
+			if(autorunBeforeCmds === undefined)
+				autorunBeforeCmds = ["gdb-set target-async on"];
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			Promise.all([
-				this.sendCommand("gdb-set target-async on"),
-				this.sendCommand("environment-directory \"" + escape(cwd) + "\""),
-				this.sendCommand("target-select remote " + target)
-			]).then(() => {
+			autorunBeforeCmds.forEach(command => {
+				commands.push(this.sendCommand(command));
+			});
+			
+			commands.push(this.sendCommand("environment-directory \"" + escape(cwd) + "\""));
+			commands.push(this.sendCommand("target-select remote " + target));
+			Promise.all(commands).then(() => {
 				this.emit("debug-ready")
 				resolve();
 			}, reject);
