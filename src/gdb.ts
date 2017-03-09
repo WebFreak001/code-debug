@@ -95,7 +95,7 @@ class GDBDebugSession extends MI2DebugSession {
 
 
 
-	protected launchRequest(response: DebugProtocol.LaunchResponse, args: CommonRequestArguments): void {
+	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args);
 		this.initDebugger();
 		this.initiliaseDefaultValueArgs(args, false);
@@ -142,7 +142,7 @@ class GDBDebugSession extends MI2DebugSession {
 		}
 	}
 
-	protected attachRequest(response: DebugProtocol.AttachResponse, args: CommonRequestArguments): void {
+	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
 		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args);
 		this.initDebugger();
 		this.initiliaseDefaultValueArgs(args, true);
