@@ -108,8 +108,17 @@
 							},
 							"autorun": {
 								"type": "array",
-								"description": "GDB commands to run when starting to debug",
+								"description": "GDB commands to be run after connection",
 								"default": []
+							},
+							"autorunBefore": {
+								"type": "array",
+								"description": "GDB commands to be run before connection",
+								"default": [
+									"gdb-set target-async on",
+									"environment-directory \"$cwd\"",
+									"target-select $target"
+								]
 							},
 							"ssh": {
 								"required": [
@@ -218,8 +227,17 @@
 							},
 							"autorun": {
 								"type": "array",
-								"description": "GDB commands to run when starting to debug",
+								"description": "GDB commands to be run after connection",
 								"default": []
+							},
+							"autorunBefore": {
+								"type": "array",
+								"description": "GDB commands to be run before connection",
+								"default": [
+									"gdb-set target-async on",
+									"environment-directory \"$cwd\"",
+									"target-select remote $target"
+								]
 							},
 							"ssh": {
 								"required": [
@@ -463,8 +481,17 @@
 							},
 							"autorun": {
 								"type": "array",
-								"description": "lldb commands to run when starting to debug",
+								"description": "lldb commands to be run after connection",
 								"default": []
+							},
+							"autorunBefore": {
+								"type": "array",
+								"description": "lldb commands to be run before connection",
+								"default": [
+									"gdb-set target-async on",
+									"environment-directory \"$cwd\"",
+									"target-select $target"
+								]
 							},
 							"ssh": {
 								"required": [
@@ -568,8 +595,17 @@
 							},
 							"autorun": {
 								"type": "array",
-								"description": "lldb commands to run when starting to debug",
+								"description": "lldb commands to be run after connection",
 								"default": []
+							},
+							"autorunBefore": {
+								"type": "array",
+								"description": "lldb commands to be run before connection",
+								"default": [
+									"gdb-set target-async on",
+									"environment-directory \"$cwd\"",
+									"target-select $target"
+								]
 							}
 						}
 					}
@@ -700,8 +736,17 @@
 							},
 							"autorun": {
 								"type": "array",
-								"description": "mago commands to run when starting to debug",
+								"description": "mago commands to be run after connection",
 								"default": []
+							},
+							"autorunBefore": {
+								"type": "array",
+								"description": "mago commands to be run before connection",
+								"default": [
+									"gdb-set target-async on",
+									"environment-directory \"$cwd\"",
+									"target-select $target"
+								]
 							}
 						}
 					},
@@ -745,8 +790,17 @@
 							},
 							"autorun": {
 								"type": "array",
-								"description": "mago commands to run when starting to debug",
+								"description": "mago commands to be run after connection",
 								"default": []
+							},
+							"autorunBefore": {
+								"type": "array",
+								"description": "mago commands to be run before connection",
+								"default": [
+									"gdb-set target-async on",
+									"environment-directory \"$cwd\"",
+									"target-select $target"
+								]
 							}
 						}
 					}

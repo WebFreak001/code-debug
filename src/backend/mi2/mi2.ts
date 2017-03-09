@@ -1,4 +1,5 @@
 import { Breakpoint, IBackend, Stack, SSHArguments, Variable } from "../backend"
+import { escape } from "../mi_parse"
 import * as ChildProcess from "child_process"
 import { EventEmitter } from "events"
 import { parseMI, MINode } from '../mi_parse';
@@ -9,10 +10,6 @@ import { posix } from "path"
 import * as nativePath from "path"
 let path = posix;
 var Client = require("ssh2").Client;
-
-export function escape(str: string) {
-	return str.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
-}
 
 const nonOutput = /^(?:\d*|undefined)[\*\+\=]|[\~\@\&\^]/;
 const gdbMatch = /(?:\d*|undefined)\(gdb\)/;
@@ -31,7 +28,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		super();
 	}
 
-	load(cwd: string, target: string, procArgs: string, separateConsole: string): Thenable<any> {
+	load(cwd: string, target: string, autorunBeforeCmds: string[], procArgs: string, separateConsole: string): Thenable<any> {
 		if (!nativePath.isAbsolute(target))
 			target = nativePath.join(cwd, target);
 		return new Promise((resolve, reject) => {
@@ -41,7 +38,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			let promises = this.initCommands(target, cwd);
+			let promises = this.initCommands(target, cwd, autorunBeforeCmds);
 			if (procArgs && procArgs.length)
 				promises.push(this.sendCommand("exec-arguments " + procArgs));
 			if (process.platform == "win32") {
@@ -72,7 +69,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	ssh(args: SSHArguments, cwd: string, target: string, procArgs: string, separateConsole: string, attach: boolean): Thenable<any> {
+	ssh(args: SSHArguments, cwd: string, target: string, autorunBeforeCmds: string[], procArgs: string, separateConsole: string, attach: boolean): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			this.isSSH = true;
 			this.sshReady = false;
@@ -143,7 +140,7 @@ export class MI2 extends EventEmitter implements IBackend {
 						this.emit("quit");
 						this.sshConn.end();
 					}).bind(this));
-					let promises = this.initCommands(target, cwd, true, attach);
+					let promises = this.initCommands(target, cwd, autorunBeforeCmds, true, attach);
 					promises.push(this.sendCommand("environment-cd \"" + escape(cwd) + "\""));
 					if (procArgs && procArgs.length && !attach)
 						promises.push(this.sendCommand("exec-arguments " + procArgs));
@@ -161,7 +158,8 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	protected initCommands(target: string, cwd: string, ssh: boolean = false, attach: boolean = false) {
+	protected initCommands(target: string, cwd: string, autorunBeforeCmds: string[], ssh: boolean = false, attach: boolean = false) {
+		let cmds = [];
 		if (ssh) {
 			if (!path.isAbsolute(target))
 				target = path.join(cwd, target);
@@ -170,17 +168,17 @@ export class MI2 extends EventEmitter implements IBackend {
 			if (!nativePath.isAbsolute(target))
 				target = nativePath.join(cwd, target);
 		}
-		var cmds = [
-			this.sendCommand("gdb-set target-async on", true),
-			this.sendCommand("environment-directory \"" + escape(cwd) + "\"", true)
-		];
+		autorunBeforeCmds.forEach(command => {
+			cmds.push(this.sendCommand(command));
+		});
 		if (!attach)
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
 		return cmds;
 	}
 
-	attach(cwd: string, executable: string, target: string): Thenable<any> {
+	attach(cwd: string, executable: string, target: string, autorunBeforeCmds: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
+			let cmds = [];
 			let args = [];
 			if (executable && !nativePath.isAbsolute(executable))
 				executable = nativePath.join(cwd, executable);
@@ -196,39 +194,38 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			var commands = [
-				this.sendCommand("gdb-set target-async on"),
-				this.sendCommand("environment-directory \"" + escape(cwd) + "\"")
-			];
+			autorunBeforeCmds.forEach(command => {
+				cmds.push(this.sendCommand(command));
+			});
+
 			if (isExtendedRemote) {
-				commands.push(this.sendCommand("target-select " + target));
-				commands.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
+				cmds.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
 			}
-			Promise.all(commands).then(() => {
+			Promise.all(cmds).then(() => {
 				this.emit("debug-ready")
 				resolve();
 			}, reject);
 		});
 	}
 
-	connect(cwd: string, executable: string, target: string): Thenable<any> {
+	connect(cwd: string, executable: string, target: string, autorunBeforeCmds: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
+			let commands = [];
 			let args = [];
 			if (executable && !nativePath.isAbsolute(executable))
 				executable = nativePath.join(cwd, executable);
 			if (executable)
 				args = args.concat([executable], this.preargs);
 			else
-				args = this.preargs;
+				args = this.preargs;	
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			Promise.all([
-				this.sendCommand("gdb-set target-async on"),
-				this.sendCommand("environment-directory \"" + escape(cwd) + "\""),
-				this.sendCommand("target-select remote " + target)
-			]).then(() => {
+			autorunBeforeCmds.forEach(command => {
+				commands.push(this.sendCommand(command));
+			});
+			Promise.all(commands).then(() => {
 				this.emit("debug-ready")
 				resolve();
 			}, reject);
