@@ -1,4 +1,5 @@
-import { MI2, escape } from "./mi2"
+import { MI2 } from "./mi2"
+import { escape } from "../mi_parse"
 import { Breakpoint } from "../backend"
 import * as ChildProcess from "child_process"
 import { posix } from "path"
@@ -6,7 +7,8 @@ import * as nativePath from "path"
 let path = posix;
 
 export class MI2_LLDB extends MI2 {
-	protected initCommands(target: string, cwd: string, ssh: boolean = false, attach: boolean = false) {
+	protected initCommands(target: string, cwd: string, autorunBeforeCmds: string[], ssh: boolean = false, attach: boolean = false) {
+		let cmds = [];
 		if (ssh) {
 			if (!path.isAbsolute(target))
 				target = path.join(cwd, target);
@@ -15,25 +17,26 @@ export class MI2_LLDB extends MI2 {
 			if (!nativePath.isAbsolute(target))
 				target = nativePath.join(cwd, target);
 		}
-		var cmds = [
-			this.sendCommand("gdb-set target-async on")
-		];
+		autorunBeforeCmds.forEach(command => {
+			cmds.push(this.sendCommand(command));
+		});
 		if (!attach)
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
 		return cmds;
 	}
 
-	attach(cwd: string, executable: string, target: string): Thenable<any> {
+	attach(cwd: string, executable: string, target: string, autorunBeforeCmds: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
+			let cmds = [];
 			this.process = ChildProcess.spawn(this.application, this.preargs, { cwd: cwd });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			Promise.all([
-				this.sendCommand("gdb-set target-async on"),
-				this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""),
-				this.sendCommand("target-attach " + target)
-			]).then(() => {
+			autorunBeforeCmds.forEach(command => {
+				cmds.push(this.sendCommand(command));
+			});
+			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""));
+			Promise.all(cmds).then(() => {
 				this.emit("debug-ready");
 				resolve();
 			}, reject);

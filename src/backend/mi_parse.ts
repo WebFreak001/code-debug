@@ -4,6 +4,10 @@ export interface MIInfo {
 	resultRecords: { resultClass: string, results: [string, any][] };
 }
 
+export function escape(str: string) {
+	return str.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+}
+
 var octalMatch = /^[0-7]{3}/;
 function parseString(str: string): string {
 	var ret = new Buffer(str.length * 4);
