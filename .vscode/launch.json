@@ -7,7 +7,9 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": ["--extensionDevelopmentPath=${workspaceRoot}" ],
+			"args": [
+				"--extensionDevelopmentPath=${workspaceRoot}"
+			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [
@@ -19,10 +21,14 @@
 			"name": "code-debug server",
 			"type": "node",
 			"request": "launch",
-			"runtimeArgs": [ "--nolazy" ],
+			"runtimeArgs": [
+				"--nolazy"
+			],
 			"program": "${workspaceRoot}/src/gdb.ts",
 			"stopOnEntry": false,
-			"args": [ "--server=4711" ],
+			"args": [
+				"--server=4711"
+			],
 			"sourceMaps": true,
 			"outFiles": [
 				"${workspaceRoot}/out/**/*.js"
@@ -35,7 +41,10 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test" ],
+			"args": [
+				"--extensionDevelopmentPath=${workspaceRoot}",
+				"--extensionTestsPath=${workspaceRoot}/out/test"
+			],
 			"stopOnEntry": false,
 			"sourceMaps": true,
 			"outFiles": [

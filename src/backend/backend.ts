@@ -39,6 +39,7 @@ export interface SSHArguments {
 	x11port: number;
 	x11host: string;
 	bootstrap: string;
+	relative: boolean;
 }
 
 export interface IBackend {
