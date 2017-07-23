@@ -31,6 +31,7 @@ export class MI2DebugSession extends DebugSession {
 	protected isSSH: boolean;
 	protected trimCWD: string;
 	protected switchCWD: string;
+	protected relative: boolean;
 	protected started: boolean;
 	protected crashed: boolean;
 	protected debugReady: boolean;
@@ -209,7 +210,9 @@ export class MI2DebugSession extends DebugSession {
 				let path = args.source.path;
 				if (this.isSSH) {
 					path = relative(this.trimCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
-					path = resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
+					if (!this.relative) {
+						path = resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
+					}
 				}
 				let all = [];
 				args.breakpoints.forEach(brk => {

@@ -70,6 +70,9 @@ class GDBDebugSession extends MI2DebugSession {
 				args.ssh.x11host = "localhost";
 			if (args.ssh.remotex11screen === undefined)
 				args.ssh.remotex11screen = 0;
+			if (args.ssh.relative === undefined)
+				args.ssh.relative = false;
+			this.relative = args.ssh.relative;
 			this.isSSH = true;
 			this.trimCWD = args.cwd.replace(/\\/g, "/");
 			this.switchCWD = args.ssh.cwd;
