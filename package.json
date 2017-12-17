@@ -341,7 +341,7 @@
 						"description": "Attaches to a running program pid using gdb",
 						"body": {
 							"type": "gdb",
-							"request": "launch",
+							"request": "attach",
 							"name": "${2:Attach to PID}",
 							"target": "${1:[PID]}",
 							"cwd": "^\"\\${workspaceRoot}\""
@@ -661,7 +661,7 @@
 						"description": "Attaches to a running program pid using lldb-mi",
 						"body": {
 							"type": "lldb-mi",
-							"request": "launch",
+							"request": "attach",
 							"name": "${2:Attach to PID}",
 							"target": "${1:[PID]}",
 							"cwd": "^\"\\${workspaceRoot}\""
@@ -868,7 +868,7 @@
 						"description": "Attaches to a running program pid using mago-mi",
 						"body": {
 							"type": "mago-mi",
-							"request": "launch",
+							"request": "attach",
 							"name": "${2:Attach to PID}",
 							"target": "${1:[PID]}",
 							"cwd": "^\"\\${workspaceRoot}\""
