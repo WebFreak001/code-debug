@@ -292,4 +292,15 @@ suite("GDB Value Expansion", () => {
 			}
 		]);
 	});
+	test("float values", () => {
+		let node = `{ intval1 = 123, floatval1 = 123.456, intval2 = 3, floatval2 = 234.45 }`;
+		let variables = expandValue(variableCreate, node);
+
+		assert.deepEqual(variables, [
+			{ name: "intval1", value: "123", variablesReference: 0 },
+			{ name: "floatval1", value: "123.456", variablesReference: 0 },
+			{ name: "intval2", value: "3", variablesReference: 0 },
+			{ name: "floatval2", value: "234.45", variablesReference: 0 }
+		]);
+	});
 });
