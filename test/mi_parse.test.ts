@@ -173,4 +173,9 @@ suite("MI Parse", () => {
 		assert.equal(MINode.valueOf(obj[1], "@frame.fullname"), undefined);
 		assert.equal(MINode.valueOf(obj[1], "@frame.line"), undefined);
 	});
+	test("empty string values", () => {
+		let parsed = parseMI(`15^done,register-names=["r0","pc","","xpsr","","control"]`);
+		let result = parsed.result('register-names');
+		assert.deepEqual(result, ["r0", "pc", "", "xpsr", "", "control"]);
+	});
 });
