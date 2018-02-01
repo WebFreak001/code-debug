@@ -11,6 +11,11 @@ export interface Breakpoint {
 	countCondition?: string;
 }
 
+export interface Thread {
+	id: number;
+	name: string;
+}
+
 export interface Stack {
 	level: number;
 	address: string;
@@ -58,9 +63,10 @@ export interface IBackend {
 	addBreakPoint(breakpoint: Breakpoint): Thenable<[boolean, Breakpoint]>;
 	removeBreakPoint(breakpoint: Breakpoint): Thenable<boolean>;
 	clearBreakPoints(): Thenable<any>;
-	getStack(maxLevels: number): Thenable<Stack[]>;
+	getThreads(): Thenable<Thread[]>;
+	getStack(maxLevels: number, thread: number): Thenable<Stack[]>;
 	getStackVariables(thread: number, frame: number): Thenable<Variable[]>;
-	evalExpression(name: string): Thenable<any>;
+	evalExpression(name: string, thread: number, frame: number): Thenable<any>;
 	isReady(): boolean;
 	changeVariable(name: string, rawValue: string): Thenable<any>;
 	examineMemory(from: number, to: number): Thenable<any>;
@@ -114,12 +120,8 @@ export class VariableObject {
 			evaluateName: this.name,
 			value: (this.value === void 0) ? "<unknown>" : this.value,
 			type: this.type,
-			// kind: this.displayhint,
 			variablesReference: this.id
 		};
-		if (this.displayhint) {
-			res.kind = this.displayhint;
-		}
 		return res;
 	}
 }

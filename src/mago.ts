@@ -32,7 +32,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 
 class MagoDebugSession extends MI2DebugSession {
 	public constructor(debuggerLinesStartAt1: boolean, isServer: boolean = false) {
-		super(debuggerLinesStartAt1, isServer, 0);
+		super(debuggerLinesStartAt1, isServer);
 	}
 
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {

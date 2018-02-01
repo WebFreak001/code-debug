@@ -5,6 +5,7 @@ const variableRegex = /^[a-zA-Z_\-][a-zA-Z0-9_\-]*/;
 const errorRegex = /^\<.+?\>/;
 const referenceStringRegex = /^(0x[0-9a-fA-F]+\s*)"/;
 const referenceRegex = /^0x[0-9a-fA-F]+/;
+const cppReferenceRegex = /^@0x[0-9a-fA-F]+/;
 const nullpointerRegex = /^0x0+\b/;
 const charRegex = /^(\d+) ['"]/;
 const numberRegex = /^\d+(\.\d+)?/;
@@ -168,6 +169,10 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			primitive = "*" + match[0];
 			value = value.substr(match[0].length).trim();
 		}
+		else if (match = cppReferenceRegex.exec(value)) {
+			primitive = match[0];
+			value = value.substr(match[0].length).trim();
+		}
 		else if (match = charRegex.exec(value)) {
 			primitive = match[1];
 			value = value.substr(match[0].length - 1);
@@ -222,19 +227,21 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			ref = variableCreate(val);
 			val = "Object";
 		}
-		if (typeof val == "string" && val.startsWith("*0x")) {
-			if (extra && MINode.valueOf(extra, "arg") == "1")
-			{
+		else if (typeof val == "string" && val.startsWith("*0x")) {
+			if (extra && MINode.valueOf(extra, "arg") == "1") {
 				ref = variableCreate(getNamespace("*(" + name), { arg: true });
 				val = "<args>";
 			}
-			else
-			{
+			else {
 				ref = variableCreate(getNamespace("*" + name));
 				val = "Object@" + val;
 			}
 		}
-		if (typeof val == "string" && val.startsWith("<...>")) {
+		else if (typeof val == "string" && val.startsWith("@0x")) {
+			ref = variableCreate(getNamespace("*&" + name.substr));
+			val = "Ref" + val;
+		}
+		else if (typeof val == "string" && val.startsWith("<...>")) {
 			ref = variableCreate(getNamespace(name));
 			val = "...";
 		}

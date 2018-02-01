@@ -1,4 +1,4 @@
-import { Breakpoint, IBackend, Stack, SSHArguments, Variable, VariableObject, MIError } from "../backend"
+import { Breakpoint, IBackend, Thread, Stack, SSHArguments, Variable, VariableObject, MIError } from "../backend"
 import * as ChildProcess from "child_process"
 import { EventEmitter } from "events"
 import { parseMI, MINode } from '../mi_parse';
@@ -365,6 +365,12 @@ export class MI2 extends EventEmitter implements IBackend {
 									}
 								} else
 									this.log("log", JSON.stringify(parsed));
+							} else if (record.type == "notify") {
+								if (record.asyncClass == "thread-created") {
+									this.emit("thread-created", parsed);
+								} else if (record.asyncClass == "thread-exited") {
+									this.emit("thread-exited", parsed);
+								}
 							}
 						}
 					});
@@ -584,39 +590,55 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	getStack(maxLevels: number): Thenable<Stack[]> {
-		if (trace)
-			this.log("stderr", "getStack");
-		return new Promise((resolve, reject) => {
-			let command = "stack-list-frames";
-			if (maxLevels) {
-				command += " 0 " + maxLevels;
-			}
-			this.sendCommand(command).then((result) => {
-				let stack = result.result("stack");
-				let ret: Stack[] = [];
-				stack.forEach(element => {
-					let level = MINode.valueOf(element, "@frame.level");
-					let addr = MINode.valueOf(element, "@frame.addr");
-					let func = MINode.valueOf(element, "@frame.func");
-					let filename = MINode.valueOf(element, "@frame.file");
-					let file = MINode.valueOf(element, "@frame.fullname");
-					let line = 0;
-					let lnstr = MINode.valueOf(element, "@frame.line");
-					if (lnstr)
-						line = parseInt(lnstr);
-					let from = parseInt(MINode.valueOf(element, "@frame.from"));
-					ret.push({
-						address: addr,
-						fileName: filename,
-						file: file,
-						function: func || from,
-						level: level,
-						line: line
-					});
-				});
-				resolve(ret);
-			}, reject);
+	async getThreads(): Promise<Thread[]> {
+		if (trace) this.log("stderr", "getThreads");
+
+		let command = "thread-info";
+		let result = await this.sendCommand(command);
+		let threads = result.result("threads");
+		let ret: Thread[] = [];
+		return threads.map(element => {
+			let id = parseInt(MINode.valueOf(element, "id"));
+			let name = MINode.valueOf(element, "name") + "";
+			return {
+				id,
+				name
+			};
+		});
+	}
+
+	async getStack(maxLevels: number, thread: number): Promise<Stack[]> {
+		if (trace) this.log("stderr", "getStack");
+
+		let command = "stack-list-frames";
+		if (thread != 0) {
+			command += ` --thread ${thread}`;
+		}
+		if (maxLevels) {
+			command += " 0 " + maxLevels;
+		}
+		let result = await this.sendCommand(command);
+		let stack = result.result("stack");
+		let ret: Stack[] = [];
+		return stack.map(element => {
+			let level = MINode.valueOf(element, "@frame.level");
+			let addr = MINode.valueOf(element, "@frame.addr");
+			let func = MINode.valueOf(element, "@frame.func");
+			let filename = MINode.valueOf(element, "@frame.file");
+			let file = MINode.valueOf(element, "@frame.fullname");
+			let line = 0;
+			let lnstr = MINode.valueOf(element, "@frame.line");
+			if (lnstr)
+				line = parseInt(lnstr);
+			let from = parseInt(MINode.valueOf(element, "@frame.from"));
+			return {
+				address: addr,
+				fileName: filename,
+				file: file,
+				function: func || from,
+				level: level,
+				line: line
+			};
 		});
 	}
 
@@ -651,14 +673,17 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	evalExpression(name: string): Thenable<any> {
+	async evalExpression(name: string, thread: number, frame: number): Promise<MINode> {
 		if (trace)
 			this.log("stderr", "evalExpression");
-		return new Promise((resolve, reject) => {
-			this.sendCommand("data-evaluate-expression " + name).then((result) => {
-				resolve(result);
-			}, reject);
-		});
+
+		let command = "data-evaluate-expression ";
+		if (thread != 0) {
+			command += `--thread ${thread} --frame ${frame} `;
+		}
+		command += name;
+
+		return await this.sendCommand(command);
 	}
 
 	async varCreate(expression: string, name: string = "-"): Promise<VariableObject> {
@@ -704,13 +729,12 @@ export class MI2 extends EventEmitter implements IBackend {
 		this.emit("msg", type, msg[msg.length - 1] == '\n' ? msg : (msg + "\n"));
 	}
 
-	sendUserInput(command: string): Thenable<any> {
+	sendUserInput(command: string, threadId: number = 0, frameLevel: number = 0): Thenable<any> {
 		if (command.startsWith("-")) {
 			return this.sendCommand(command.substr(1));
 		}
 		else {
-			this.sendRaw(command);
-			return Promise.resolve(undefined);
+			return this.sendCliCommand(command, threadId, frameLevel);
 		}
 	}
 
@@ -721,6 +745,15 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.stream.write(raw + "\n");
 		else
 			this.process.stdin.write(raw + "\n");
+	}
+
+	async sendCliCommand(command: string, threadId: number = 0, frameLevel: number = 0) {
+		let mi_command = "interpreter-exec ";
+		if (threadId != 0) {
+			mi_command += `--thread ${threadId} --frame ${frameLevel} `;
+		}
+		mi_command += `console "${command.replace(/[\\"']/g, '\\$&')}"`;
+		await this.sendCommand(mi_command);
 	}
 
 	sendCommand(command: string, suppressFailure: boolean = false): Thenable<MINode> {
