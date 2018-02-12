@@ -50,6 +50,7 @@
 						"objective-c",
 						"fortran",
 						"fortran-modern",
+						"fortran90",
 						"rust",
 						"pascal",
 						"objectpascal",
