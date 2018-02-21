@@ -260,6 +260,7 @@ export class MI2DebugSession extends DebugSession {
 	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
 		if (!this.miDebugger) {
 			this.sendResponse(response);
+			return;
 		}
 		this.miDebugger.getThreads().then(
 			threads => {
