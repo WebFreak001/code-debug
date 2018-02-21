@@ -235,6 +235,8 @@ export class MI2DebugSession extends DebugSession {
 				Promise.all(all).then(brkpoints => {
 					let finalBrks = [];
 					brkpoints.forEach(brkp => {
+						// TODO: Currently all breakpoints returned are marked as verified,
+						// which leads to verified breakpoints on a broken lldb.
 						if (brkp[0])
 							finalBrks.push(new DebugAdapter.Breakpoint(true, brkp[1].line));
 					});
@@ -256,13 +258,24 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
+		if (!this.miDebugger) {
+			this.sendResponse(response);
+		}
 		this.miDebugger.getThreads().then(
 			threads => {
 				response.body = {
 					threads: []
 				};
 				for (const thread of threads) {
-					response.body.threads.push(new Thread(thread.id, thread.id + ":" + thread.name));
+					let threadName = thread.name;
+					// TODO: Thread names are undefined on LLDB
+					if (threadName === undefined) {
+						threadName = thread.targetId;
+					}
+					if (threadName === undefined) {
+						threadName = "<unnamed>";
+					}
+					response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
 				}
 				this.sendResponse(response);
 			});

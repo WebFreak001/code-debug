@@ -598,12 +598,17 @@ export class MI2 extends EventEmitter implements IBackend {
 		let threads = result.result("threads");
 		let ret: Thread[] = [];
 		return threads.map(element => {
-			let id = parseInt(MINode.valueOf(element, "id"));
-			let name = MINode.valueOf(element, "name") + "";
-			return {
-				id,
-				name
+			let ret : Thread = {
+				id: parseInt(MINode.valueOf(element, "id")),
+				targetId: MINode.valueOf(element, "target-id")
 			};
+
+			let name = MINode.valueOf(element, "name");
+			if (name) {
+				ret.name = name;
+			}
+			
+			return ret;
 		});
 	}
 

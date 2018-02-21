@@ -13,7 +13,8 @@ export interface Breakpoint {
 
 export interface Thread {
 	id: number;
-	name: string;
+	targetId: string;
+	name?: string;
 }
 
 export interface Stack {
