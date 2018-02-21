@@ -205,8 +205,10 @@ export function parseMI(output: string): MINode {
 		let oldContent = output;
 		let canBeValueList = output[0] == '[';
 		output = output.substr(1);
-		if (output[0] == '}' || output[0] == ']')
+		if (output[0] == '}' || output[0] == ']') {
+			output = output.substr(1); // ] or }
 			return [];
+		}
 		if (canBeValueList) {
 			let value = parseValue();
 			if (value) { // is value list

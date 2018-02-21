@@ -178,4 +178,14 @@ suite("MI Parse", () => {
 		let result = parsed.result('register-names');
 		assert.deepEqual(result, ["r0", "pc", "", "xpsr", "", "control"]);
 	});
+	test("empty array values", () => {
+		let parsed = parseMI(`15^done,foo={x=[],y="y"}`);
+		assert.deepEqual(parsed.result('foo.x'), []);
+		assert.equal(parsed.result('foo.y'), "y");
+	});
+	test("empty object values", () => {
+		let parsed = parseMI(`15^done,foo={x={},y="y"}`);
+		assert.deepEqual(parsed.result('foo.x'), {});
+		assert.equal(parsed.result('foo.y'), "y");
+	});
 });

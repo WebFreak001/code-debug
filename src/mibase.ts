@@ -1,4 +1,5 @@
-import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
+import * as DebugAdapter from 'vscode-debugadapter';
+import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, ThreadEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Breakpoint, IBackend, Variable, VariableObject, ValuesFormattingMode, MIError } from './backend/backend';
 import { MINode } from './backend/mi_parse';
@@ -19,7 +20,7 @@ class ExtendedVariable {
 }
 
 const STACK_HANDLES_START = 1000;
-const VAR_HANDLES_START = 2000;
+const VAR_HANDLES_START = 512 * 256 + 1000;
 
 export class MI2DebugSession extends DebugSession {
 	protected variableHandles = new Handles<string | VariableObject | ExtendedVariable>(VAR_HANDLES_START);
@@ -35,12 +36,10 @@ export class MI2DebugSession extends DebugSession {
 	protected crashed: boolean;
 	protected debugReady: boolean;
 	protected miDebugger: MI2;
-	protected threadID: number = 1;
 	protected commandServer: net.Server;
 
-	public constructor(debuggerLinesStartAt1: boolean, isServer: boolean = false, threadID: number = 1) {
+	public constructor(debuggerLinesStartAt1: boolean, isServer: boolean = false) {
 		super(debuggerLinesStartAt1, isServer);
-		this.threadID = threadID;
 	}
 
 	protected initDebugger() {
@@ -53,6 +52,8 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.on("step-end", this.handleBreak.bind(this));
 		this.miDebugger.on("step-out-end", this.handleBreak.bind(this));
 		this.miDebugger.on("signal-stop", this.handlePause.bind(this));
+		this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));
+		this.miDebugger.on("thread-exited", this.threadExitedEvent.bind(this));
 		this.sendEvent(new InitializedEvent());
 		try {
 			this.commandServer = net.createServer(c => {
@@ -109,22 +110,39 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected handleBreakpoint(info: MINode) {
-		this.sendEvent(new StoppedEvent("breakpoint", this.threadID));
+		let event = new StoppedEvent("breakpoint", parseInt(info.record("thread-id")));
+		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
+		this.sendEvent(event);
 	}
 
 	protected handleBreak(info: MINode) {
-		this.sendEvent(new StoppedEvent("step", this.threadID));
+		let event = new StoppedEvent("step", parseInt(info.record("thread-id")));
+		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
+		this.sendEvent(event);
 	}
 
 	protected handlePause(info: MINode) {
-		this.sendEvent(new StoppedEvent("user request", this.threadID));
+		let event = new StoppedEvent("user request", parseInt(info.record("thread-id")));
+		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
+		this.sendEvent(event);
 	}
 
 	protected stopEvent(info: MINode) {
 		if (!this.started)
 			this.crashed = true;
-		if (!this.quit)
-			this.sendEvent(new StoppedEvent("exception", this.threadID));
+		if (!this.quit) {
+			let event = new StoppedEvent("exception", parseInt(info.record("thread-id")));
+			(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
+			this.sendEvent(event);
+		}
+	}
+
+	protected threadCreatedEvent(info: MINode) {
+		this.sendEvent(new ThreadEvent("started", info.record("id")));
+	}
+
+	protected threadExitedEvent(info: MINode) {
+		this.sendEvent(new ThreadEvent("exited", info.record("id")));
 	}
 
 	protected quitEvent() {
@@ -211,15 +229,16 @@ export class MI2DebugSession extends DebugSession {
 					path = relative(this.trimCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
 					path = resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
 				}
-				let all = [];
-				args.breakpoints.forEach(brk => {
-					all.push(this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition }));
+				let all = args.breakpoints.map(brk => {
+					return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
 				});
 				Promise.all(all).then(brkpoints => {
 					let finalBrks = [];
 					brkpoints.forEach(brkp => {
+						// TODO: Currently all breakpoints returned are marked as verified,
+						// which leads to verified breakpoints on a broken lldb.
 						if (brkp[0])
-							finalBrks.push({ line: brkp[1].line });
+							finalBrks.push(new DebugAdapter.Breakpoint(true, brkp[1].line));
 					});
 					response.body = {
 						breakpoints: finalBrks
@@ -239,18 +258,43 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
-		response.body = {
-			threads: [
-				new Thread(this.threadID, "Thread 1")
-			]
-		};
-		this.sendResponse(response);
+		if (!this.miDebugger) {
+			this.sendResponse(response);
+			return;
+		}
+		this.miDebugger.getThreads().then(
+			threads => {
+				response.body = {
+					threads: []
+				};
+				for (const thread of threads) {
+					let threadName = thread.name;
+					// TODO: Thread names are undefined on LLDB
+					if (threadName === undefined) {
+						threadName = thread.targetId;
+					}
+					if (threadName === undefined) {
+						threadName = "<unnamed>";
+					}
+					response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
+				}
+				this.sendResponse(response);
+			});
+	}
+
+	// Supports 256 threads.
+	protected threadAndLevelToFrameId(threadId: number, level: number) {
+		return level << 8 | threadId;
+	}
+	protected frameIdToThreadAndLevel(frameId: number) {
+		return [frameId & 0xff, frameId >> 8];
 	}
 
 	protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
-		this.miDebugger.getStack(args.levels).then(stack => {
+		this.miDebugger.getStack(args.levels, args.threadId).then(stack => {
 			let ret: StackFrame[] = [];
 			stack.forEach(element => {
+				let source = null;
 				let file = element.file;
 				if (file) {
 					if (this.isSSH) {
@@ -262,10 +306,15 @@ export class MI2DebugSession extends DebugSession {
 							file = file[10] + ":" + file.substr(11); // replaces /cygdrive/c/foo/bar.txt with c:/foo/bar.txt
 						}
 					}
-					ret.push(new StackFrame(element.level, element.function + "@" + element.address, new Source(element.fileName, file), element.line, 0));
+					source = new Source(element.fileName, file);
 				}
-				else
-					ret.push(new StackFrame(element.level, element.function + "@" + element.address, null, element.line, 0));
+
+				ret.push(new StackFrame(
+					this.threadAndLevelToFrameId(args.threadId, element.level),
+					element.function + "@" + element.address,
+					source,
+					element.line,
+					0));
 			});
 			response.body = {
 				stackFrames: ret
@@ -331,11 +380,12 @@ export class MI2DebugSession extends DebugSession {
 		if (typeof id == "number") {
 			let stack: Variable[];
 			try {
-				stack = await this.miDebugger.getStackVariables(this.threadID, id);
+				let [threadId, level] = this.frameIdToThreadAndLevel(id);
+				stack = await this.miDebugger.getStackVariables(threadId, level);
 				for (const variable of stack) {
 					if (this.useVarObjects) {
 						try {
-							let varObjName = `var_${variable.name}`;
+							let varObjName = `var_${id}_${variable.name}`;
 							let varObj: VariableObject;
 							try {
 								const changes = await this.miDebugger.varUpdate(varObjName);
@@ -406,7 +456,8 @@ export class MI2DebugSession extends DebugSession {
 			// Variable members
 			let variable;
 			try {
-				variable = await this.miDebugger.evalExpression(JSON.stringify(id));
+				// TODO: this evals on an (effectively) unknown thread for multithreaded programs.
+				variable = await this.miDebugger.evalExpression(JSON.stringify(id), 0, 0);
 				try {
 					let expanded = expandValue(createVariable, variable.result("value"), id, variable);
 					if (!expanded) {
@@ -469,7 +520,8 @@ export class MI2DebugSession extends DebugSession {
 						this.sendResponse(response);
 					};
 					let addOne = async () => {
-						const variable = await this.miDebugger.evalExpression(JSON.stringify(`${varReq.name}+${arrIndex})`));
+						// TODO: this evals on an (effectively) unknown thread for multithreaded programs.
+						const variable = await this.miDebugger.evalExpression(JSON.stringify(`${varReq.name}+${arrIndex})`), 0, 0);
 						try {
 							let expanded = expandValue(createVariable, variable.result("value"), varReq.name, variable);
 							if (!expanded) {
@@ -589,8 +641,9 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
-		if (args.context == "watch" || args.context == "hover")
-			this.miDebugger.evalExpression(args.expression).then((res) => {
+		let [threadId, level] = this.frameIdToThreadAndLevel(args.frameId);
+		if (args.context == "watch" || args.context == "hover") {
+			this.miDebugger.evalExpression(args.expression, threadId, level).then((res) => {
 				response.body = {
 					variablesReference: 0,
 					result: res.result("value")
@@ -599,8 +652,8 @@ export class MI2DebugSession extends DebugSession {
 			}, msg => {
 				this.sendErrorResponse(response, 7, msg.toString());
 			});
-		else {
-			this.miDebugger.sendUserInput(args.expression).then(output => {
+		} else {
+			this.miDebugger.sendUserInput(args.expression, threadId, level).then(output => {
 				if (typeof output == "undefined")
 					response.body = {
 						result: "",
