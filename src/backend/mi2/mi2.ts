@@ -121,7 +121,9 @@ export class MI2 extends EventEmitter implements IBackend {
 				username: args.user
 			};
 
-			if (args.keyfile) {
+			if (args.useAgent) {
+				connectionArgs.agent = process.env.SSH_AUTH_SOCK;
+			} else if (args.keyfile) {
 				if (require("fs").existsSync(args.keyfile))
 					connectionArgs.privateKey = require("fs").readFileSync(args.keyfile);
 				else {

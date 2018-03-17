@@ -38,6 +38,7 @@ export interface SSHArguments {
 	host: string;
 	keyfile: string;
 	password: string;
+	useAgent: boolean;
 	cwd: string;
 	port: number;
 	user: string;
