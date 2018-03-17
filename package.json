@@ -162,6 +162,11 @@
 										"type": "string",
 										"description": "Absolute path to private key"
 									},
+									"useAgent": {
+										"type": "boolean",
+										"description": "Auto-detect the running SSH agent (via SSH_AUTH_SOCK environment variable) and use it to perform authentication",
+										"default": false
+									},
 									"forwardX11": {
 										"type": "boolean",
 										"description": "If true, the server will redirect x11 to the local host",
@@ -286,6 +291,11 @@
 									"keyfile": {
 										"type": "string",
 										"description": "Absolute path to private key"
+									},
+									"useAgent": {
+										"type": "boolean",
+										"description": "Auto-detect the running SSH agent (via SSH_AUTH_SOCK environment variable) and use it to perform authentication",
+										"default": false
 									},
 									"forwardX11": {
 										"type": "boolean",
@@ -546,6 +556,11 @@
 									"keyfile": {
 										"type": "string",
 										"description": "Absolute path to private key"
+									},
+									"useAgent": {
+										"type": "boolean",
+										"description": "Auto-detect the running SSH agent (via SSH_AUTH_SOCK environment variable) and use it to perform authentication",
+										"default": false
 									},
 									"forwardX11": {
 										"type": "boolean",
