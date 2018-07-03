@@ -346,7 +346,8 @@
 							"request": "launch",
 							"name": "${2:Launch Program}",
 							"target": "${1:./bin/executable}",
-							"cwd": "^\"\\${workspaceRoot}\""
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -357,7 +358,8 @@
 							"request": "attach",
 							"name": "${2:Attach to PID}",
 							"target": "${1:[PID]}",
-							"cwd": "^\"\\${workspaceRoot}\""
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -370,7 +372,8 @@
 							"executable": "${1:./bin/executable}",
 							"target": ":${2:2345}",
 							"remote": true,
-							"cwd": "^\"\\${workspaceRoot}\""
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -387,7 +390,8 @@
 								"cwd": "${3:/home/remote_user/project/}",
 								"keyfile": "${4:/home/my_user/.ssh/id_rsa}",
 								"user": "${5:remote_user}"
-							}
+							},
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -407,7 +411,8 @@
 								"forwardX11": true,
 								"x11host": "localhost",
 								"x11port": 6000
-							}
+							},
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -426,7 +431,8 @@
 								"attach 1",
 								"load ${1:./bin/executable.elf}"
 							]
-						}
+						},
+						"valuesFormatting": "parseText"
 					}
 				]
 			},
@@ -675,7 +681,8 @@
 							"request": "launch",
 							"name": "${2:Launch Program}",
 							"target": "${1:./bin/executable}",
-							"cwd": "^\"\\${workspaceRoot}\""
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -686,7 +693,8 @@
 							"request": "attach",
 							"name": "${2:Attach to PID}",
 							"target": "${1:[PID]}",
-							"cwd": "^\"\\${workspaceRoot}\""
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -703,7 +711,8 @@
 								"cwd": "${3:/home/remote_user/project/}",
 								"keyfile": "${4:/home/my_user/.ssh/id_rsa}",
 								"user": "${5:remote_user}"
-							}
+							},
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -723,7 +732,8 @@
 								"forwardX11": true,
 								"x11host": "localhost",
 								"x11port": 6000
-							}
+							},
+							"valuesFormatting": "parseText"
 						}
 					}
 				]
@@ -882,7 +892,8 @@
 							"request": "launch",
 							"name": "${2:Launch Program}",
 							"target": "${1:./bin/executable}",
-							"cwd": "^\"\\${workspaceRoot}\""
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
 						}
 					},
 					{
@@ -893,7 +904,8 @@
 							"request": "attach",
 							"name": "${2:Attach to PID}",
 							"target": "${1:[PID]}",
-							"cwd": "^\"\\${workspaceRoot}\""
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
 						}
 					}
 				]
