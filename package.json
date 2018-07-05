@@ -334,7 +334,8 @@
 						"type": "gdb",
 						"request": "launch",
 						"target": "./bin/executable",
-						"cwd": "${workspaceRoot}"
+						"cwd": "${workspaceRoot}",
+						"valuesFormatting": "parseText"
 					}
 				],
 				"configurationSnippets": [
@@ -669,7 +670,8 @@
 						"type": "lldb-mi",
 						"request": "launch",
 						"target": "./bin/executable",
-						"cwd": "${workspaceRoot}"
+						"cwd": "${workspaceRoot}",
+						"valuesFormatting": "parseText"
 					}
 				],
 				"configurationSnippets": [
@@ -880,7 +882,8 @@
 						"type": "mago-mi",
 						"request": "launch",
 						"target": "./bin/executable",
-						"cwd": "${workspaceRoot}"
+						"cwd": "${workspaceRoot}",
+						"valuesFormatting": "parseText"
 					}
 				],
 				"configurationSnippets": [
