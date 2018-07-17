@@ -12,8 +12,8 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage("No editor with valid file name active");
 			return;
 		}
-		var fileName = vscode.window.activeTextEditor.document.fileName;
-		var ext = path.extname(fileName);
+		const fileName = vscode.window.activeTextEditor.document.fileName;
+		const ext = path.extname(fileName);
 		return fileName.substr(0, fileName.length - ext.length);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand("code-debug.getFileBasenameNoExt", () => {
@@ -21,22 +21,22 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage("No editor with valid file name active");
 			return;
 		}
-		var fileName = path.basename(vscode.window.activeTextEditor.document.fileName);
-		var ext = path.extname(fileName);
+		const fileName = path.basename(vscode.window.activeTextEditor.document.fileName);
+		const ext = path.extname(fileName);
 		return fileName.substr(0, fileName.length - ext.length);
 	}));
 }
 
-var memoryLocationRegex = /^0x[0-9a-f]+$/;
+const memoryLocationRegex = /^0x[0-9a-f]+$/;
 
 function getMemoryRange(range: string) {
 	if (!range)
 		return undefined;
 	range = range.replace(/\s+/g, "").toLowerCase();
-	var index;
+	let index;
 	if ((index = range.indexOf("+")) != -1) {
-		var from = range.substr(0, index);
-		var length = range.substr(index + 1);
+		const from = range.substr(0, index);
+		let length = range.substr(index + 1);
 		if (!memoryLocationRegex.exec(from))
 			return undefined;
 		if (memoryLocationRegex.exec(length))
@@ -44,8 +44,8 @@ function getMemoryRange(range: string) {
 		return "from=" + encodeURIComponent(from) + "&length=" + encodeURIComponent(length);
 	}
 	else if ((index = range.indexOf("-")) != -1) {
-		var from = range.substr(0, index);
-		var to = range.substr(index + 1);
+		const from = range.substr(0, index);
+		const to = range.substr(index + 1);
 		if (!memoryLocationRegex.exec(from))
 			return undefined;
 		if (!memoryLocationRegex.exec(to))
@@ -58,7 +58,7 @@ function getMemoryRange(range: string) {
 }
 
 function examineMemory() {
-	let socketlists = path.join(os.tmpdir(), "code-debug-sockets");
+	const socketlists = path.join(os.tmpdir(), "code-debug-sockets");
 	if (!fs.existsSync(socketlists)) {
 		if (process.platform == "win32")
 			return vscode.window.showErrorMessage("This command is not available on windows");
@@ -72,7 +72,7 @@ function examineMemory() {
 			else
 				return vscode.window.showErrorMessage("No debugging sessions available");
 		}
-		var pickedFile = (file) => {
+		const pickedFile = (file) => {
 			vscode.window.showInputBox({ placeHolder: "Memory Location or Range", validateInput: range => getMemoryRange(range) === undefined ? "Range must either be in format 0xF00-0xF01, 0xF100+32 or 0xABC154" : "" }).then(range => {
 				vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse("debugmemory://" + file + "#" + getMemoryRange(range)));
 			});
@@ -91,12 +91,12 @@ function examineMemory() {
 class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 	provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): Thenable<string> {
 		return new Promise((resolve, reject) => {
-			var conn = net.connect(path.join(os.tmpdir(), "code-debug-sockets", uri.authority));
-			var from, to;
-			var highlightAt = -1;
-			var splits = uri.fragment.split("&");
+			const conn = net.connect(path.join(os.tmpdir(), "code-debug-sockets", uri.authority));
+			let from, to;
+			let highlightAt = -1;
+			const splits = uri.fragment.split("&");
 			if (splits[0].split("=")[0] == "at") {
-				var loc = parseInt(splits[0].split("=")[1].substr(2), 16);
+				const loc = parseInt(splits[0].split("=")[1].substr(2), 16);
 				highlightAt = 64;
 				from = Math.max(loc - 64, 0);
 				to = Math.max(loc + 768, 0);
@@ -116,14 +116,14 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 				return reject("Negative Range");
 			conn.write("examineMemory " + JSON.stringify([from, to - from + 1]));
 			conn.once("data", data => {
-				var formattedCode = "";
-				var hexString = data.toString();
-				var x = 0;
-				var asciiLine = "";
-				var byteNo = 0;
-				for (var i = 0; i < hexString.length; i += 2) {
-					var digit = hexString.substr(i, 2);
-					var digitNum = parseInt(digit, 16);
+				let formattedCode = "";
+				const hexString = data.toString();
+				let x = 0;
+				let asciiLine = "";
+				let byteNo = 0;
+				for (let i = 0; i < hexString.length; i += 2) {
+					const digit = hexString.substr(i, 2);
+					const digitNum = parseInt(digit, 16);
 					if (digitNum >= 32 && digitNum <= 126)
 						asciiLine += String.fromCharCode(digitNum);
 					else
@@ -140,7 +140,7 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 					byteNo++;
 				}
 				if (x > 0) {
-					for (var i = 0; i <= 16 - x; i++) {
+					for (let i = 0; i <= 16 - x; i++) {
 						formattedCode += "   ";
 					}
 					formattedCode += asciiLine;

@@ -3,7 +3,7 @@ import { Breakpoint } from "../backend"
 import * as ChildProcess from "child_process"
 import { posix } from "path"
 import * as nativePath from "path"
-let path = posix;
+const path = posix;
 
 export class MI2_LLDB extends MI2 {
 	protected initCommands(target: string, cwd: string, ssh: boolean = false, attach: boolean = false) {
@@ -15,7 +15,7 @@ export class MI2_LLDB extends MI2 {
 			if (!nativePath.isAbsolute(target))
 				target = nativePath.join(cwd, target);
 		}
-		var cmds = [
+		const cmds = [
 			this.sendCommand("gdb-set target-async on")
 		];
 		if (!attach)
@@ -43,7 +43,7 @@ export class MI2_LLDB extends MI2 {
 
 	clearBreakPoints(): Thenable<any> {
 		return new Promise((resolve, reject) => {
-			let promises = [];
+			const promises = [];
 			this.breakpoints.forEach((k, index) => {
 				promises.push(this.sendCommand("break-delete " + k).then((result) => {
 					if (result.resultRecords.resultClass == "done") resolve(true);

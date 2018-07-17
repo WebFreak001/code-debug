@@ -12,7 +12,6 @@ const numberRegex = /^\d+(\.\d+)?/;
 const pointerCombineChar = ".";
 
 export function isExpandable(value: string): number {
-	let primitive: any;
 	let match;
 	value = value.trim();
 	if (value.length == 0) return 0;
@@ -31,13 +30,13 @@ export function isExpandable(value: string): number {
 }
 
 export function expandValue(variableCreate: Function, value: string, root: string = "", extra: any = undefined): any {
-	let parseCString = () => {
+	const parseCString = () => {
 		value = value.trim();
 		if (value[0] != '"' && value[0] != '\'')
 			return "";
 		let stringEnd = 1;
 		let inString = true;
-		let charStr = value[0];
+		const charStr = value[0];
 		let remaining = value.substr(1);
 		let escaped = false;
 		while (inString) {
@@ -51,16 +50,16 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			remaining = remaining.substr(1);
 			stringEnd++;
 		}
-		let str = value.substr(0, stringEnd).trim();
+		const str = value.substr(0, stringEnd).trim();
 		value = value.substr(stringEnd).trim();
 		return str;
 	};
 
-	let stack = [root];
+	const stack = [root];
 	let parseValue, parseCommaResult, parseCommaValue, parseResult, createValue;
 	let variable = "";
 
-	let getNamespace = (variable) => {
+	const getNamespace = (variable) => {
 		let namespace = "";
 		let prefix = "";
 		stack.push(variable);
@@ -86,11 +85,11 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		return prefix + namespace;
 	};
 
-	let parseTupleOrList = () => {
+	const parseTupleOrList = () => {
 		value = value.trim();
 		if (value[0] != '{')
 			return undefined;
-		let oldContent = value;
+		const oldContent = value;
 		value = value.substr(1).trim();
 		if (value[0] == '}') {
 			value = value.substr(1).trim();
@@ -103,19 +102,19 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 				return <any>"<...>";
 			}
 		}
-		let eqPos = value.indexOf("=");
-		let newValPos1 = value.indexOf("{");
-		let newValPos2 = value.indexOf(",");
+		const eqPos = value.indexOf("=");
+		const newValPos1 = value.indexOf("{");
+		const newValPos2 = value.indexOf(",");
 		let newValPos = newValPos1;
 		if (newValPos2 != -1 && newValPos2 < newValPos1)
 			newValPos = newValPos2;
 		if (newValPos != -1 && eqPos > newValPos || eqPos == -1) { // is value list
-			let values = [];
+			const values = [];
 			stack.push("[0]");
 			let val = parseValue();
 			stack.pop();
 			values.push(createValue("[0]", val));
-			let remaining = value;
+			const remaining = value;
 			let i = 0;
 			while (true) {
 				stack.push("[" + (++i) + "]");
@@ -132,7 +131,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 
 		let result = parseResult(true);
 		if (result) {
-			let results = [];
+			const results = [];
 			results.push(result);
 			while (result = parseCommaResult(true))
 				results.push(result);
@@ -143,7 +142,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		return undefined;
 	};
 
-	let parsePrimitive = () => {
+	const parsePrimitive = () => {
 		let primitive: any;
 		let match;
 		value = value.trim();
@@ -208,14 +207,14 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 
 	parseResult = (pushToStack: boolean = false) => {
 		value = value.trim();
-		let variableMatch = resultRegex.exec(value);
+		const variableMatch = resultRegex.exec(value);
 		if (!variableMatch)
 			return undefined;
 		value = value.substr(variableMatch[0].length).trim();
-		let name = variable = variableMatch[1];
+		const name = variable = variableMatch[1];
 		if (pushToStack)
 			stack.push(variable);
-		let val = parseValue();
+		const val = parseValue();
 		if (pushToStack)
 			stack.pop();
 		return createValue(name, val);

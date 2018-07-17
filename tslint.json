@@ -1,0 +1,7 @@
+{
+	"defaultSeverity": "error",
+	"rules": {
+		"no-var-keyword": true,
+		"prefer-const": true
+	}
+}

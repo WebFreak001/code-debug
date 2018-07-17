@@ -926,10 +926,12 @@
 		"ssh2": "^0.5.4"
 	},
 	"devDependencies": {
-		"typescript": "^2.1.6",
-		"vscode": "^1.0.3",
-		"mocha": "^3.2.0",
+		"@types/mocha": "^2.2.39",
 		"@types/node": "^7.0.5",
-		"@types/mocha": "^2.2.39"
+		"mocha": "^3.2.0",
+		"tslint": "^5.11.0",
+		"tslint-language-service": "^0.9.9",
+		"typescript": "^2.1.6",
+		"vscode": "^1.0.3"
 	}
 }
