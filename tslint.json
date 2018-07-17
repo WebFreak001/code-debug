@@ -2,6 +2,7 @@
 	"defaultSeverity": "error",
 	"rules": {
 		"no-var-keyword": true,
-		"prefer-const": true
+		"prefer-const": true,
+		"no-null-keyword": true
 	}
 }

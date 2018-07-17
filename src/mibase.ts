@@ -294,7 +294,7 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.getStack(args.levels, args.threadId).then(stack => {
 			const ret: StackFrame[] = [];
 			stack.forEach(element => {
-				let source = null;
+				let source = undefined;
 				let file = element.file;
 				if (file) {
 					if (this.isSSH) {

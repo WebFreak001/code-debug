@@ -544,7 +544,7 @@ export class MI2 extends EventEmitter implements IBackend {
 								this.breakpoints.set(newBrk, bkptNum);
 								resolve([true, newBrk]);
 							} else {
-								resolve([false, null]);
+								resolve([false, undefined]);
 							}
 						}, reject);
 					}
