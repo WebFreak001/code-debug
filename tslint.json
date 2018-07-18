@@ -32,7 +32,6 @@
 		"one-variable-per-declaration": false,
 		"only-arrow-functions": false,
 		"ordered-imports": false,
-		"prefer-for-of": false,
 		"quotemark": false,
 		"radix": false,
 		"semicolon": false,

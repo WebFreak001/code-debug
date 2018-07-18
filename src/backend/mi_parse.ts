@@ -93,8 +93,7 @@ export class MINode implements MIInfo {
 				path = path.substr(target[0].length);
 				if (current.length && typeof current != "string") {
 					const found = [];
-					for (let i = 0; i < current.length; i++) {
-						const element = current[i];
+					for (const element of current) {
 						if (element[0] == target[1]) {
 							found.push(element[1]);
 						}
