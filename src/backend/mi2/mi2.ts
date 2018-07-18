@@ -609,7 +609,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			if (name) {
 				ret.name = name;
 			}
-			
+
 			return ret;
 		});
 	}

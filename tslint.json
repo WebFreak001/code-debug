@@ -24,7 +24,6 @@
 		"no-consecutive-blank-lines": false,
 		"no-empty": false,
 		"no-shadowed-variable": false,
-		"no-trailing-whitespace": false,
 		"no-unnecessary-initializer": false,
 		"object-literal-shorthand": false,
 		"object-literal-sort-keys": false,
