@@ -1,12 +1,12 @@
-import { Breakpoint, IBackend, Thread, Stack, SSHArguments, Variable, VariableObject, MIError } from "../backend"
-import * as ChildProcess from "child_process"
-import { EventEmitter } from "events"
+import { Breakpoint, IBackend, Thread, Stack, SSHArguments, Variable, VariableObject, MIError } from "../backend";
+import * as ChildProcess from "child_process";
+import { EventEmitter } from "events";
 import { parseMI, MINode } from '../mi_parse';
 import * as linuxTerm from '../linux/console';
-import * as net from "net"
-import * as fs from "fs"
-import { posix } from "path"
-import * as nativePath from "path"
+import * as net from "net";
+import * as fs from "fs";
+import { posix } from "path";
+import * as nativePath from "path";
 const path = posix;
 import { Client } from "ssh2";
 
@@ -66,7 +66,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				promises.push(this.sendCommand("exec-arguments " + procArgs));
 			if (process.platform == "win32") {
 				if (separateConsole !== undefined)
-					promises.push(this.sendCommand("gdb-set new-console on"))
+					promises.push(this.sendCommand("gdb-set new-console on"));
 				Promise.all(promises).then(() => {
 					this.emit("debug-ready");
 					resolve();
@@ -170,7 +170,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					if (procArgs && procArgs.length && !attach)
 						promises.push(this.sendCommand("exec-arguments " + procArgs));
 					Promise.all(promises).then(() => {
-						this.emit("debug-ready")
+						this.emit("debug-ready");
 						resolve();
 					}, reject);
 				});
@@ -231,7 +231,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				commands.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
 			}
 			Promise.all(commands).then(() => {
-				this.emit("debug-ready")
+				this.emit("debug-ready");
 				resolve();
 			}, reject);
 		});
@@ -256,7 +256,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				this.sendCommand("environment-directory \"" + escape(cwd) + "\""),
 				this.sendCommand("target-select remote " + target)
 			]).then(() => {
-				this.emit("debug-ready")
+				this.emit("debug-ready");
 				resolve();
 			}, reject);
 		});
@@ -408,7 +408,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			}, 1000);
 			this.stream.on("exit", function (code) {
 				clearTimeout(to);
-			})
+			});
 			this.sendRaw("-gdb-exit");
 		}
 		else {
@@ -719,7 +719,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	async varUpdate(name: string = "*"): Promise<MINode> {
 		if (trace)
 			this.log("stderr", "varUpdate");
-		return this.sendCommand(`var-update --all-values ${name}`)
+		return this.sendCommand(`var-update --all-values ${name}`);
 	}
 
 	async varAssign(name: string, rawValue: string): Promise<MINode> {

@@ -133,7 +133,7 @@ export interface MIError extends Error {
 	readonly name: string;
 	readonly message: string;
 	readonly source: string;
-};
+}
 export interface MIErrorConstructor {
 	new (message: string, source: string): MIError;
 	readonly prototype: MIError;

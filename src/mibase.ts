@@ -190,7 +190,7 @@ export class MI2DebugSession extends DebugSession {
 		}
 		catch (err) {
 			this.sendErrorResponse(response, 11, `Could not continue: ${err}`);
-		};
+		}
 	}
 
 	protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
@@ -321,7 +321,7 @@ export class MI2DebugSession extends DebugSession {
 			};
 			this.sendResponse(response);
 		}, err => {
-			this.sendErrorResponse(response, 12, `Failed to get Stack Trace: ${err.toString()}`)
+			this.sendErrorResponse(response, 12, `Failed to get Stack Trace: ${err.toString()}`);
 		});
 	}
 
@@ -500,7 +500,7 @@ export class MI2DebugSession extends DebugSession {
 
 					response.body = {
 						variables: vars
-					}
+					};
 					this.sendResponse(response);
 				}
 				catch (err) {
@@ -647,7 +647,7 @@ export class MI2DebugSession extends DebugSession {
 				response.body = {
 					variablesReference: 0,
 					result: res.result("value")
-				}
+				};
 				this.sendResponse(response);
 			}, msg => {
 				this.sendErrorResponse(response, 7, msg.toString());

@@ -1,4 +1,4 @@
-import { MINode } from "./mi_parse"
+import { MINode } from "./mi_parse";
 
 const resultRegex = /^([a-zA-Z_\-][a-zA-Z0-9_\-]*|\[\d+\])\s*=\s*/;
 const variableRegex = /^[a-zA-Z_\-][a-zA-Z0-9_\-]*/;

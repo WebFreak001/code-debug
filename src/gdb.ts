@@ -87,10 +87,10 @@ class GDBDebugSession extends MI2DebugSession {
 					if (this.crashed)
 						this.handlePause(undefined);
 				}, err => {
-					this.sendErrorResponse(response, 100, `Failed to start MI Debugger: ${err.toString()}`)
+					this.sendErrorResponse(response, 100, `Failed to start MI Debugger: ${err.toString()}`);
 				});
 			}, err => {
-				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`)
+				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`);
 			});
 		}
 		else {
@@ -108,10 +108,10 @@ class GDBDebugSession extends MI2DebugSession {
 					if (this.crashed)
 						this.handlePause(undefined);
 				}, err => {
-					this.sendErrorResponse(response, 100, `Failed to Start MI Debugger: ${err.toString()}`)
+					this.sendErrorResponse(response, 100, `Failed to Start MI Debugger: ${err.toString()}`);
 				});
 			}, err => {
-				this.sendErrorResponse(response, 103, `Failed to load MI Debugger: ${err.toString()}`)
+				this.sendErrorResponse(response, 103, `Failed to load MI Debugger: ${err.toString()}`);
 			});
 		}
 	}
@@ -151,7 +151,7 @@ class GDBDebugSession extends MI2DebugSession {
 				}, 50);
 				this.sendResponse(response);
 			}, err => {
-				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`)
+				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`);
 			});
 		}
 		else {
@@ -163,7 +163,7 @@ class GDBDebugSession extends MI2DebugSession {
 						});
 					this.sendResponse(response);
 				}, err => {
-					this.sendErrorResponse(response, 102, `Failed to attach: ${err.toString()}`)
+					this.sendErrorResponse(response, 102, `Failed to attach: ${err.toString()}`);
 				});
 			}
 			else {
@@ -174,7 +174,7 @@ class GDBDebugSession extends MI2DebugSession {
 						});
 					this.sendResponse(response);
 				}, err => {
-					this.sendErrorResponse(response, 101, `Failed to attach: ${err.toString()}`)
+					this.sendErrorResponse(response, 101, `Failed to attach: ${err.toString()}`);
 				});
 			}
 		}

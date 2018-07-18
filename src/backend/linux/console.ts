@@ -1,5 +1,5 @@
-import * as ChildProcess from "child_process"
-import * as fs from "fs"
+import * as ChildProcess from "child_process";
+import * as fs from "fs";
 
 export function spawnTerminalEmulator(preferedEmulator: string): Thenable<string> {
 	return new Promise((resolve, reject) => {
