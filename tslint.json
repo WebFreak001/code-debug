@@ -26,7 +26,6 @@
 		"no-unnecessary-initializer": false,
 		"object-literal-shorthand": false,
 		"object-literal-sort-keys": false,
-		"one-line": false,
 		"one-variable-per-declaration": false,
 		"only-arrow-functions": false,
 		"ordered-imports": false,

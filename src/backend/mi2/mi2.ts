@@ -71,8 +71,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					this.emit("debug-ready");
 					resolve();
 				}, reject);
-			}
-			else {
+			} else {
 				if (separateConsole !== undefined) {
 					linuxTerm.spawnTerminalEmulator(separateConsole).then(tty => {
 						promises.push(this.sendCommand("inferior-tty-set " + tty));
@@ -81,8 +80,7 @@ export class MI2 extends EventEmitter implements IBackend {
 							resolve();
 						}, reject);
 					});
-				}
-				else {
+				} else {
 					Promise.all(promises).then(() => {
 						this.emit("debug-ready");
 						resolve();
@@ -187,8 +185,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		if (ssh) {
 			if (!path.isAbsolute(target))
 				target = path.join(cwd, target);
-		}
-		else {
+		} else {
 			if (!nativePath.isAbsolute(target))
 				target = nativePath.join(cwd, target);
 		}
@@ -318,8 +315,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			if (couldBeOutput(line)) {
 				if (!gdbMatch.exec(line))
 					this.log("stdout", line);
-			}
-			else {
+			} else {
 				const parsed = parseMI(line);
 				if (this.debugOutput)
 					this.log("log", "GDB -> App: " + JSON.stringify(parsed));
@@ -360,8 +356,7 @@ export class MI2 extends EventEmitter implements IBackend {
 									else if (reason == "exited") { // exit with error code != 0
 										this.log("stderr", "Program exited with code " + parsed.record("exit-code"));
 										this.emit("exited-normally", parsed);
-									}
-									else {
+									} else {
 										this.log("console", "Not implemented stop reason (assuming exception): " + reason);
 										this.emit("stopped", parsed);
 									}
@@ -410,8 +405,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				clearTimeout(to);
 			});
 			this.sendRaw("-gdb-exit");
-		}
-		else {
+		} else {
 			const proc = this.process;
 			const to = setTimeout(() => {
 				process.kill(-proc.pid);
@@ -521,8 +515,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					if (match.length != breakpoint.countCondition.length) {
 						this.log("stderr", "Unsupported break count expression: '" + breakpoint.countCondition + "'. Only supports 'X' for breaking once after X times or '>X' for ignoring the first X breaks");
 						location += "-t ";
-					}
-					else if (parseInt(match) != 0)
+					} else if (parseInt(match) != 0)
 						location += "-t -i " + parseInt(match) + " ";
 				}
 			}
@@ -547,13 +540,11 @@ export class MI2 extends EventEmitter implements IBackend {
 								resolve([false, undefined]);
 							}
 						}, reject);
-					}
-					else {
+					} else {
 						this.breakpoints.set(newBrk, bkptNum);
 						resolve([true, newBrk]);
 					}
-				}
-				else {
+				} else {
 					reject(result);
 				}
 			}, reject);
@@ -570,8 +561,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				if (result.resultRecords.resultClass == "done") {
 					this.breakpoints.delete(breakpoint);
 					resolve(true);
-				}
-				else resolve(false);
+				} else resolve(false);
 			});
 		});
 	}
@@ -584,8 +574,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				if (result.resultRecords.resultClass == "done") {
 					this.breakpoints.clear();
 					resolve(true);
-				}
-				else resolve(false);
+				} else resolve(false);
 			}, () => {
 				resolve(false);
 			});
@@ -739,8 +728,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	sendUserInput(command: string, threadId: number = 0, frameLevel: number = 0): Thenable<any> {
 		if (command.startsWith("-")) {
 			return this.sendCommand(command.substr(1));
-		}
-		else {
+		} else {
 			return this.sendCliCommand(command, threadId, frameLevel);
 		}
 	}
@@ -771,11 +759,9 @@ export class MI2 extends EventEmitter implements IBackend {
 					if (suppressFailure) {
 						this.log("stderr", `WARNING: Error executing command '${command}'`);
 						resolve(node);
-					}
-					else
+					} else
 						reject(new MIError(node.result("msg") || "Internal error", command));
-				}
-				else
+				} else
 					resolve(node);
 			};
 			this.sendRaw(sel + "-" + command);

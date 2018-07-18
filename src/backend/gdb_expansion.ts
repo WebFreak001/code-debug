@@ -75,8 +75,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 							name = name.substr(1);
 						}
 						namespace = namespace + pointerCombineChar + name;
-					}
-					else
+					} else
 						namespace = name;
 				}
 			}
@@ -151,45 +150,35 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		else if (value.startsWith("true")) {
 			primitive = "true";
 			value = value.substr(4).trim();
-		}
-		else if (value.startsWith("false")) {
+		} else if (value.startsWith("false")) {
 			primitive = "false";
 			value = value.substr(5).trim();
-		}
-		else if (match = nullpointerRegex.exec(value)) {
+		} else if (match = nullpointerRegex.exec(value)) {
 			primitive = "<nullptr>";
 			value = value.substr(match[0].length).trim();
-		}
-		else if (match = referenceStringRegex.exec(value)) {
+		} else if (match = referenceStringRegex.exec(value)) {
 			value = value.substr(match[1].length).trim();
 			primitive = parseCString();
-		}
-		else if (match = referenceRegex.exec(value)) {
+		} else if (match = referenceRegex.exec(value)) {
 			primitive = "*" + match[0];
 			value = value.substr(match[0].length).trim();
-		}
-		else if (match = cppReferenceRegex.exec(value)) {
+		} else if (match = cppReferenceRegex.exec(value)) {
 			primitive = match[0];
 			value = value.substr(match[0].length).trim();
-		}
-		else if (match = charRegex.exec(value)) {
+		} else if (match = charRegex.exec(value)) {
 			primitive = match[1];
 			value = value.substr(match[0].length - 1);
 			primitive += " " + parseCString();
-		}
-		else if (match = numberRegex.exec(value)) {
+		} else if (match = numberRegex.exec(value)) {
 			primitive = match[0];
 			value = value.substr(match[0].length).trim();
-		}
-		else if (match = variableRegex.exec(value)) {
+		} else if (match = variableRegex.exec(value)) {
 			primitive = match[0];
 			value = value.substr(match[0].length).trim();
-		}
-		else if (match = errorRegex.exec(value)) {
+		} else if (match = errorRegex.exec(value)) {
 			primitive = match[0];
 			value = value.substr(match[0].length).trim();
-		}
-		else {
+		} else {
 			primitive = value;
 		}
 		return primitive;
@@ -225,22 +214,18 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		if (typeof val == "object") {
 			ref = variableCreate(val);
 			val = "Object";
-		}
-		else if (typeof val == "string" && val.startsWith("*0x")) {
+		} else if (typeof val == "string" && val.startsWith("*0x")) {
 			if (extra && MINode.valueOf(extra, "arg") == "1") {
 				ref = variableCreate(getNamespace("*(" + name), { arg: true });
 				val = "<args>";
-			}
-			else {
+			} else {
 				ref = variableCreate(getNamespace("*" + name));
 				val = "Object@" + val;
 			}
-		}
-		else if (typeof val == "string" && val.startsWith("@0x")) {
+		} else if (typeof val == "string" && val.startsWith("@0x")) {
 			ref = variableCreate(getNamespace("*&" + name.substr));
 			val = "Ref" + val;
-		}
-		else if (typeof val == "string" && val.startsWith("<...>")) {
+		} else if (typeof val == "string" && val.startsWith("<...>")) {
 			ref = variableCreate(getNamespace(name));
 			val = "...";
 		}

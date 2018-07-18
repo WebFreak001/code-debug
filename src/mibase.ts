@@ -179,16 +179,14 @@ export class MI2DebugSession extends DebugSession {
 				response.body = {
 					value: res.result("value")
 				};
-			}
-			else {
+			} else {
 				await this.miDebugger.changeVariable(args.name, args.value);
 				response.body = {
 					value: args.value
 				};
 			}
 			this.sendResponse(response);
-		}
-		catch (err) {
+		} catch (err) {
 			this.sendErrorResponse(response, 11, `Could not continue: ${err}`);
 		}
 	}
@@ -300,8 +298,7 @@ export class MI2DebugSession extends DebugSession {
 					if (this.isSSH) {
 						file = relative(this.switchCWD.replace(/\\/g, "/"), file.replace(/\\/g, "/"));
 						file = systemPath.resolve(this.trimCWD.replace(/\\/g, "/"), file.replace(/\\/g, "/"));
-					}
-					else if (process.platform === "win32") {
+					} else if (process.platform === "win32") {
 						if (file.startsWith("\\cygdrive\\") || file.startsWith("/cygdrive/")) {
 							file = file[10] + ":" + file.substr(11); // replaces /cygdrive/c/foo/bar.txt with c:/foo/bar.txt
 						}
@@ -333,8 +330,7 @@ export class MI2DebugSession extends DebugSession {
 			}, msg => {
 				this.sendErrorResponse(response, 2, `Could not continue: ${msg}`);
 			});
-		}
-		else
+		} else
 			this.sendResponse(response);
 	}
 
@@ -353,8 +349,7 @@ export class MI2DebugSession extends DebugSession {
 		let id: number | string | VariableObject | ExtendedVariable;
 		if (args.variablesReference < VAR_HANDLES_START) {
 			id = args.variablesReference - STACK_HANDLES_START;
-		}
-		else {
+		} else {
 			id = this.variableHandles.get(args.variablesReference);
 		}
 
@@ -369,8 +364,7 @@ export class MI2DebugSession extends DebugSession {
 			let id: number;
 			if (this.variableHandlesReverse.hasOwnProperty(varObj.name)) {
 				id = this.variableHandlesReverse[varObj.name];
-			}
-			else {
+			} else {
 				id = createVariable(varObj);
 				this.variableHandlesReverse[varObj.name] = id;
 			}
@@ -398,29 +392,25 @@ export class MI2DebugSession extends DebugSession {
 								});
 								const varId = this.variableHandlesReverse[varObjName];
 								varObj = this.variableHandles.get(varId) as any;
-							}
-							catch (err) {
+							} catch (err) {
 								if (err instanceof MIError && err.message == "Variable object not found") {
 									varObj = await this.miDebugger.varCreate(variable.name, varObjName);
 									const varId = findOrCreateVariable(varObj);
 									varObj.exp = variable.name;
 									varObj.id = varId;
-								}
-								else {
+								} else {
 									throw err;
 								}
 							}
 							variables.push(varObj.toProtocolVariable());
-						}
-						catch (err) {
+						} catch (err) {
 							variables.push({
 								name: variable.name,
 								value: `<${err}>`,
 								variablesReference: 0
 							});
 						}
-					}
-					else {
+					} else {
 						if (variable.valueStr !== undefined) {
 							let expanded = expandValue(createVariable, `{${variable.name}=${variable.valueStr})`, "", variable.raw);
 							if (expanded) {
@@ -447,12 +437,10 @@ export class MI2DebugSession extends DebugSession {
 					variables: variables
 				};
 				this.sendResponse(response);
-			}
-			catch (err) {
+			} catch (err) {
 				this.sendErrorResponse(response, 1, `Could not expand variable: ${err}`);
 			}
-		}
-		else if (typeof id == "string") {
+		} else if (typeof id == "string") {
 			// Variable members
 			let variable;
 			try {
@@ -462,8 +450,7 @@ export class MI2DebugSession extends DebugSession {
 					let expanded = expandValue(createVariable, variable.result("value"), id, variable);
 					if (!expanded) {
 						this.sendErrorResponse(response, 2, `Could not expand variable`);
-					}
-					else {
+					} else {
 						if (typeof expanded[0] == "string")
 							expanded = [
 								{
@@ -477,16 +464,13 @@ export class MI2DebugSession extends DebugSession {
 						};
 						this.sendResponse(response);
 					}
-				}
-				catch (e) {
+				} catch (e) {
 					this.sendErrorResponse(response, 2, `Could not expand variable: ${e}`);
 				}
-			}
-			catch (err) {
+			} catch (err) {
 				this.sendErrorResponse(response, 1, `Could not expand variable: ${err}`);
 			}
-		}
-		else if (typeof id == "object") {
+		} else if (typeof id == "object") {
 			if (id instanceof VariableObject) {
 				// Variable members
 				let children: VariableObject[];
@@ -502,12 +486,10 @@ export class MI2DebugSession extends DebugSession {
 						variables: vars
 					};
 					this.sendResponse(response);
-				}
-				catch (err) {
+				} catch (err) {
 					this.sendErrorResponse(response, 1, `Could not expand variable: ${err}`);
 				}
-			}
-			else if (id instanceof ExtendedVariable) {
+			} else if (id instanceof ExtendedVariable) {
 				const varReq = id;
 				if (varReq.options.arg) {
 					const strArr = [];
@@ -526,16 +508,14 @@ export class MI2DebugSession extends DebugSession {
 							const expanded = expandValue(createVariable, variable.result("value"), varReq.name, variable);
 							if (!expanded) {
 								this.sendErrorResponse(response, 15, `Could not expand variable`);
-							}
-							else {
+							} else {
 								if (typeof expanded == "string") {
 									if (expanded == "<nullptr>") {
 										if (argsPart)
 											argsPart = false;
 										else
 											return submit();
-									}
-									else if (expanded[0] != '"') {
+									} else if (expanded[0] != '"') {
 										strArr.push({
 											name: "[err]",
 											value: expanded,
@@ -549,8 +529,7 @@ export class MI2DebugSession extends DebugSession {
 										variablesReference: 0
 									});
 									addOne();
-								}
-								else {
+								} else {
 									strArr.push({
 										name: "[err]",
 										value: expanded,
@@ -559,24 +538,20 @@ export class MI2DebugSession extends DebugSession {
 									submit();
 								}
 							}
-						}
-						catch (e) {
+						} catch (e) {
 							this.sendErrorResponse(response, 14, `Could not expand variable: ${e}`);
 						}
 					};
 					addOne();
-				}
-				else
+				} else
 					this.sendErrorResponse(response, 13, `Unimplemented variable request options: ${JSON.stringify(varReq.options)}`);
-			}
-			else {
+			} else {
 				response.body = {
 					variables: id
 				};
 				this.sendResponse(response);
 			}
-		}
-		else {
+		} else {
 			response.body = {
 				variables: variables
 			};
@@ -678,6 +653,5 @@ function prettyStringArray(strings) {
 			return strings.join(", ");
 		else
 			return JSON.stringify(strings);
-	}
-	else return strings;
+	} else return strings;
 }

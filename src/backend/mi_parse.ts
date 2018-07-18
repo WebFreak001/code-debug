@@ -39,8 +39,7 @@ function parseString(str: string): string {
 			else if (m = octalMatch.exec(str.substr(i))) {
 				ret.writeUInt8(parseInt(m[0], 8), bufIndex++);
 				i += 2;
-			}
-			else
+			} else
 				bufIndex += ret.write(str[i], bufIndex);
 			escaped = false;
 		} else {
@@ -104,12 +103,10 @@ export class MINode implements MIInfo {
 						current = found[0];
 					} else return undefined;
 				} else return undefined;
-			}
-			else if (path[0] == '@') {
+			} else if (path[0] == '@') {
 				current = [current];
 				path = path.substr(1);
-			}
-			else {
+			} else {
 				target = indexRegex.exec(path);
 				if (target) {
 					path = path.substr(target[0].length);
@@ -118,8 +115,7 @@ export class MINode implements MIInfo {
 						current = current[i];
 					} else if (i == 0) {
 					} else return undefined;
-				}
-				else return undefined;
+				} else return undefined;
 			}
 			path = path.trim();
 		} while (path);
@@ -188,8 +184,7 @@ export function parseMI(output: string): MINode {
 		let str;
 		try {
 			str = parseString(output.substr(0, stringEnd));
-		}
-		catch (e) {
+		} catch (e) {
 			str = output.substr(0, stringEnd);
 		}
 		output = output.substr(stringEnd);
@@ -286,8 +281,7 @@ export function parseMI(output: string): MINode {
 			while (result = parseCommaResult())
 				asyncRecord.output.push(result);
 			outOfBandRecord.push(asyncRecord);
-		}
-		else if (match[3]) {
+		} else if (match[3]) {
 			const streamRecord = {
 				isStream: true,
 				type: streamRecordType[match[3]],

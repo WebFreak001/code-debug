@@ -10,8 +10,7 @@ export class MI2_LLDB extends MI2 {
 		if (ssh) {
 			if (!path.isAbsolute(target))
 				target = path.join(cwd, target);
-		}
-		else {
+		} else {
 			if (!nativePath.isAbsolute(target))
 				target = nativePath.join(cwd, target);
 		}
