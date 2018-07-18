@@ -3,6 +3,7 @@
 	"extends": "tslint:recommended",
 	"rules": {
 		"no-null-keyword": true,
+		"indent": [true, "tabs"],
 		/* Rules in tslint:recommended that we don't follow yet. */
 		"array-type": false,
 		"arrow-parens": false,
@@ -12,7 +13,6 @@
 		"comment-format": false,
 		"curly": false,
 		"eofline": false,
-		"indent": false,
 		"interface-name": false,
 		"max-classes-per-file": false,
 		"max-line-length": false,
