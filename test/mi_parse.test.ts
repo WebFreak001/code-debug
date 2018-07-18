@@ -3,7 +3,7 @@ import { parseMI, MINode } from '../src/backend/mi_parse';
 
 suite("MI Parse", () => {
 	test("Simple out of band record", () => {
-		let parsed = parseMI(`4=thread-exited,id="3",group-id="i1"`);
+		const parsed = parseMI(`4=thread-exited,id="3",group-id="i1"`);
 		assert.ok(parsed);
 		assert.equal(parsed.token, 4);
 		assert.equal(parsed.outOfBandRecord.length, 1);
@@ -15,7 +15,7 @@ suite("MI Parse", () => {
 		assert.equal(parsed.resultRecords, undefined);
 	});
 	test("Console stream output with new line", () => {
-		let parsed = parseMI(`~"[Thread 0x7fffe993a700 (LWP 11002) exited]\\n"`);
+		const parsed = parseMI(`~"[Thread 0x7fffe993a700 (LWP 11002) exited]\\n"`);
 		assert.ok(parsed);
 		assert.equal(parsed.token, undefined);
 		assert.equal(parsed.outOfBandRecord.length, 1);
@@ -40,21 +40,21 @@ suite("MI Parse", () => {
 		assert.equal(parsed.resultRecords, undefined);
 	});
 	test("Empty line", () => {
-		let parsed = parseMI(``);
+		const parsed = parseMI(``);
 		assert.ok(parsed);
 		assert.equal(parsed.token, undefined);
 		assert.equal(parsed.outOfBandRecord.length, 0);
 		assert.equal(parsed.resultRecords, undefined);
 	});
 	test("'(gdb)' line", () => {
-		let parsed = parseMI(`(gdb)`);
+		const parsed = parseMI(`(gdb)`);
 		assert.ok(parsed);
 		assert.equal(parsed.token, undefined);
 		assert.equal(parsed.outOfBandRecord.length, 0);
 		assert.equal(parsed.resultRecords, undefined);
 	});
 	test("Simple result record", () => {
-		let parsed = parseMI(`1^running`);
+		const parsed = parseMI(`1^running`);
 		assert.ok(parsed);
 		assert.equal(parsed.token, 1);
 		assert.equal(parsed.outOfBandRecord.length, 0);
@@ -63,7 +63,7 @@ suite("MI Parse", () => {
 		assert.equal(parsed.resultRecords.results.length, 0);
 	});
 	test("Advanced out of band record (Breakpoint hit)", () => {
-		let parsed = parseMI(`*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",frame={addr="0x00000000004e807f",func="D main",args=[{name="args",value="..."}],file="source/app.d",fullname="/path/to/source/app.d",line="157"},thread-id="1",stopped-threads="all",core="0"`);
+		const parsed = parseMI(`*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",frame={addr="0x00000000004e807f",func="D main",args=[{name="args",value="..."}],file="source/app.d",fullname="/path/to/source/app.d",line="157"},thread-id="1",stopped-threads="all",core="0"`);
 		assert.ok(parsed);
 		assert.equal(parsed.token, undefined);
 		assert.equal(parsed.outOfBandRecord.length, 1);
@@ -73,7 +73,7 @@ suite("MI Parse", () => {
 		assert.deepEqual(parsed.outOfBandRecord[0].output[0], ["reason", "breakpoint-hit"]);
 		assert.deepEqual(parsed.outOfBandRecord[0].output[1], ["disp", "keep"]);
 		assert.deepEqual(parsed.outOfBandRecord[0].output[2], ["bkptno", "1"]);
-		let frame = [
+		const frame = [
 			["addr", "0x00000000004e807f"],
 			["func", "D main"],
 			["args", [[["name", "args"], ["value", "..."]]]],
@@ -88,14 +88,14 @@ suite("MI Parse", () => {
 		assert.equal(parsed.resultRecords, undefined);
 	});
 	test("Advanced result record", () => {
-		let parsed = parseMI(`2^done,asm_insns=[src_and_asm_line={line="134",file="source/app.d",fullname="/path/to/source/app.d",line_asm_insn=[{address="0x00000000004e7da4",func-name="_Dmain",offset="0",inst="push   %rbp"},{address="0x00000000004e7da5",func-name="_Dmain",offset="1",inst="mov    %rsp,%rbp"}]}]`);
+		const parsed = parseMI(`2^done,asm_insns=[src_and_asm_line={line="134",file="source/app.d",fullname="/path/to/source/app.d",line_asm_insn=[{address="0x00000000004e7da4",func-name="_Dmain",offset="0",inst="push   %rbp"},{address="0x00000000004e7da5",func-name="_Dmain",offset="1",inst="mov    %rsp,%rbp"}]}]`);
 		assert.ok(parsed);
 		assert.equal(parsed.token, 2);
 		assert.equal(parsed.outOfBandRecord.length, 0);
 		assert.notEqual(parsed.resultRecords, undefined);
 		assert.equal(parsed.resultRecords.resultClass, "done");
 		assert.equal(parsed.resultRecords.results.length, 1);
-		let asm_insns = [
+		const asm_insns = [
 			"asm_insns",
 			[
 				[
@@ -129,7 +129,7 @@ suite("MI Parse", () => {
 		assert.equal(parsed.result("asm_insns.src_and_asm_line.line_asm_insn[1].address"), "0x00000000004e7da5");
 	});
 	test("valueof children", () => {
-		let obj = [
+		const obj = [
 			[
 				"frame",
 				[
@@ -174,17 +174,17 @@ suite("MI Parse", () => {
 		assert.equal(MINode.valueOf(obj[1], "@frame.line"), undefined);
 	});
 	test("empty string values", () => {
-		let parsed = parseMI(`15^done,register-names=["r0","pc","","xpsr","","control"]`);
-		let result = parsed.result('register-names');
+		const parsed = parseMI(`15^done,register-names=["r0","pc","","xpsr","","control"]`);
+		const result = parsed.result('register-names');
 		assert.deepEqual(result, ["r0", "pc", "", "xpsr", "", "control"]);
 	});
 	test("empty array values", () => {
-		let parsed = parseMI(`15^done,foo={x=[],y="y"}`);
+		const parsed = parseMI(`15^done,foo={x=[],y="y"}`);
 		assert.deepEqual(parsed.result('foo.x'), []);
 		assert.equal(parsed.result('foo.y'), "y");
 	});
 	test("empty object values", () => {
-		let parsed = parseMI(`15^done,foo={x={},y="y"}`);
+		const parsed = parseMI(`15^done,foo={x={},y="y"}`);
 		assert.deepEqual(parsed.result('foo.x'), {});
 		assert.equal(parsed.result('foo.y'), "y");
 	});

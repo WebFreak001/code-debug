@@ -5,22 +5,22 @@ import { MINode } from "../mi_parse"
 export class MI2_Mago extends MI2_LLDB {
 	getStack(maxLevels: number, thread: number): Promise<Stack[]> {
 		return new Promise((resolve, reject) => {
-			let command = "stack-list-frames";
+			const command = "stack-list-frames";
 			this.sendCommand(command).then((result) => {
-				let stack = result.resultRecords.results;
-				let ret: Stack[] = [];
-				let remaining = [];
-				let addToStack = (element) => {
-					let level = MINode.valueOf(element, "frame.level");
-					let addr = MINode.valueOf(element, "frame.addr");
-					let func = MINode.valueOf(element, "frame.func");
-					let filename = MINode.valueOf(element, "file");
-					let file = MINode.valueOf(element, "fullname");
+				const stack = result.resultRecords.results;
+				const ret: Stack[] = [];
+				const remaining = [];
+				const addToStack = (element) => {
+					const level = MINode.valueOf(element, "frame.level");
+					const addr = MINode.valueOf(element, "frame.addr");
+					const func = MINode.valueOf(element, "frame.func");
+					const filename = MINode.valueOf(element, "file");
+					const file = MINode.valueOf(element, "fullname");
 					let line = 0;
-					let lnstr = MINode.valueOf(element, "line");
+					const lnstr = MINode.valueOf(element, "line");
 					if (lnstr)
 						line = parseInt(lnstr);
-					let from = parseInt(MINode.valueOf(element, "from"));
+					const from = parseInt(MINode.valueOf(element, "from"));
 					ret.push({
 						address: addr,
 						fileName: filename || "",

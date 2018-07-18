@@ -117,7 +117,7 @@ export class VariableObject {
 	}
 
 	public toProtocolVariable(): DebugProtocol.Variable {
-		let res: DebugProtocol.Variable = {
+		const res: DebugProtocol.Variable = {
 			name: this.exp,
 			evaluateName: this.name,
 			value: (this.value === void 0) ? "<unknown>" : this.value,

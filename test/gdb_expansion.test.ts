@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { expandValue, isExpandable } from '../src/backend/gdb_expansion';
 
 suite("GDB Value Expansion", () => {
-	let variableCreate = (variable) => { return { expanded: variable }; };
+	const variableCreate = (variable) => { return { expanded: variable }; };
 	test("Various values", () => {
 		assert.strictEqual(isExpandable(`false`), 0);
 		assert.equal(expandValue(variableCreate, `false`), "false");
@@ -104,7 +104,7 @@ suite("GDB Value Expansion", () => {
 	});
 	test("Simple node", () => {
 		assert.strictEqual(isExpandable(`{a = false, b = 5, c = 0x0, d = "foobar"}`), 1);
-		let variables = expandValue(variableCreate, `{a = false, b = 5, c = 0x0, d = "foobar"}`);
+		const variables = expandValue(variableCreate, `{a = false, b = 5, c = 0x0, d = "foobar"}`);
 		assert.equal(variables.length, 4);
 		assert.equal(variables[0].name, "a");
 		assert.equal(variables[0].value, "false");
@@ -116,9 +116,9 @@ suite("GDB Value Expansion", () => {
 		assert.equal(variables[3].value, `"foobar"`);
 	});
 	test("Complex node", () => {
-		let node = `{quit = false, _views = {{view = 0x7ffff7ece1e8, renderer = 0x7ffff7eccc50, world = 0x7ffff7ece480}}, deltaTimer = {_flagStarted = false, _timeStart = {length = 0}, _timeMeasured = {length = 0}}, _start = {callbacks = 0x0}, _stop = {callbacks = 0x0}}`;
+		const node = `{quit = false, _views = {{view = 0x7ffff7ece1e8, renderer = 0x7ffff7eccc50, world = 0x7ffff7ece480}}, deltaTimer = {_flagStarted = false, _timeStart = {length = 0}, _timeMeasured = {length = 0}}, _start = {callbacks = 0x0}, _stop = {callbacks = 0x0}}`;
 		assert.strictEqual(isExpandable(node), 1);
-		let variables = expandValue(variableCreate, node);
+		const variables = expandValue(variableCreate, node);
 		assert.deepEqual(variables, [
 			{
 				name: "quit",
@@ -224,9 +224,9 @@ suite("GDB Value Expansion", () => {
 		]);
 	});
 	test("Simple node with errors", () => {
-		let node = `{_enableMipMaps = false, _minFilter = <incomplete type>, _magFilter = <incomplete type>, _wrapX = <incomplete type>, _wrapY = <incomplete type>, _inMode = 6408, _mode = 6408, _id = 1, _width = 1024, _height = 1024}`;
+		const node = `{_enableMipMaps = false, _minFilter = <incomplete type>, _magFilter = <incomplete type>, _wrapX = <incomplete type>, _wrapY = <incomplete type>, _inMode = 6408, _mode = 6408, _id = 1, _width = 1024, _height = 1024}`;
 		assert.strictEqual(isExpandable(node), 1);
-		let variables = expandValue(variableCreate, node);
+		const variables = expandValue(variableCreate, node);
 		assert.deepEqual(variables, [
 			{
 				name: "_enableMipMaps",
@@ -281,9 +281,9 @@ suite("GDB Value Expansion", () => {
 		]);
 	});
 	test("lldb strings", () => {
-		let node = `{ name = {...} }`;
+		const node = `{ name = {...} }`;
 		assert.strictEqual(isExpandable(node), 1);
-		let variables = expandValue(variableCreate, node);
+		const variables = expandValue(variableCreate, node);
 		assert.deepEqual(variables, [
 			{
 				name: "name",
@@ -293,8 +293,8 @@ suite("GDB Value Expansion", () => {
 		]);
 	});
 	test("float values", () => {
-		let node = `{ intval1 = 123, floatval1 = 123.456, intval2 = 3, floatval2 = 234.45 }`;
-		let variables = expandValue(variableCreate, node);
+		const node = `{ intval1 = 123, floatval1 = 123.456, intval2 = 3, floatval2 = 234.45 }`;
+		const variables = expandValue(variableCreate, node);
 
 		assert.deepEqual(variables, [
 			{ name: "intval1", value: "123", variablesReference: 0 },

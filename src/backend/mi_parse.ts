@@ -4,18 +4,18 @@ export interface MIInfo {
 	resultRecords: { resultClass: string, results: [string, any][] };
 }
 
-var octalMatch = /^[0-7]{3}/;
+const octalMatch = /^[0-7]{3}/;
 function parseString(str: string): string {
-	var ret = new Buffer(str.length * 4);
-	var bufIndex = 0;
+	const ret = new Buffer(str.length * 4);
+	let bufIndex = 0;
 
 	if (str[0] != '"' || str[str.length - 1] != '"')
 		throw new Error("Not a valid string");
 	str = str.slice(1, -1);
-	var escaped = false;
-	for (var i = 0; i < str.length; i++) {
+	let escaped = false;
+	for (let i = 0; i < str.length; i++) {
 		if (escaped) {
-			var m;
+			let m;
 			if (str[i] == '\\')
 				bufIndex += ret.write('\\', bufIndex);
 			else if (str[i] == '"')
@@ -81,8 +81,8 @@ export class MINode implements MIInfo {
 	static valueOf(start: any, path: string): any {
 		if (!start)
 			return undefined;
-		let pathRegex = /^\.?([a-zA-Z_\-][a-zA-Z0-9_\-]*)/;
-		let indexRegex = /^\[(\d+)\](?:$|\.)/;
+		const pathRegex = /^\.?([a-zA-Z_\-][a-zA-Z0-9_\-]*)/;
+		const indexRegex = /^\[(\d+)\](?:$|\.)/;
 		path = path.trim();
 		if (!path)
 			return start;
@@ -92,9 +92,9 @@ export class MINode implements MIInfo {
 			if (target) {
 				path = path.substr(target[0].length);
 				if (current.length && typeof current != "string") {
-					let found = [];
+					const found = [];
 					for (let i = 0; i < current.length; i++) {
-						let element = current[i];
+						const element = current[i];
 						if (element[0] == target[1]) {
 							found.push(element[1]);
 						}
@@ -114,7 +114,7 @@ export class MINode implements MIInfo {
 				target = indexRegex.exec(path);
 				if (target) {
 					path = path.substr(target[0].length);
-					let i = parseInt(target[1]);
+					const i = parseInt(target[1]);
 					if (current.length && typeof current != "string" && i >= 0 && i < current.length) {
 						current = current[i];
 					} else if (i == 0) {
@@ -154,21 +154,21 @@ export function parseMI(output: string): MINode {
 	*/
 
 	let token = undefined;
-	let outOfBandRecord = [];
+	const outOfBandRecord = [];
 	let resultRecords = undefined;
 
-	let asyncRecordType = {
+	const asyncRecordType = {
 		"*": "exec",
 		"+": "status",
 		"=": "notify"
 	};
-	let streamRecordType = {
+	const streamRecordType = {
 		"~": "console",
 		"@": "target",
 		"&": "log"
 	};
 
-	let parseCString = () => {
+	const parseCString = () => {
 		if (output[0] != '"')
 			return "";
 		let stringEnd = 1;
@@ -199,11 +199,11 @@ export function parseMI(output: string): MINode {
 
 	let parseValue, parseCommaResult, parseCommaValue, parseResult;
 
-	let parseTupleOrList = () => {
+	const parseTupleOrList = () => {
 		if (output[0] != '{' && output[0] != '[')
 			return undefined;
-		let oldContent = output;
-		let canBeValueList = output[0] == '[';
+		const oldContent = output;
+		const canBeValueList = output[0] == '[';
 		output = output.substr(1);
 		if (output[0] == '}' || output[0] == ']') {
 			output = output.substr(1); // ] or }
@@ -212,9 +212,9 @@ export function parseMI(output: string): MINode {
 		if (canBeValueList) {
 			let value = parseValue();
 			if (value) { // is value list
-				let values = [];
+				const values = [];
 				values.push(value);
-				let remaining = output;
+				const remaining = output;
 				while ((value = parseCommaValue()) !== undefined)
 					values.push(value);
 				output = output.substr(1); // ]
@@ -223,7 +223,7 @@ export function parseMI(output: string): MINode {
 		}
 		let result = parseResult();
 		if (result) {
-			let results = [];
+			const results = [];
 			results.push(result);
 			while (result = parseCommaResult())
 				results.push(result);
@@ -244,11 +244,11 @@ export function parseMI(output: string): MINode {
 	};
 
 	parseResult = () => {
-		let variableMatch = variableRegex.exec(output);
+		const variableMatch = variableRegex.exec(output);
 		if (!variableMatch)
 			return undefined;
 		output = output.substr(variableMatch[0].length + 1);
-		let variable = variableMatch[1];
+		const variable = variableMatch[1];
 		return [variable, parseValue()];
 	};
 
@@ -275,9 +275,9 @@ export function parseMI(output: string): MINode {
 		}
 
 		if (match[2]) {
-			let classMatch = asyncClassRegex.exec(output);
+			const classMatch = asyncClassRegex.exec(output);
 			output = output.substr(classMatch[1].length);
-			let asyncRecord = {
+			const asyncRecord = {
 				isStream: false,
 				type: asyncRecordType[match[2]],
 				asyncClass: classMatch[1],
@@ -289,7 +289,7 @@ export function parseMI(output: string): MINode {
 			outOfBandRecord.push(asyncRecord);
 		}
 		else if (match[3]) {
-			let streamRecord = {
+			const streamRecord = {
 				isStream: true,
 				type: streamRecordType[match[3]],
 				content: parseCString()
