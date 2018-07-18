@@ -34,7 +34,6 @@
 		"space-before-function-paren": false,
 		"trailing-comma": false,
 		"triple-equals": false,
-		"typedef-whitespace": false,
-		"variable-name": false
+		"typedef-whitespace": false
 	}
 }

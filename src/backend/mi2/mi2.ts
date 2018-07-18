@@ -743,12 +743,12 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	async sendCliCommand(command: string, threadId: number = 0, frameLevel: number = 0) {
-		let mi_command = "interpreter-exec ";
+		let miCommand = "interpreter-exec ";
 		if (threadId != 0) {
-			mi_command += `--thread ${threadId} --frame ${frameLevel} `;
+			miCommand += `--thread ${threadId} --frame ${frameLevel} `;
 		}
-		mi_command += `console "${command.replace(/[\\"']/g, '\\$&')}"`;
-		await this.sendCommand(mi_command);
+		miCommand += `console "${command.replace(/[\\"']/g, '\\$&')}"`;
+		await this.sendCommand(miCommand);
 	}
 
 	sendCommand(command: string, suppressFailure: boolean = false): Thenable<MINode> {

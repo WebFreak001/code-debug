@@ -95,7 +95,7 @@ suite("MI Parse", () => {
 		assert.notEqual(parsed.resultRecords, undefined);
 		assert.equal(parsed.resultRecords.resultClass, "done");
 		assert.equal(parsed.resultRecords.results.length, 1);
-		const asm_insns = [
+		const asmInsns = [
 			"asm_insns",
 			[
 				[
@@ -125,7 +125,7 @@ suite("MI Parse", () => {
 				]
 			]
 		];
-		assert.deepEqual(parsed.resultRecords.results[0], asm_insns);
+		assert.deepEqual(parsed.resultRecords.results[0], asmInsns);
 		assert.equal(parsed.result("asm_insns.src_and_asm_line.line_asm_insn[1].address"), "0x00000000004e7da5");
 	});
 	test("valueof children", () => {
