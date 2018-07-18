@@ -1,8 +1,8 @@
-import { MI2, escape } from "./mi2"
-import { Breakpoint } from "../backend"
-import * as ChildProcess from "child_process"
-import { posix } from "path"
-import * as nativePath from "path"
+import { MI2, escape } from "./mi2";
+import { Breakpoint } from "../backend";
+import * as ChildProcess from "child_process";
+import { posix } from "path";
+import * as nativePath from "path";
 const path = posix;
 
 export class MI2_LLDB extends MI2 {
@@ -10,8 +10,7 @@ export class MI2_LLDB extends MI2 {
 		if (ssh) {
 			if (!path.isAbsolute(target))
 				target = path.join(cwd, target);
-		}
-		else {
+		} else {
 			if (!nativePath.isAbsolute(target))
 				target = nativePath.join(cwd, target);
 		}

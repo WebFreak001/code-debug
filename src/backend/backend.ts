@@ -84,7 +84,7 @@ export class VariableObject {
 	frozen: boolean;
 	dynamic: boolean;
 	displayhint: string;
-	has_more: boolean;
+	hasMore: boolean;
 	id: number;
 	constructor(node: any) {
 		this.name = MINode.valueOf(node, "name");
@@ -97,7 +97,7 @@ export class VariableObject {
 		this.dynamic = !!MINode.valueOf(node, "dynamic");
 		this.displayhint = MINode.valueOf(node, "displayhint");
 		// TODO: use has_more when it's > 0
-		this.has_more = !!MINode.valueOf(node, "has_more");
+		this.hasMore = !!MINode.valueOf(node, "has_more");
 	}
 
 	public applyChanges(node: MINode) {
@@ -107,7 +107,7 @@ export class VariableObject {
 		}
 		this.dynamic = !!MINode.valueOf(node, "dynamic");
 		this.displayhint = MINode.valueOf(node, "displayhint");
-		this.has_more = !!MINode.valueOf(node, "has_more");
+		this.hasMore = !!MINode.valueOf(node, "has_more");
 	}
 
 	public isCompound(): boolean {
@@ -133,13 +133,13 @@ export interface MIError extends Error {
 	readonly name: string;
 	readonly message: string;
 	readonly source: string;
-};
+}
 export interface MIErrorConstructor {
 	new (message: string, source: string): MIError;
 	readonly prototype: MIError;
 }
 
-export const MIError: MIErrorConstructor = <any>class MIError {
+export const MIError: MIErrorConstructor = <any> class MIError {
 	readonly name: string;
 	readonly message: string;
 	readonly source: string;

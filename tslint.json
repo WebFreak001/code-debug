@@ -3,6 +3,7 @@
 	"extends": "tslint:recommended",
 	"rules": {
 		"no-null-keyword": true,
+		"indent": [true, "tabs"],
 		/* Rules in tslint:recommended that we don't follow yet. */
 		"array-type": false,
 		"arrow-parens": false,
@@ -11,8 +12,6 @@
 		"class-name": false,
 		"comment-format": false,
 		"curly": false,
-		"eofline": false,
-		"indent": false,
 		"interface-name": false,
 		"max-classes-per-file": false,
 		"max-line-length": false,
@@ -24,24 +23,16 @@
 		"no-consecutive-blank-lines": false,
 		"no-empty": false,
 		"no-shadowed-variable": false,
-		"no-trailing-whitespace": false,
 		"no-unnecessary-initializer": false,
-		"no-var-requires": false,
 		"object-literal-shorthand": false,
 		"object-literal-sort-keys": false,
-		"one-line": false,
 		"one-variable-per-declaration": false,
 		"only-arrow-functions": false,
 		"ordered-imports": false,
-		"prefer-for-of": false,
 		"quotemark": false,
 		"radix": false,
-		"semicolon": false,
 		"space-before-function-paren": false,
 		"trailing-comma": false,
-		"triple-equals": false,
-		"typedef-whitespace": false,
-		"variable-name": false,
-		"whitespace": false
+		"triple-equals": false
 	}
 }

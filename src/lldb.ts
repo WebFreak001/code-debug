@@ -83,8 +83,7 @@ class LLDBDebugSession extends MI2DebugSession {
 						this.handlePause(undefined);
 				});
 			});
-		}
-		else {
+		} else {
 			this.miDebugger.load(args.cwd, args.target, args.arguments, undefined).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {

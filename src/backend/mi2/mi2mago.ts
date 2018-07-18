@@ -1,6 +1,6 @@
-import { MI2_LLDB } from "./mi2lldb"
-import { Stack } from "../backend"
-import { MINode } from "../mi_parse"
+import { MI2_LLDB } from "./mi2lldb";
+import { Stack } from "../backend";
+import { MINode } from "../mi_parse";
 
 export class MI2_Mago extends MI2_LLDB {
 	getStack(maxLevels: number, thread: number): Promise<Stack[]> {
@@ -29,7 +29,7 @@ export class MI2_Mago extends MI2_LLDB {
 						level: level,
 						line: line
 					});
-				}
+				};
 				stack.forEach(element => {
 					if (element)
 						if (element[0] == "stack") {

@@ -42,8 +42,7 @@ function getMemoryRange(range: string) {
 		if (memoryLocationRegex.exec(length))
 			length = parseInt(length.substr(2), 16).toString();
 		return "from=" + encodeURIComponent(from) + "&length=" + encodeURIComponent(length);
-	}
-	else if ((index = range.indexOf("-")) != -1) {
+	} else if ((index = range.indexOf("-")) != -1) {
 		const from = range.substr(0, index);
 		const to = range.substr(index + 1);
 		if (!memoryLocationRegex.exec(from))
@@ -51,8 +50,7 @@ function getMemoryRange(range: string) {
 		if (!memoryLocationRegex.exec(to))
 			return undefined;
 		return "from=" + encodeURIComponent(from) + "&to=" + encodeURIComponent(to);
-	}
-	else if (memoryLocationRegex.exec(range))
+	} else if (memoryLocationRegex.exec(range))
 		return "at=" + encodeURIComponent(range);
 	else return undefined;
 }
@@ -100,18 +98,14 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 				highlightAt = 64;
 				from = Math.max(loc - 64, 0);
 				to = Math.max(loc + 768, 0);
-			}
-			else if (splits[0].split("=")[0] == "from") {
+			} else if (splits[0].split("=")[0] == "from") {
 				from = parseInt(splits[0].split("=")[1].substr(2), 16);
 				if (splits[1].split("=")[0] == "to") {
 					to = parseInt(splits[1].split("=")[1].substr(2), 16);
-				}
-				else if (splits[1].split("=")[0] == "length") {
+				} else if (splits[1].split("=")[0] == "length") {
 					to = from + parseInt(splits[1].split("=")[1]);
-				}
-				else return reject("Invalid Range");
-			}
-			else return reject("Invalid Range");
+				} else return reject("Invalid Range");
+			} else return reject("Invalid Range");
 			if (to < from)
 				return reject("Negative Range");
 			conn.write("examineMemory " + JSON.stringify([from, to - from + 1]));

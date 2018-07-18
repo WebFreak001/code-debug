@@ -95,7 +95,7 @@ suite("MI Parse", () => {
 		assert.notEqual(parsed.resultRecords, undefined);
 		assert.equal(parsed.resultRecords.resultClass, "done");
 		assert.equal(parsed.resultRecords.results.length, 1);
-		const asm_insns = [
+		const asmInsns = [
 			"asm_insns",
 			[
 				[
@@ -125,7 +125,7 @@ suite("MI Parse", () => {
 				]
 			]
 		];
-		assert.deepEqual(parsed.resultRecords.results[0], asm_insns);
+		assert.deepEqual(parsed.resultRecords.results[0], asmInsns);
 		assert.equal(parsed.result("asm_insns.src_and_asm_line.line_asm_insn[1].address"), "0x00000000004e7da5");
 	});
 	test("valueof children", () => {
@@ -158,14 +158,14 @@ suite("MI Parse", () => {
 				]
 			]
 		];
-		
+
 		assert.equal(MINode.valueOf(obj[0], "@frame.level"), "0");
 		assert.equal(MINode.valueOf(obj[0], "@frame.addr"), "0x0000000000435f70");
 		assert.equal(MINode.valueOf(obj[0], "@frame.func"), "D main");
 		assert.equal(MINode.valueOf(obj[0], "@frame.file"), "source/app.d");
 		assert.equal(MINode.valueOf(obj[0], "@frame.fullname"), "/path/to/source/app.d");
 		assert.equal(MINode.valueOf(obj[0], "@frame.line"), "5");
-		
+
 		assert.equal(MINode.valueOf(obj[1], "@frame.level"), "1");
 		assert.equal(MINode.valueOf(obj[1], "@frame.addr"), "0x00000000004372d3");
 		assert.equal(MINode.valueOf(obj[1], "@frame.func"), "rt.dmain2._d_run_main()");
