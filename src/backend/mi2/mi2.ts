@@ -8,7 +8,7 @@ import * as fs from "fs"
 import { posix } from "path"
 import * as nativePath from "path"
 const path = posix;
-const Client = require("ssh2").Client;
+import { Client } from "ssh2";
 
 export function escape(str: string) {
 	return str.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");

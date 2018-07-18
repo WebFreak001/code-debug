@@ -26,7 +26,6 @@
 		"no-shadowed-variable": false,
 		"no-trailing-whitespace": false,
 		"no-unnecessary-initializer": false,
-		"no-var-requires": false,
 		"object-literal-shorthand": false,
 		"object-literal-sort-keys": false,
 		"one-line": false,
