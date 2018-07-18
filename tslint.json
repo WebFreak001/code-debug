@@ -35,7 +35,6 @@
 		"trailing-comma": false,
 		"triple-equals": false,
 		"typedef-whitespace": false,
-		"variable-name": false,
-		"whitespace": false
+		"variable-name": false
 	}
 }

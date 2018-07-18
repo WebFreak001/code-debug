@@ -139,7 +139,7 @@ export interface MIErrorConstructor {
 	readonly prototype: MIError;
 }
 
-export const MIError: MIErrorConstructor = <any>class MIError {
+export const MIError: MIErrorConstructor = <any> class MIError {
 	readonly name: string;
 	readonly message: string;
 	readonly source: string;

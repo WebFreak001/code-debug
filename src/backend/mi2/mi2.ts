@@ -295,7 +295,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	onOutputStderr(lines) {
-		lines = <string[]>lines.split('\n');
+		lines = <string[]> lines.split('\n');
 		lines.forEach(line => {
 			this.log("stderr", line);
 		});
@@ -310,7 +310,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	onOutput(lines) {
-		lines = <string[]>lines.split('\n');
+		lines = <string[]> lines.split('\n');
 		lines.forEach(line => {
 			if (couldBeOutput(line)) {
 				if (!gdbMatch.exec(line))

@@ -98,7 +98,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			value = value.substr(3).trim();
 			if (value[0] == '}') {
 				value = value.substr(1).trim();
-				return <any>"<...>";
+				return <any> "<...>";
 			}
 		}
 		const eqPos = value.indexOf("=");
