@@ -37,6 +37,7 @@ export class MI2DebugSession extends DebugSession {
 	protected debugReady: boolean;
 	protected miDebugger: MI2;
 	protected commandServer: net.Server;
+	protected serverPath: string;
 
 	public constructor(debuggerLinesStartAt1: boolean, isServer: boolean = false) {
 		super(debuggerLinesStartAt1, isServer);
@@ -77,7 +78,7 @@ export class MI2DebugSession extends DebugSession {
 			});
 			if (!fs.existsSync(systemPath.join(os.tmpdir(), "code-debug-sockets")))
 				fs.mkdirSync(systemPath.join(os.tmpdir(), "code-debug-sockets"));
-			this.commandServer.listen(systemPath.join(os.tmpdir(), "code-debug-sockets", "Debug-Instance-" + Math.floor(Math.random() * 36 * 36 * 36 * 36).toString(36)));
+			this.commandServer.listen(this.serverPath = systemPath.join(os.tmpdir(), "code-debug-sockets", ("Debug-Instance-" + Math.floor(Math.random() * 36 * 36 * 36 * 36).toString(36)).toLowerCase()));
 		} catch (e) {
 			if (process.platform != "win32")
 				this.handleMsg("stderr", "Code-Debug WARNING: Utility Command Server: Failed to start " + e.toString() + "\nCode-Debug WARNING: The examine memory location command won't work");
@@ -148,6 +149,11 @@ export class MI2DebugSession extends DebugSession {
 	protected quitEvent() {
 		this.quit = true;
 		this.sendEvent(new TerminatedEvent());
+
+		if (this.serverPath)
+			fs.unlink(this.serverPath, (err) => {
+				console.error("Failed to unlink debug server");
+			});
 	}
 
 	protected launchError(err: any) {

@@ -72,7 +72,7 @@ function examineMemory() {
 		}
 		const pickedFile = (file) => {
 			vscode.window.showInputBox({ placeHolder: "Memory Location or Range", validateInput: range => getMemoryRange(range) === undefined ? "Range must either be in format 0xF00-0xF01, 0xF100+32 or 0xABC154" : "" }).then(range => {
-				vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse("debugmemory://" + file + "#" + getMemoryRange(range)));
+				vscode.window.showTextDocument(vscode.Uri.parse("debugmemory://" + file + "#" + getMemoryRange(range)));
 			});
 		};
 		if (files.length == 1)
@@ -89,7 +89,7 @@ function examineMemory() {
 class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 	provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): Thenable<string> {
 		return new Promise((resolve, reject) => {
-			const conn = net.connect(path.join(os.tmpdir(), "code-debug-sockets", uri.authority));
+			const conn = net.connect(path.join(os.tmpdir(), "code-debug-sockets", uri.authority.toLowerCase()));
 			let from, to;
 			let highlightAt = -1;
 			const splits = uri.fragment.split("&");
@@ -110,24 +110,38 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 				return reject("Negative Range");
 			conn.write("examineMemory " + JSON.stringify([from, to - from + 1]));
 			conn.once("data", data => {
-				let formattedCode = "";
+				let formattedCode = "                  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F\n";
+				var index: number = from;
 				const hexString = data.toString();
 				let x = 0;
 				let asciiLine = "";
 				let byteNo = 0;
 				for (let i = 0; i < hexString.length; i += 2) {
+					if (x == 0) {
+						var addr = index.toString(16);
+						while (addr.length < 16) addr = '0' + addr;
+						formattedCode += addr + "  ";
+					}
+					index++;
+
 					const digit = hexString.substr(i, 2);
 					const digitNum = parseInt(digit, 16);
 					if (digitNum >= 32 && digitNum <= 126)
 						asciiLine += String.fromCharCode(digitNum);
 					else
 						asciiLine += ".";
+
 					if (highlightAt == byteNo) {
-						formattedCode += "<b>" + digit + "</b> ";
-					} else
+						formattedCode = formattedCode.slice(0, -1) + "[" + digit + "]";
+					} else {
 						formattedCode += digit + " ";
-					if (++x > 16) {
-						formattedCode += asciiLine + "\n";
+					}
+
+					if (x == 7)
+						formattedCode += " ";
+
+					if (++x >= 16) {
+						formattedCode += " " + asciiLine + "\n";
 						x = 0;
 						asciiLine = "";
 					}
@@ -137,11 +151,25 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 					for (let i = 0; i <= 16 - x; i++) {
 						formattedCode += "   ";
 					}
+					if (x >= 8)
+						formattedCode = formattedCode.slice(0, -2);
+					else
+						formattedCode = formattedCode.slice(0, -1);
 					formattedCode += asciiLine;
 				}
-				resolve("<h2>Memory Range from 0x" + from.toString(16) + " to 0x" + to.toString(16) + "</h2><code><pre>" + formattedCode + "</pre></code>");
+				resolve(center("Memory Range from 0x" + from.toString(16) + " to 0x" + to.toString(16), 84) + "\n\n" + formattedCode);
 				conn.destroy();
 			});
 		});
 	}
+}
+
+function center(str: string, width: number): string {
+	var left = true;
+	while (str.length < width) {
+		if (left) str = ' ' + str;
+		else str = str + ' ';
+		left = !left;
+	}
+	return str;
 }
