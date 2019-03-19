@@ -13,7 +13,7 @@
 	"publisher": "webfreak",
 	"icon": "images/icon.png",
 	"engines": {
-		"vscode": "^1.8.0"
+		"vscode": "^1.28.0"
 	},
 	"main": "./out/src/frontend/extension",
 	"activationEvents": [
@@ -923,15 +923,20 @@
 	"dependencies": {
 		"vscode-debugadapter": "^1.16.0",
 		"vscode-debugprotocol": "^1.16.0",
-		"ssh2": "^0.5.4"
+		"ssh2": "^0.8.2"
 	},
 	"devDependencies": {
-		"@types/mocha": "^2.2.39",
-		"@types/node": "^7.0.5",
-		"mocha": "^3.2.0",
-		"tslint": "^5.11.0",
+		"@types/mocha": "^5.2.6",
+		"@types/node": "^11.11.3",
+		"mocha": "^6.0.2",
+		"tslint": "^5.14.0",
 		"tslint-language-service": "^0.9.9",
-		"typescript": "^2.1.6",
-		"vscode": "^1.0.3"
+		"typescript": "^3.3.3333",
+		"vscode": "^1.1.30"
+	},
+	"__metadata": {
+		"id": "2fd22b8e-b3b8-4e7f-9a28-a5e2d1bdd0d4",
+		"publisherDisplayName": "WebFreak",
+		"publisherId": "e054f80a-50f9-4d80-85c8-6ff87eef6c35"
 	}
 }
