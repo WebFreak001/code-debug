@@ -225,7 +225,7 @@ export class MI2DebugSession extends DebugSession {
 				let path = args.source.path;
 				if (this.isSSH) {
 					path = relative(this.trimCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
-					path = resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
+					path = systemPath.resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
 				}
 				const all = args.breakpoints.map(brk => {
 					return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
