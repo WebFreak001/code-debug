@@ -1,3 +1,22 @@
+# 0.23.0
+
+(released March 2019)
+
+Normalize file paths in stack trace (fixes duplicate opening of files)
+New Examine memory Location UI
+Breakpoints in SSH on windows fixed (@HaronK)
+Project code improvements (@simark)
+Initial configurations contain valueFormatting now (@Yanpas)
+
+# 0.22.0
+
+(released March 2018)
+
+Support for using SSH agent
+Support multi-threading (@LeszekSwirski)
+Fixed GDB expansion logic with floats (Marcel Ball)
+Fixed attach to PID template (@gentoo90)
+
 # 0.21.0 / 0.21.1 / 0.21.2
 
 (0.21.2 is pushed without changes to hopefully fix vscode installation)
