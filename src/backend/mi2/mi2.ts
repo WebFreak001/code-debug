@@ -621,7 +621,12 @@ export class MI2 extends EventEmitter implements IBackend {
 			const addr = MINode.valueOf(element, "@frame.addr");
 			const func = MINode.valueOf(element, "@frame.func");
 			const filename = MINode.valueOf(element, "@frame.file");
-			const file = MINode.valueOf(element, "@frame.fullname");
+			let file: string = MINode.valueOf(element, "@frame.fullname");
+			if (this.isSSH)
+				file = posix.normalize(file);
+			else
+				file = nativePath.normalize(file);
+
 			let line = 0;
 			const lnstr = MINode.valueOf(element, "@frame.line");
 			if (lnstr)
