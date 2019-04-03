@@ -230,8 +230,9 @@ export class MI2DebugSession extends DebugSession {
 			this.miDebugger.clearBreakPoints().then(() => {
 				let path = args.source.path;
 				if (this.isSSH) {
-					path = relative(this.trimCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
-					path = systemPath.resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
+					// trimCWD is the local path, switchCWD is the ssh path
+					path = systemPath.relative(this.trimCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
+					path = resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
 				}
 				const all = args.breakpoints.map(brk => {
 					return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
@@ -302,6 +303,7 @@ export class MI2DebugSession extends DebugSession {
 				let file = element.file;
 				if (file) {
 					if (this.isSSH) {
+						// trimCWD is the local path, switchCWD is the ssh path
 						file = relative(this.switchCWD.replace(/\\/g, "/"), file.replace(/\\/g, "/"));
 						file = systemPath.resolve(this.trimCWD.replace(/\\/g, "/"), file.replace(/\\/g, "/"));
 					} else if (process.platform === "win32") {
