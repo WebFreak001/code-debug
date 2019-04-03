@@ -1,3 +1,10 @@
+# 0.23.1
+
+Fixes:
+Breakpoints in SSH in other working directories properly resolved
+Undefined/null paths don't crash stacktrace
+Added kotlin to language list
+
 # 0.23.0
 
 (released March 2019)
