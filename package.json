@@ -61,7 +61,8 @@
 						"arm",
 						"asm",
 						"vala",
-						"crystal"
+						"crystal",
+						"kotlin"
 					]
 				},
 				"variables": {
@@ -475,7 +476,8 @@
 						"dylan",
 						"mips",
 						"renderscript",
-						"vala"
+						"vala",
+						"kotlin"
 					]
 				},
 				"configurationAttributes": {
