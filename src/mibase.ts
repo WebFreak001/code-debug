@@ -653,6 +653,27 @@ export class MI2DebugSession extends DebugSession {
 			});
 		}
 	}
+
+	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
+		this.miDebugger.goto(args.source.path, args.line).then(done => {
+			response.body = {
+				targets : [{
+					id : 1,
+					label : args.source.name,
+					column: args.column,
+					line : args.line
+				}]
+			};
+			this.sendResponse(response);
+		}, msg => {
+			this.sendErrorResponse(response, 6, `Could not step over: ${msg}`);
+		});
+	}
+
+	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
+		this.sendResponse(response);
+	}
+
 }
 
 function prettyStringArray(strings) {
