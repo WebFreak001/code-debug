@@ -666,7 +666,7 @@ export class MI2DebugSession extends DebugSession {
 			};
 			this.sendResponse(response);
 		}, msg => {
-			this.sendErrorResponse(response, 6, `Could not step over: ${msg}`);
+			this.sendErrorResponse(response, 6, `Could not jump: ${msg}`);
 		});
 	}
 
