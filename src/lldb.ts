@@ -33,6 +33,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 
 class LLDBDebugSession extends MI2DebugSession {
 	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
+		response.body.supportsGotoTargetsRequest = true;
 		response.body.supportsHitConditionalBreakpoints = true;
 		response.body.supportsConfigurationDoneRequest = true;
 		response.body.supportsConditionalBreakpoints = true;
