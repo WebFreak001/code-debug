@@ -57,4 +57,13 @@ export class MI2_LLDB extends MI2 {
 	setBreakPointCondition(bkptNum, condition): Thenable<any> {
 		return this.sendCommand("break-condition " + bkptNum + " \"" + escape(condition) + "\" 1");
 	}
+
+	goto(filename: string, line: number): Thenable<Boolean> {
+		return new Promise((resolve, reject) => {
+			const target: string = (filename ? filename + ":" : "") + line;
+			this.sendCliCommand("jump " + target).then(() => {
+				resolve(true);
+			}, reject);
+		});
+	}
 }
