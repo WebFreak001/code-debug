@@ -62,7 +62,8 @@
 						"asm",
 						"vala",
 						"crystal",
-						"kotlin"
+						"kotlin",
+						"zig"
 					]
 				},
 				"variables": {
