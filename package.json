@@ -62,7 +62,8 @@
 						"asm",
 						"vala",
 						"crystal",
-						"kotlin"
+						"kotlin",
+						"zig"
 					]
 				},
 				"variables": {
@@ -477,7 +478,8 @@
 						"mips",
 						"renderscript",
 						"vala",
-						"kotlin"
+						"kotlin",
+						"zig"
 					]
 				},
 				"configurationAttributes": {
