@@ -478,7 +478,8 @@
 						"mips",
 						"renderscript",
 						"vala",
-						"kotlin"
+						"kotlin",
+						"zig"
 					]
 				},
 				"configurationAttributes": {
