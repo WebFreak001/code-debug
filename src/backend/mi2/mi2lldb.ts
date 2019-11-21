@@ -60,7 +60,10 @@ export class MI2_LLDB extends MI2 {
 
 	goto(filename: string, line: number): Thenable<Boolean> {
 		return new Promise((resolve, reject) => {
-			const target: string = (filename ? filename + ":" : "") + line;
+			// LLDB parses the file differently than GDB...
+			// GDB doesn't allow quoting only the file but only the whole argument
+			// LLDB doesn't allow quoting the whole argument but rather only the file
+			const target: string = '"' + (filename ? escape(filename) + ":" : "") + '"' + line;
 			this.sendCliCommand("jump " + target).then(() => {
 				resolve(true);
 			}, reject);
