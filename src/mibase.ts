@@ -52,6 +52,7 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.on("breakpoint", this.handleBreakpoint.bind(this));
 		this.miDebugger.on("step-end", this.handleBreak.bind(this));
 		this.miDebugger.on("step-out-end", this.handleBreak.bind(this));
+		this.miDebugger.on("step-other", this.handleBreak.bind(this));
 		this.miDebugger.on("signal-stop", this.handlePause.bind(this));
 		this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));
 		this.miDebugger.on("thread-exited", this.threadExitedEvent.bind(this));
@@ -116,9 +117,9 @@ export class MI2DebugSession extends DebugSession {
 		this.sendEvent(event);
 	}
 
-	protected handleBreak(info: MINode) {
-		const event = new StoppedEvent("step", parseInt(info.record("thread-id")));
-		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
+	protected handleBreak(info?: MINode) {
+		const event = new StoppedEvent("step", info ? parseInt(info.record("thread-id")) : 1);
+		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info ? info.record("stopped-threads") == "all" : true;
 		this.sendEvent(event);
 	}
 
@@ -657,16 +658,16 @@ export class MI2DebugSession extends DebugSession {
 	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
 		this.miDebugger.goto(args.source.path, args.line).then(done => {
 			response.body = {
-				targets : [{
-					id : 1,
-					label : args.source.name,
+				targets: [{
+					id: 1,
+					label: args.source.name,
 					column: args.column,
 					line : args.line
 				}]
 			};
 			this.sendResponse(response);
 		}, msg => {
-			this.sendErrorResponse(response, 6, `Could not jump: ${msg}`);
+			this.sendErrorResponse(response, 16, `Could not jump: ${msg}`);
 		});
 	}
 

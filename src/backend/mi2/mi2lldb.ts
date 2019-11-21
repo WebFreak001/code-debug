@@ -63,8 +63,9 @@ export class MI2_LLDB extends MI2 {
 			// LLDB parses the file differently than GDB...
 			// GDB doesn't allow quoting only the file but only the whole argument
 			// LLDB doesn't allow quoting the whole argument but rather only the file
-			const target: string = '"' + (filename ? escape(filename) + ":" : "") + '"' + line;
+			const target: string = (filename ? '"' + escape(filename) + '":' : "") + line;
 			this.sendCliCommand("jump " + target).then(() => {
+				this.emit("step-other", null);
 				resolve(true);
 			}, reject);
 		});
