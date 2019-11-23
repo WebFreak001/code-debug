@@ -423,7 +423,7 @@
 						"description": "Debugs an embedded microcontroller supported by GDB by attaching over extended-remote",
 						"body": {
 							"type": "gdb",
-							"request": "launch",
+							"request": "attach",
 							"name": "${6:Debug Microcontroller}",
 							"target": "extended-remote ${2:/dev/cu.usbmodem00000000}",
 							"executable": "${1:./bin/executable.elf}",
