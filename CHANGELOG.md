@@ -1,3 +1,10 @@
+# 0.24.0
+
+Added zig as supported language.
+Fix example Debug Microcontroller template
+Implement "Jump to Cursor" to skip instructions
+Fix memory dump for theia
+
 # 0.23.1
 
 Fixes:
