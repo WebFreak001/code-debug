@@ -72,7 +72,7 @@ function examineMemory() {
 		}
 		const pickedFile = (file) => {
 			vscode.window.showInputBox({ placeHolder: "Memory Location or Range", validateInput: range => getMemoryRange(range) === undefined ? "Range must either be in format 0xF00-0xF01, 0xF100+32 or 0xABC154" : "" }).then(range => {
-				vscode.window.showTextDocument(vscode.Uri.parse("debugmemory://" + file + "#" + getMemoryRange(range)));
+				vscode.window.showTextDocument(vscode.Uri.parse("debugmemory://" + file + "?" + getMemoryRange(range)));
 			});
 		};
 		if (files.length == 1)
@@ -92,7 +92,7 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 			const conn = net.connect(path.join(os.tmpdir(), "code-debug-sockets", uri.authority.toLowerCase()));
 			let from, to;
 			let highlightAt = -1;
-			const splits = uri.fragment.split("&");
+			const splits = uri.query.split("&");
 			if (splits[0].split("=")[0] == "at") {
 				const loc = parseInt(splits[0].split("=")[1].substr(2), 16);
 				highlightAt = 64;
