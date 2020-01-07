@@ -111,6 +111,10 @@
 								"description": "Additional arguments to pass to GDB",
 								"default": []
 							},
+							"extendedRemote": {
+								"type": "string",
+								"description": "gdbserver (extended-remote) to connect to (eg :2345)"
+							},
 							"valuesFormatting": {
 								"type": "string",
 								"description": "Set the way of showing variable values. 'disabled' - show value as is, 'parseText' - parse debuggers output text into structure, 'prettyPrinters' - enable debuggers custom pretty-printers if there are any",
@@ -438,6 +442,19 @@
 								"attach 1",
 								"load ${1:./bin/executable.elf}"
 							]
+						},
+						"valuesFormatting": "parseText"
+					},
+					{
+						"label": "GDB: Debug on remote device",
+						"description": "Transfer program to and debug it on a remote device",
+						"body": {
+							"type": "gdb",
+							"request": "launch",
+							"name": "${3:Debug remote device}",
+							"extendedRemote": "${2:192.168.0.1:2345}",
+							"executable": "${1:./bin/executable.elf}",
+							"cwd": "^\"\\${workspaceRoot}\""
 						},
 						"valuesFormatting": "parseText"
 					}
