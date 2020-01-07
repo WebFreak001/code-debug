@@ -73,12 +73,16 @@
 				"configurationAttributes": {
 					"launch": {
 						"required": [
-							"target"
+							"executable"
 						],
 						"properties": {
-							"target": {
+							"executable": {
 								"type": "string",
 								"description": "Path of executable"
+							},
+							"target": {
+								"type": "string",
+								"description": "Path of executable (DEPRECATED use executable argument instead)"
 							},
 							"arguments": {
 								"type": "string",
@@ -106,6 +110,10 @@
 								"type": "array",
 								"description": "Additional arguments to pass to GDB",
 								"default": []
+							},
+							"extendedRemote": {
+								"type": "string",
+								"description": "gdbserver (extended-remote) to connect to (eg :2345)"
 							},
 							"valuesFormatting": {
 								"type": "string",
@@ -434,6 +442,19 @@
 								"attach 1",
 								"load ${1:./bin/executable.elf}"
 							]
+						},
+						"valuesFormatting": "parseText"
+					},
+					{
+						"label": "GDB: Debug on remote device",
+						"description": "Transfer program to and debug it on a remote device",
+						"body": {
+							"type": "gdb",
+							"request": "launch",
+							"name": "${3:Debug remote device}",
+							"extendedRemote": "${2:192.168.0.1:2345}",
+							"executable": "${1:./bin/executable.elf}",
+							"cwd": "^\"\\${workspaceRoot}\""
 						},
 						"valuesFormatting": "parseText"
 					}

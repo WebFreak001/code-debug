@@ -2,3 +2,9 @@ out
 node_modules
 *.vsix
 .vscode-test
+
+# Editor littering
+*.swp
+*.orig
+*.rej
+*~
