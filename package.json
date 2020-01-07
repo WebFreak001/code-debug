@@ -73,12 +73,16 @@
 				"configurationAttributes": {
 					"launch": {
 						"required": [
-							"target"
+							"executable"
 						],
 						"properties": {
-							"target": {
+							"executable": {
 								"type": "string",
 								"description": "Path of executable"
+							},
+							"target": {
+								"type": "string",
+								"description": "Path of executable (DEPRECATED use executable argument instead)"
 							},
 							"arguments": {
 								"type": "string",
