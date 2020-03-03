@@ -15,6 +15,7 @@ export interface Thread {
 	id: number;
 	targetId: string;
 	name?: string;
+	details?: string;
 }
 
 export interface Stack {

@@ -277,6 +277,9 @@ export class MI2DebugSession extends DebugSession {
 					let threadName = thread.name;
 					// TODO: Thread names are undefined on LLDB
 					if (threadName === undefined) {
+						threadName = thread.details;
+					}
+					if (threadName === undefined) {
 						threadName = thread.targetId;
 					}
 					if (threadName === undefined) {
