@@ -9,7 +9,7 @@
 		"native",
 		"debug"
 	],
-	"version": "0.24.0",
+	"version": "0.25.0",
 	"publisher": "webfreak",
 	"icon": "images/icon.png",
 	"engines": {
@@ -106,6 +106,13 @@
 								"type": "array",
 								"description": "Additional arguments to pass to GDB",
 								"default": []
+							},
+							"pathSubstitutions": {
+								"type": "object",
+								"description": "Help GDB find your source using path substitutions (GDB `substitute-path` variable",
+								"default": {
+									"<fromPath>": "<toPath>"
+								}
 							},
 							"valuesFormatting": {
 								"type": "string",
