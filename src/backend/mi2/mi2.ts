@@ -27,7 +27,7 @@ function couldBeOutput(line: string) {
 const trace = false;
 
 export class MI2 extends EventEmitter implements IBackend {
-	constructor(public application: string, public preargs: string[], public extraargs: string[], procEnv: any, public pathSubstitutions: any = {}) {
+	constructor(public application: string, public preargs: string[], public extraargs: string[], procEnv: any, public extraCommands: string[] = []) {
 		super();
 
 		if (procEnv) {
@@ -197,10 +197,9 @@ export class MI2 extends EventEmitter implements IBackend {
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
 		if (this.prettyPrint)
 			cmds.push(this.sendCommand("enable-pretty-printing"));
-		
-		for (const key in this.pathSubstitutions) {
-			cmds.push(this.sendCommand("gdb-set substitute-path " + key + " " + this.pathSubstitutions[key]));
-		};
+		for (let cmd of this.extraCommands) {
+			cmds.push(this.sendCommand(cmd));
+		}
 
 		return cmds;
 	}

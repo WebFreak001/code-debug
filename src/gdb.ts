@@ -10,7 +10,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	gdbpath: string;
 	env: any;
 	debugger_args: string[];
-	pathSubstitutions: any; 
+	pathSubstitutions: { [index: string]: string };
 	arguments: string;
 	terminal: string;
 	autorun: string[];
@@ -26,7 +26,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	gdbpath: string;
 	env: any;
 	debugger_args: string[];
-	pathSubstitutions: any;
+	pathSubstitutions: { [index: string]: string };
 	executable: string;
 	remote: boolean;
 	autorun: string[];
@@ -50,7 +50,8 @@ class GDBDebugSession extends MI2DebugSession {
 	}
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env, args.pathSubstitutions);
+		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env);
+		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = false;
@@ -119,7 +120,8 @@ class GDBDebugSession extends MI2DebugSession {
 	}
 
 	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env, args.pathSubstitutions);
+		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env);
+		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = !args.remote;
@@ -177,6 +179,15 @@ class GDBDebugSession extends MI2DebugSession {
 					this.sendErrorResponse(response, 101, `Failed to attach: ${err.toString()}`);
 				});
 			}
+		}
+	}
+
+	// Add extra commands for source file path substitution in GDB-specific syntax
+	protected setPathSubstitutions(substitutions: { [index: string]: string }): void {
+		if (substitutions) {
+			Object.keys(substitutions).forEach(source => {
+				this.miDebugger.extraCommands.push("gdb-set substitute-path " + source + " " + substitutions[source]);
+			})
 		}
 	}
 }

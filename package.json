@@ -9,7 +9,7 @@
 		"native",
 		"debug"
 	],
-	"version": "0.25.0",
+	"version": "0.24.0",
 	"publisher": "webfreak",
 	"icon": "images/icon.png",
 	"engines": {
@@ -258,6 +258,13 @@
 								"type": "array",
 								"description": "Additional arguments to pass to GDB",
 								"default": []
+							},
+							"pathSubstitutions": {
+								"type": "object",
+								"description": "Help GDB find your source using path substitutions (GDB `substitute-path` variable",
+								"default": {
+									"<fromPath>": "<toPath>"
+								}
 							},
 							"cwd": {
 								"type": "string",
@@ -522,6 +529,13 @@
 								"description": "Additional arguments to pass to LLDB",
 								"default": []
 							},
+							"pathSubstitutions": {
+								"type": "object",
+								"description": "Help LLDB find your source using path substitutions (LLDB `target.source-map` variable",
+								"default": {
+									"<fromPath>": "<toPath>"
+								}
+							},
 							"valuesFormatting": {
 								"type": "string",
 								"description": "Set the way of showing variable values. 'disabled' - show value as is, 'parseText' - parse debuggers output text into structure, 'prettyPrinters' - enable debuggers custom pretty-printers if there are any",
@@ -661,6 +675,13 @@
 								"type": "array",
 								"description": "Additional arguments to pass to LLDB",
 								"default": []
+							},
+							"pathSubstitutions": {
+								"type": "object",
+								"description": "Help LLDB find your source using path substitutions (LLDB `target.source-map` variable",
+								"default": {
+									"<fromPath>": "<toPath>"
+								}
 							},
 							"cwd": {
 								"type": "string",
