@@ -122,6 +122,15 @@ class LLDBDebugSession extends MI2DebugSession {
 			this.sendResponse(response);
 		});
 	}
+
+	// Add extra commands for source file path substitution in LLDB-specific syntax
+	protected setPathSubstitutions(substitutions: { [index: string]: string }): void {
+		if (substitutions) {
+			Object.keys(substitutions).forEach(source => {
+				this.miDebugger.extraCommands.push("settings set target.source-map " + source + " " + substitutions[source]);
+			})
+		}
+	}
 }
 
 DebugSession.run(LLDBDebugSession);
