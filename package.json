@@ -109,7 +109,7 @@
 							},
 							"pathSubstitutions": {
 								"type": "object",
-								"description": "Help GDB find your source using path substitutions (GDB `substitute-path` variable",
+								"description": "Help GDB find your source using path substitutions (GDB `substitute-path)` variable",
 								"default": {
 									"<fromPath>": "<toPath>"
 								}
@@ -261,7 +261,7 @@
 							},
 							"pathSubstitutions": {
 								"type": "object",
-								"description": "Help GDB find your source using path substitutions (GDB `substitute-path` variable",
+								"description": "Help GDB find your source using path substitutions (GDB `substitute-path)` variable",
 								"default": {
 									"<fromPath>": "<toPath>"
 								}
@@ -531,7 +531,7 @@
 							},
 							"pathSubstitutions": {
 								"type": "object",
-								"description": "Help LLDB find your source using path substitutions (LLDB `target.source-map` variable",
+								"description": "Help LLDB find your source using path substitutions (LLDB `target.source-map)` variable",
 								"default": {
 									"<fromPath>": "<toPath>"
 								}
@@ -678,7 +678,7 @@
 							},
 							"pathSubstitutions": {
 								"type": "object",
-								"description": "Help LLDB find your source using path substitutions (LLDB `target.source-map` variable",
+								"description": "Help LLDB find your source using path substitutions (LLDB `target.source-map)` variable",
 								"default": {
 									"<fromPath>": "<toPath>"
 								}
