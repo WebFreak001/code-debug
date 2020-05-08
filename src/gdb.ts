@@ -2,7 +2,7 @@ import { MI2DebugSession } from './mibase';
 import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { MI2 } from "./backend/mi2/mi2";
-import { SSHArguments, ValuesFormattingMode } from './backend/backend';
+import { SSHArguments, ProxySSHArguments, ValuesFormattingMode } from './backend/backend';
 
 export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
 	cwd: string;
@@ -15,6 +15,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	terminal: string;
 	autorun: string[];
 	ssh: SSHArguments;
+	proxyConnection: ProxySSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
@@ -31,6 +32,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	remote: boolean;
 	autorun: string[];
 	ssh: SSHArguments;
+	proxyConnection: ProxySSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
@@ -77,7 +79,7 @@ class GDBDebugSession extends MI2DebugSession {
 			this.isSSH = true;
 			this.trimCWD = args.cwd.replace(/\\/g, "/");
 			this.switchCWD = args.ssh.cwd;
-			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, args.terminal, false).then(() => {
+			this.miDebugger.ssh(args.proxyConnection, args.ssh, args.ssh.cwd, args.target, args.arguments, args.terminal, false).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
@@ -145,7 +147,7 @@ class GDBDebugSession extends MI2DebugSession {
 			this.isSSH = true;
 			this.trimCWD = args.cwd.replace(/\\/g, "/");
 			this.switchCWD = args.ssh.cwd;
-			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, "", undefined, true).then(() => {
+			this.miDebugger.ssh(args.proxyConnection, args.ssh, args.ssh.cwd, args.target, "", undefined, true).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
@@ -187,7 +189,7 @@ class GDBDebugSession extends MI2DebugSession {
 		if (substitutions) {
 			Object.keys(substitutions).forEach(source => {
 				this.miDebugger.extraCommands.push("gdb-set substitute-path " + source + " " + substitutions[source]);
-			})
+			});
 		}
 	}
 }

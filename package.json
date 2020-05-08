@@ -139,6 +139,24 @@
 								"description": "GDB commands to run when starting to debug",
 								"default": []
 							},
+							"proxyConnection": {
+								"type": "object",
+								"description": "If this is set then the extension will connect to an ssh host throw a proxy server and run GDB there",
+								"properties": {
+									"host": {
+										"type": "string",
+										"description": "Remote host name/ip to connect to"
+									},
+									"username": {
+										"type": "string",
+										"description": "Username to connect as"
+									},
+									"identity": {
+										"type": "string",
+										"description": "Absolute path to private key"
+									}
+								}
+							},
 							"ssh": {
 								"required": [
 									"host",
@@ -275,6 +293,27 @@
 								"type": "array",
 								"description": "GDB commands to run when starting to debug",
 								"default": []
+							},
+							"proxyConnection": {
+								"type": "object",
+								"description": "This is the intermediate poly connection",
+								"properties": {
+									"host": {
+										"type": "string",
+										"description": "Poly host name/ip to connect to",
+										"default": "localhost"
+									},
+									"username": {
+										"type": "string",
+										"description": "Username to connect as",
+										"default": "${4:my_user}"
+									},
+									"identity": {
+										"type": "string",
+										"description": "Absolute path to private key",
+										"dafault": "${4:/home/my_user/.ssh/id_rsa}"
+									}
+								}
 							},
 							"ssh": {
 								"required": [
@@ -953,9 +992,10 @@
 		"postinstall": "node ./node_modules/vscode/bin/install"
 	},
 	"dependencies": {
+		"ssh2": "^0.8.2",
+		"ssh2-promise": "^0.1.7",
 		"vscode-debugadapter": "^1.16.0",
-		"vscode-debugprotocol": "^1.16.0",
-		"ssh2": "^0.8.2"
+		"vscode-debugprotocol": "^1.16.0"
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.6",

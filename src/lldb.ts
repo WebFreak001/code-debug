@@ -2,7 +2,7 @@ import { MI2DebugSession } from './mibase';
 import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { MI2_LLDB } from "./backend/mi2/mi2lldb";
-import { SSHArguments, ValuesFormattingMode } from './backend/backend';
+import { SSHArguments, ProxySSHArguments, ValuesFormattingMode } from './backend/backend';
 
 export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
 	cwd: string;
@@ -13,6 +13,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	arguments: string;
 	autorun: string[];
 	ssh: SSHArguments;
+	proxyConnection: ProxySSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
@@ -69,7 +70,7 @@ class LLDBDebugSession extends MI2DebugSession {
 			this.isSSH = true;
 			this.trimCWD = args.cwd.replace(/\\/g, "/");
 			this.switchCWD = args.ssh.cwd;
-			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, undefined, false).then(() => {
+			this.miDebugger.ssh(args.proxyConnection, args.ssh, args.ssh.cwd, args.target, args.arguments, undefined, false).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
@@ -128,7 +129,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		if (substitutions) {
 			Object.keys(substitutions).forEach(source => {
 				this.miDebugger.extraCommands.push("settings set target.source-map " + source + " " + substitutions[source]);
-			})
+			});
 		}
 	}
 }

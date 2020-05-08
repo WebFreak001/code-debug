@@ -1,4 +1,4 @@
-import { Breakpoint, IBackend, Thread, Stack, SSHArguments, Variable, VariableObject, MIError } from "../backend";
+import { Breakpoint, IBackend, Thread, Stack, SSHArguments, ProxySSHArguments, Variable, VariableObject, MIError } from "../backend";
 import * as ChildProcess from "child_process";
 import { EventEmitter } from "events";
 import { parseMI, MINode } from '../mi_parse';
@@ -9,6 +9,7 @@ import { posix } from "path";
 import * as nativePath from "path";
 const path = posix;
 import { Client } from "ssh2";
+import ssh2_promise = require('ssh2-promise');
 
 export function escape(str: string) {
 	return str.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
@@ -90,11 +91,17 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	ssh(args: SSHArguments, cwd: string, target: string, procArgs: string, separateConsole: string, attach: boolean): Thenable<any> {
+	ssh(proxyConnection: ProxySSHArguments, args: SSHArguments, cwd: string, target: string, procArgs: string, separateConsole: string, attach: boolean): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			this.isSSH = true;
 			this.sshReady = false;
-			this.sshConn = new Client();
+
+			if (proxyConnection != undefined) {
+				const remoteConnection = {  host: args.host, username: args.user , password: args.password};
+				this.sshConn = new ssh2_promise([proxyConnection, remoteConnection]);
+			} else {
+				this.sshConn = new Client();
+			}
 
 			if (separateConsole !== undefined)
 				this.log("stderr", "WARNING: Output to terminal emulators are not supported over SSH");
@@ -134,50 +141,74 @@ export class MI2 extends EventEmitter implements IBackend {
 				connectionArgs.password = args.password;
 			}
 
-			this.sshConn.on("ready", () => {
+			//Promise
+			if (proxyConnection != undefined) {
+				this.sshConn.connect().then(() => {
 				this.log("stdout", "Running " + this.application + " over ssh...");
 				const execArgs: any = {};
-				if (args.forwardX11) {
-					execArgs.x11 = {
-						single: false,
-						screen: args.remotex11screen
-					};
-				}
+				if (args.forwardX11) { execArgs.x11 = { single: false, screen: args.remotex11screen }; }
 				let sshCMD = this.application + " " + this.preargs.join(" ");
-				if (args.bootstrap) sshCMD = args.bootstrap + " && " + sshCMD;
-				if (attach)
-					sshCMD += " -p " + target;
+				if (args.bootstrap)  sshCMD = args.bootstrap + " && " + sshCMD;
+				if (attach) sshCMD += " -p " + target;
 				this.sshConn.exec(sshCMD, execArgs, (err, stream) => {
-					if (err) {
-						this.log("stderr", "Could not run " + this.application + " over ssh!");
-						this.log("stderr", err.toString());
-						this.emit("quit");
-						reject();
-						return;
-					}
+					if (err) {  this.log("stderr", "Could not run " + this.application + " over ssh!"); this.log("stderr", err.toString()); this.emit("quit"); reject(); return; }
 					this.sshReady = true;
 					this.stream = stream;
 					stream.on("data", this.stdout.bind(this));
 					stream.stderr.on("data", this.stderr.bind(this));
-					stream.on("exit", (() => {
-						this.emit("quit");
-						this.sshConn.end();
-					}).bind(this));
+					stream.on("exit", (() => { this.emit("quit"); this.sshConn.end(); }).bind(this));
 					const promises = this.initCommands(target, cwd, true, attach);
 					promises.push(this.sendCommand("environment-cd \"" + escape(cwd) + "\""));
-					if (procArgs && procArgs.length && !attach)
-						promises.push(this.sendCommand("exec-arguments " + procArgs));
-					Promise.all(promises).then(() => {
-						this.emit("debug-ready");
-						resolve();
-					}, reject);
+					if (procArgs && procArgs.length && !attach) promises.push(this.sendCommand("exec-arguments " + procArgs));
+					Promise.all(promises).then(() => {  this.emit("debug-ready");  resolve();  }, reject);
 				});
-			}).on("error", (err) => {
-				this.log("stderr", "Could not run " + this.application + " over ssh!");
-				this.log("stderr", err.toString());
-				this.emit("quit");
-				reject();
-			}).connect(connectionArgs);
+				}).catch(err => {this.log("stderr", "Could not run " + this.application + " over ssh!"); this.log("stderr", err.toString()); this.emit("quit"); reject(); });
+			} else {
+				this.sshConn.on("ready", () => {
+					this.log("stdout", "Running " + this.application + " over ssh...");
+					const execArgs: any = {};
+					if (args.forwardX11) {
+						execArgs.x11 = {
+							single: false,
+							screen: args.remotex11screen
+						};
+					}
+					let sshCMD = this.application + " " + this.preargs.join(" ");
+					if (args.bootstrap) sshCMD = args.bootstrap + " && " + sshCMD;
+					if (attach)
+						sshCMD += " -p " + target;
+					this.sshConn.exec(sshCMD, execArgs, (err, stream) => {
+						if (err) {
+							this.log("stderr", "Could not run " + this.application + " over ssh!");
+							this.log("stderr", err.toString());
+							this.emit("quit");
+							reject();
+							return;
+						}
+						this.sshReady = true;
+						this.stream = stream;
+						stream.on("data", this.stdout.bind(this));
+						stream.stderr.on("data", this.stderr.bind(this));
+						stream.on("exit", (() => {
+							this.emit("quit");
+							this.sshConn.end();
+						}).bind(this));
+						const promises = this.initCommands(target, cwd, true, attach);
+						promises.push(this.sendCommand("environment-cd \"" + escape(cwd) + "\""));
+						if (procArgs && procArgs.length && !attach)
+							promises.push(this.sendCommand("exec-arguments " + procArgs));
+						Promise.all(promises).then(() => {
+							this.emit("debug-ready");
+							resolve();
+						}, reject);
+					});
+				}).on("error", (err) => {
+					this.log("stderr", "Could not run " + this.application + " over ssh!");
+					this.log("stderr", err.toString());
+					this.emit("quit");
+					reject();
+				}).connect(connectionArgs);
+			}
 		});
 	}
 
@@ -197,7 +228,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
 		if (this.prettyPrint)
 			cmds.push(this.sendCommand("enable-pretty-printing"));
-		for (let cmd of this.extraCommands) {
+		for (const cmd of this.extraCommands) {
 			cmds.push(this.sendCommand(cmd));
 		}
 
