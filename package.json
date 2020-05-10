@@ -201,6 +201,24 @@
 									"bootstrap": {
 										"type": "string",
 										"description": "Content will be executed on the SSH host before the debugger call."
+									},
+									"proxyPort": {
+										"type": "number",
+										"description": "Port of the proxy server to connect to; (by default port = display + 6000)",
+										"default": 22
+									},
+									"proxyHost": {
+										"type": "string",
+										"description": "Hostname/ip of the proxy server",
+										"default": "localhost"
+									},
+									"proxyUser": {
+										"type": "string",
+										"description": "Username to connect as"
+									},
+									"proxyPassword": {
+										"type": "string",
+										"description": "Plain text password (unsafe; if possible use keyfile instead)"
 									}
 								}
 							}
@@ -338,6 +356,24 @@
 									"bootstrap": {
 										"type": "string",
 										"description": "Content will be executed on the SSH host before the debugger call."
+									},
+									"proxyPort": {
+										"type": "number",
+										"description": "Port of the proxy server to connect to; (by default port = display + 6000)",
+										"default": 22
+									},
+									"proxyHost": {
+										"type": "string",
+										"description": "Hostname/ip of the proxy server",
+										"default": "localhost"
+									},
+									"proxyUser": {
+										"type": "string",
+										"description": "Username to connect as"
+									},
+									"proxyPassword": {
+										"type": "string",
+										"description": "Plain text password (unsafe; if possible use keyfile instead)"
 									}
 								}
 							}
@@ -407,6 +443,27 @@
 								"cwd": "${3:/home/remote_user/project/}",
 								"keyfile": "${4:/home/my_user/.ssh/id_rsa}",
 								"user": "${5:remote_user}"
+							},
+							"valuesFormatting": "parseText"
+						}
+					},
+					{
+						"label": "GDB: Launch over SSH throw a proxy server",
+						"description": "Remotely starts the program using gdb",
+						"body": {
+							"type": "gdb",
+							"request": "launch",
+							"name": "${6:Launch Program (SSH)}",
+							"target": "${1:./bin/executable}",
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"ssh": {
+								"host": "${2:127.0.0.1}",
+								"cwd": "${3:/home/remote_user/project/}",
+								"keyfile": "${4:/home/my_user/.ssh/id_rsa}",
+								"user": "${5:remote_user}",
+								"proxyHost": "${7:proxy_host}",
+								"proxyUser": "${8:proxy_user}",
+								"proxyPassword": "${9:proxy_password}"
 							},
 							"valuesFormatting": "parseText"
 						}
@@ -623,6 +680,24 @@
 									"bootstrap": {
 										"type": "string",
 										"description": "Content will be executed on the SSH host before the debugger call."
+									},
+									"proxyPort": {
+										"type": "number",
+										"description": "Port of the proxy server to connect to; (by default port = display + 6000)",
+										"default": 22
+									},
+									"proxyHost": {
+										"type": "string",
+										"description": "Hostname/ip of the proxy server",
+										"default": "localhost"
+									},
+									"proxyUser": {
+										"type": "string",
+										"description": "Username to connect as"
+									},
+									"proxyPassword": {
+										"type": "string",
+										"description": "Plain text password (unsafe; if possible use keyfile instead)"
 									}
 								}
 							}
@@ -953,9 +1028,10 @@
 		"postinstall": "node ./node_modules/vscode/bin/install"
 	},
 	"dependencies": {
+		"ssh2": "^0.8.2",
+		"ssh2-promise": "^0.1.7",
 		"vscode-debugadapter": "^1.16.0",
-		"vscode-debugprotocol": "^1.16.0",
-		"ssh2": "^0.8.2"
+		"vscode-debugprotocol": "^1.16.0"
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.6",
