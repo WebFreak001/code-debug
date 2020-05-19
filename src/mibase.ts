@@ -288,12 +288,12 @@ export class MI2DebugSession extends DebugSession {
 			});
 	}
 
-	// Supports 256 threads.
+	// Supports 65535 threads.
 	protected threadAndLevelToFrameId(threadId: number, level: number) {
-		return level << 8 | threadId;
+		return level << 16 | threadId;
 	}
 	protected frameIdToThreadAndLevel(frameId: number) {
-		return [frameId & 0xff, frameId >> 8];
+		return [frameId & 0xffff, frameId >> 16];
 	}
 
 	protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
