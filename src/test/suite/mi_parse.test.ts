@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { parseMI, MINode } from '../src/backend/mi_parse';
+import { parseMI, MINode } from '../../backend/mi_parse';
 
 suite("MI Parse", () => {
 	test("Simple out of band record", () => {
@@ -184,8 +184,9 @@ suite("MI Parse", () => {
 		assert.equal(parsed.result('foo.y'), "y");
 	});
 	test("empty object values", () => {
+		// GDB may send {} as empty array
 		const parsed = parseMI(`15^done,foo={x={},y="y"}`);
-		assert.deepEqual(parsed.result('foo.x'), {});
+		assert.deepEqual(parsed.result('foo.x'), []);
 		assert.equal(parsed.result('foo.y'), "y");
 	});
 });

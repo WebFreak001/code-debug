@@ -13,9 +13,8 @@ before_install:
       sleep 3;
     fi
 
-install:
-  - npm install
-  - npm run vscode:prepublish
-
 script:
-  - npm test --silent
+- |
+  npm install
+  tsc
+  node out/src/test/runTest.js

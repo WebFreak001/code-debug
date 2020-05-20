@@ -9,6 +9,7 @@
 		"native",
 		"debug"
 	],
+	"license": "public domain",
 	"version": "0.24.0",
 	"publisher": "webfreak",
 	"icon": "images/icon.png",
@@ -949,22 +950,21 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "tsc -p ./",
-		"compile": "tsc -watch -p ./",
-		"postinstall": "node ./node_modules/vscode/bin/install"
+		"compile": "tsc -watch -p ./"
 	},
 	"dependencies": {
-		"vscode-debugadapter": "^1.16.0",
-		"vscode-debugprotocol": "^1.16.0",
-		"ssh2": "^0.8.2"
+		"vscode-debugadapter": "^1.40.0",
+		"vscode-debugprotocol": "^1.40.0",
+		"ssh2": "^0.8.9"
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.6",
 		"@types/node": "^11.11.3",
-		"mocha": "^6.0.2",
-		"tslint": "^5.14.0",
-		"tslint-language-service": "^0.9.9",
-		"typescript": "^3.3.3333",
-		"vscode": "^1.1.30"
+		"@types/vscode": "^1.28.0",
+		"mocha": "^6.2.3",
+		"tslint": "^5.20.1",
+		"typescript": "^3.9.3",
+		"vscode-test": "1.3.0"
 	},
 	"__metadata": {
 		"id": "2fd22b8e-b3b8-4e7f-9a28-a5e2d1bdd0d4",
