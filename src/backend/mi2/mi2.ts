@@ -8,7 +8,7 @@ import * as fs from "fs";
 import { posix } from "path";
 import * as nativePath from "path";
 const path = posix;
-import { Client } from "ssh2";
+import ssh2_promise = require('ssh2-promise');
 
 export function escape(str: string) {
 	return str.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
@@ -94,10 +94,44 @@ export class MI2 extends EventEmitter implements IBackend {
 		return new Promise((resolve, reject) => {
 			this.isSSH = true;
 			this.sshReady = false;
-			this.sshConn = new Client();
 
 			if (separateConsole !== undefined)
 				this.log("stderr", "WARNING: Output to terminal emulators are not supported over SSH");
+
+			const connectionArgs: any = {
+				host: args.host,
+				port: args.port,
+				username: args.user
+			};
+
+			const proxyConnection: any = {
+				host: args.proxyHost,
+				port: args.proxyPort,
+				username: args.proxyUser
+			};
+
+			if (args.useAgent) {
+				connectionArgs.agent = process.env.SSH_AUTH_SOCK;
+			} else if (args.keyfile) {
+				if (require("fs").existsSync(args.keyfile)) {
+					connectionArgs.identity = args.keyfile;
+					proxyConnection.identity = args.keyfile;
+				} else {
+					this.log("stderr", "SSH key file does not exist!");
+					this.emit("quit");
+					reject();
+					return;
+				}
+			} else {
+				connectionArgs.password = args.password;
+				proxyConnection.password = args.proxyPassword;
+			}
+
+			if (proxyConnection.host !== undefined) {
+				this.sshConn = new ssh2_promise([proxyConnection, connectionArgs]);
+			} else {
+				this.sshConn = new ssh2_promise(connectionArgs);
+			}
 
 			if (args.forwardX11) {
 				this.sshConn.on("x11", (info, accept, reject) => {
@@ -113,28 +147,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				});
 			}
 
-			const connectionArgs: any = {
-				host: args.host,
-				port: args.port,
-				username: args.user
-			};
-
-			if (args.useAgent) {
-				connectionArgs.agent = process.env.SSH_AUTH_SOCK;
-			} else if (args.keyfile) {
-				if (require("fs").existsSync(args.keyfile))
-					connectionArgs.privateKey = require("fs").readFileSync(args.keyfile);
-				else {
-					this.log("stderr", "SSH key file does not exist!");
-					this.emit("quit");
-					reject();
-					return;
-				}
-			} else {
-				connectionArgs.password = args.password;
-			}
-
-			this.sshConn.on("ready", () => {
+			this.sshConn.connect().then(() =>  {
 				this.log("stdout", "Running " + this.application + " over ssh...");
 				const execArgs: any = {};
 				if (args.forwardX11) {
@@ -172,12 +185,12 @@ export class MI2 extends EventEmitter implements IBackend {
 						resolve();
 					}, reject);
 				});
-			}).on("error", (err) => {
+			}).catch("error", (err) => {
 				this.log("stderr", "Could not run " + this.application + " over ssh!");
 				this.log("stderr", err.toString());
 				this.emit("quit");
 				reject();
-			}).connect(connectionArgs);
+			});
 		});
 	}
 
