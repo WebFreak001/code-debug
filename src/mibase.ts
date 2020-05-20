@@ -274,14 +274,7 @@ export class MI2DebugSession extends DebugSession {
 					threads: []
 				};
 				for (const thread of threads) {
-					let threadName = thread.name;
-					// TODO: Thread names are undefined on LLDB
-					if (threadName === undefined) {
-						threadName = thread.targetId;
-					}
-					if (threadName === undefined) {
-						threadName = "<unnamed>";
-					}
+					let threadName = thread.name || thread.targetId || "<unnamed>";
 					response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
 				}
 				this.sendResponse(response);
