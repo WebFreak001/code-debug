@@ -610,10 +610,8 @@ export class MI2 extends EventEmitter implements IBackend {
 				targetId: MINode.valueOf(element, "target-id")
 			};
 
-			const name = MINode.valueOf(element, "name");
-			if (name) {
-				ret.name = name;
-			}
+			ret.name = MINode.valueOf(element, "details")
+				|| undefined;
 
 			return ret;
 		});
