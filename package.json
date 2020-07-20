@@ -130,6 +130,11 @@
 								"description": "Prints all GDB calls to the console",
 								"default": false
 							},
+							"multiProcess": {
+								"type": "boolean",
+								"description": "Allow multiple process debugging",
+								"default": false
+							},
 							"showDevDebugOutput": {
 								"type": "boolean",
 								"description": "Prints all GDB responses to the console",

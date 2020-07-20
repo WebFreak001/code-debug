@@ -17,6 +17,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
+	multiProcess: boolean;
 	showDevDebugOutput: boolean;
 }
 
@@ -33,6 +34,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
+	multiProcess: boolean;
 	showDevDebugOutput: boolean;
 }
 
@@ -62,6 +64,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
+		this.miDebugger.multiProcess = !!args.multiProcess;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		if (args.ssh !== undefined) {
 			if (args.ssh.forwardX11 === undefined)
@@ -130,6 +133,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
+		this.miDebugger.multiProcess = !!args.multiProcess;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		if (args.ssh !== undefined) {
 			if (args.ssh.forwardX11 === undefined)
