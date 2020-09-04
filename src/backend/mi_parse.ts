@@ -205,7 +205,7 @@ export function parseMI(output: string): MINode {
 		}
 		if (canBeValueList) {
 			let value = parseValue();
-			if (value) { // is value list
+			if (value !== undefined) { // is value list
 				const values = [];
 				values.push(value);
 				const remaining = output;
