@@ -222,10 +222,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
-			const commands = [
-				this.sendCommand("gdb-set target-async on"),
-				this.sendCommand("environment-directory \"" + escape(cwd) + "\"")
-			];
+			const commands = (this.application == "rust-gdb") ? [this.sendCommand("environment-directory \"" + escape(cwd) + "\"")] : [this.sendCommand("gdb-set target-async on"), this.sendCommand("environment-directory \"" + escape(cwd) + "\"")];
 			if (isExtendedRemote) {
 				commands.push(this.sendCommand("target-select " + target));
 				commands.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
