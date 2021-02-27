@@ -223,8 +223,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
 			const commands = [
-				this.sendCommand("gdb-set target-async on"),
-				this.sendCommand("environment-directory \"" + escape(cwd) + "\"")
+				this.sendCommand("gdb-set target-async on", true),
+				this.sendCommand("environment-directory \"" + escape(cwd) + "\"", true)
 			];
 			if (isExtendedRemote) {
 				commands.push(this.sendCommand("target-select " + target));
@@ -252,8 +252,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
 			Promise.all([
-				this.sendCommand("gdb-set target-async on"),
-				this.sendCommand("environment-directory \"" + escape(cwd) + "\""),
+				this.sendCommand("gdb-set target-async on", true),
+				this.sendCommand("environment-directory \"" + escape(cwd) + "\"", true),
 				this.sendCommand("target-select remote " + target)
 			]).then(() => {
 				this.emit("debug-ready");
