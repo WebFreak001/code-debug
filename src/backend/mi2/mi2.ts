@@ -69,7 +69,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					promises.push(this.sendCommand("gdb-set new-console on"));
 				Promise.all(promises).then(() => {
 					this.emit("debug-ready");
-					resolve();
+					resolve(undefined);
 				}, reject);
 			} else {
 				if (separateConsole !== undefined) {
@@ -77,13 +77,13 @@ export class MI2 extends EventEmitter implements IBackend {
 						promises.push(this.sendCommand("inferior-tty-set " + tty));
 						Promise.all(promises).then(() => {
 							this.emit("debug-ready");
-							resolve();
+							resolve(undefined);
 						}, reject);
 					});
 				} else {
 					Promise.all(promises).then(() => {
 						this.emit("debug-ready");
-						resolve();
+						resolve(undefined);
 					}, reject);
 				}
 			}
@@ -169,7 +169,7 @@ export class MI2 extends EventEmitter implements IBackend {
 						promises.push(this.sendCommand("exec-arguments " + procArgs));
 					Promise.all(promises).then(() => {
 						this.emit("debug-ready");
-						resolve();
+						resolve(undefined);
 					}, reject);
 				});
 			}).on("error", (err) => {
@@ -232,7 +232,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			}
 			Promise.all(commands).then(() => {
 				this.emit("debug-ready");
-				resolve();
+				resolve(undefined);
 			}, reject);
 		});
 	}
@@ -257,7 +257,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				this.sendCommand("target-select remote " + target)
 			]).then(() => {
 				this.emit("debug-ready");
-				resolve();
+				resolve(undefined);
 			}, reject);
 		});
 	}
@@ -390,7 +390,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				this.log("console", "Running executable");
 				this.sendCommand("exec-run").then((info) => {
 					if (info.resultRecords.resultClass == "running")
-						resolve();
+						resolve(undefined);
 					else
 						reject();
 				}, reject);

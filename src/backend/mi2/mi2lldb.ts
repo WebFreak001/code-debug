@@ -35,7 +35,7 @@ export class MI2_LLDB extends MI2 {
 				this.sendCommand("target-attach " + target)
 			]).then(() => {
 				this.emit("debug-ready");
-				resolve();
+				resolve(undefined);
 			}, reject);
 		});
 	}
