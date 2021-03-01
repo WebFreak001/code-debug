@@ -228,7 +228,7 @@ export class MI2DebugSession extends DebugSession {
 	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
 		const cb = (() => {
 			this.debugReady = true;
-			this.miDebugger.clearBreakPoints().then(() => {
+			this.miDebugger.clearBreakPoints(args.source.path).then(() => {
 				let path = args.source.path;
 				if (this.isSSH) {
 					// trimCWD is the local path, switchCWD is the ssh path

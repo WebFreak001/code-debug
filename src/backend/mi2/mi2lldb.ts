@@ -40,16 +40,21 @@ export class MI2_LLDB extends MI2 {
 		});
 	}
 
-	clearBreakPoints(): Thenable<any> {
+	clearBreakPoints(source?: string): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			const promises = [];
-			this.breakpoints.forEach((k, index) => {
-				promises.push(this.sendCommand("break-delete " + k).then((result) => {
-					if (result.resultRecords.resultClass == "done") resolve(true);
-					else resolve(false);
-				}));
+			const breakpoints = this.breakpoints;
+			this.breakpoints = new Map();
+			breakpoints.forEach((k, index) => {
+				if (index.file === source) {
+					promises.push(this.sendCommand("break-delete " + k).then((result) => {
+						if (result.resultRecords.resultClass == "done") resolve(true);
+						else resolve(false);
+					}));
+				} else {
+					this.breakpoints.set(index, k);
+				}
 			});
-			this.breakpoints.clear();
 			Promise.all(promises).then(resolve, reject);
 		});
 	}
