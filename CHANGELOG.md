@@ -1,3 +1,7 @@
+# 0.25.1
+
+* Remove the need for extra trust for debugging workspaces per guidance "for debug extensions" as noted in the [Workspace Trust Extension Guide](https://github.com/microsoft/vscode/issues/120251#issuecomment-825832603)
+
 # 0.25.0
 
 (Released May 2020)
