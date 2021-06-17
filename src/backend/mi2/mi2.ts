@@ -543,7 +543,8 @@ export class MI2 extends EventEmitter implements IBackend {
 				if (result.resultRecords.resultClass == "done") {
 					const bkptNum = parseInt(result.result("bkpt.number"));
 					const newBrk = {
-						file: result.result("bkpt.file"),
+						file: breakpoint.file ? breakpoint.file : result.result("bkpt.file"),
+						raw: breakpoint.raw,
 						line: parseInt(result.result("bkpt.line")),
 						condition: breakpoint.condition
 					};
@@ -582,18 +583,24 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	clearBreakPoints(): Thenable<any> {
+	clearBreakPoints(source?: string): Thenable<any> {
 		if (trace)
 			this.log("stderr", "clearBreakPoints");
 		return new Promise((resolve, reject) => {
-			this.sendCommand("break-delete").then((result) => {
-				if (result.resultRecords.resultClass == "done") {
-					this.breakpoints.clear();
-					resolve(true);
-				} else resolve(false);
-			}, () => {
-				resolve(false);
+			const promises = [];
+			const breakpoints = this.breakpoints;
+			this.breakpoints = new Map();
+			breakpoints.forEach((k, index) => {
+				if (index.file === source) {
+					promises.push(this.sendCommand("break-delete " + k).then((result) => {
+						if (result.resultRecords.resultClass == "done") resolve(true);
+						else resolve(false);
+					}));
+				} else {
+					this.breakpoints.set(index, k);
+				}
 			});
+			Promise.all(promises).then(resolve, reject);
 		});
 	}
 

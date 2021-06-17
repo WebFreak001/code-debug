@@ -64,7 +64,7 @@ export interface IBackend {
 	loadBreakPoints(breakpoints: Breakpoint[]): Thenable<[boolean, Breakpoint][]>;
 	addBreakPoint(breakpoint: Breakpoint): Thenable<[boolean, Breakpoint]>;
 	removeBreakPoint(breakpoint: Breakpoint): Thenable<boolean>;
-	clearBreakPoints(): Thenable<any>;
+	clearBreakPoints(source?: string): Thenable<any>;
 	getThreads(): Thenable<Thread[]>;
 	getStack(maxLevels: number, thread: number): Thenable<Stack[]>;
 	getStackVariables(thread: number, frame: number): Thenable<Variable[]>;
