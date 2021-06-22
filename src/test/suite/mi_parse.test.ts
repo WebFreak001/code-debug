@@ -194,4 +194,14 @@ suite("MI Parse", () => {
 		assert.deepEqual(parsed.result('foo.x'), []);
 		assert.equal(parsed.result('foo.y'), "y");
 	});
+	test("object list", () => {
+		const parsed = parseMI(`14^done,foo=[{x="0",y="1"}]`);
+		const result = parsed.result('foo');
+		assert.deepEqual(result, [[['x', '0'], ['y', '1']]]);
+	});
+	test("object list long", () => {
+		const parsed = parseMI(`14^done,register-values=[{number="90",value="0x00000001"},{number="91",value="0x00000200"},{number="92",value="0x00030000"}]`);
+		const result = parsed.result('register-values');
+		assert.deepEqual(result, [[['number', '90'], ['value', '0x00000001']], [['number', '91'], ['value', '0x00000200']],  [['number', '92'], ['value', '0x00030000']]]);
+	});
 });

@@ -20,7 +20,8 @@
 	"activationEvents": [
 		"onCommand:code-debug.examineMemoryLocation",
 		"onCommand:code-debug.getFileNameNoExt",
-		"onCommand:code-debug.getFileBasenameNoExt"
+		"onCommand:code-debug.getFileBasenameNoExt",
+		"onDebug"
 	],
 	"categories": [
 		"Debuggers"
@@ -39,8 +40,21 @@
 			{
 				"command": "code-debug.examineMemoryLocation",
 				"title": "Code-Debug: Examine memory location"
+			},
+			{
+				"command": "code-debug.getRegisters",
+				"title": "Code-Debug: Get Registers"
 			}
 		],
+		"views": {
+			"debug": [
+				{
+					"id": "code-debug.registers",
+					"name": "Registers",
+					"when": "debugType == gdb"
+				}
+			]
+		},
 		"debuggers": [
 			{
 				"type": "gdb",

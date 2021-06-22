@@ -3,28 +3,70 @@ import * as net from "net";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
+import { RegisterTreeProvider } from './registers';
 
 export function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("debugmemory", new MemoryContentProvider()));
-	context.subscriptions.push(vscode.commands.registerCommand("code-debug.examineMemoryLocation", examineMemory));
-	context.subscriptions.push(vscode.commands.registerCommand("code-debug.getFileNameNoExt", () => {
-		if (!vscode.window.activeTextEditor || !vscode.window.activeTextEditor.document || !vscode.window.activeTextEditor.document.fileName) {
-			vscode.window.showErrorMessage("No editor with valid file name active");
-			return;
+	return new CodeDebugExtension(context);
+}
+
+export class CodeDebugExtension {
+	private registerProvider: RegisterTreeProvider;
+
+	constructor(private context: vscode.ExtensionContext) {
+		this.registerProvider = new RegisterTreeProvider();
+
+		context.subscriptions.push(
+			vscode.workspace.registerTextDocumentContentProvider("debugmemory", new MemoryContentProvider()),
+			vscode.commands.registerCommand("code-debug.examineMemoryLocation", examineMemory),
+			vscode.commands.registerCommand("code-debug.getFileNameNoExt", () => {
+				if (!vscode.window.activeTextEditor || !vscode.window.activeTextEditor.document || !vscode.window.activeTextEditor.document.fileName) {
+					vscode.window.showErrorMessage("No editor with valid file name active");
+					return;
+				}
+				const fileName = vscode.window.activeTextEditor.document.fileName;
+				const ext = path.extname(fileName);
+				return fileName.substr(0, fileName.length - ext.length);
+			}),
+			vscode.commands.registerCommand("code-debug.getFileBasenameNoExt", () => {
+				if (!vscode.window.activeTextEditor || !vscode.window.activeTextEditor.document || !vscode.window.activeTextEditor.document.fileName) {
+					vscode.window.showErrorMessage("No editor with valid file name active");
+					return;
+				}
+				const fileName = path.basename(vscode.window.activeTextEditor.document.fileName);
+				const ext = path.extname(fileName);
+				return fileName.substr(0, fileName.length - ext.length);
+			}),
+			vscode.window.createTreeView('code-debug.registers', {
+				treeDataProvider: this.registerProvider
+			}),
+			vscode.debug.onDidStartDebugSession(this.debugSessionStarted.bind(this)),
+			vscode.debug.onDidTerminateDebugSession(this.debugSessionTerminated.bind(this)),
+			vscode.debug.onDidReceiveDebugSessionCustomEvent(this.debugSessionCustomEventReceived.bind(this)),
+		);
+	}
+
+	private debugSessionStarted(e: vscode.DebugSession) {
+		this.registerProvider.debugSessionStarted();
+	}
+
+	private debugSessionTerminated(e: vscode.DebugSession) {
+		this.registerProvider.debugSessionTerminated();
+	}
+
+	private debugSessionCustomEventReceived(e: vscode.DebugSessionCustomEvent) {
+		switch (e.event) {
+			case 'custom-stopped':
+				this.registerProvider.debugSessionStoped();
+				break;
+
+			case 'custom-continued':
+				this.registerProvider.debugSessionContinued();
+				break;
+
+			default:
+				break;
 		}
-		const fileName = vscode.window.activeTextEditor.document.fileName;
-		const ext = path.extname(fileName);
-		return fileName.substr(0, fileName.length - ext.length);
-	}));
-	context.subscriptions.push(vscode.commands.registerCommand("code-debug.getFileBasenameNoExt", () => {
-		if (!vscode.window.activeTextEditor || !vscode.window.activeTextEditor.document || !vscode.window.activeTextEditor.document.fileName) {
-			vscode.window.showErrorMessage("No editor with valid file name active");
-			return;
-		}
-		const fileName = path.basename(vscode.window.activeTextEditor.document.fileName);
-		const ext = path.extname(fileName);
-		return fileName.substr(0, fileName.length - ext.length);
-	}));
+	}
 }
 
 const memoryLocationRegex = /^0x[0-9a-f]+$/;

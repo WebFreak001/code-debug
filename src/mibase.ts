@@ -1,5 +1,5 @@
 import * as DebugAdapter from 'vscode-debugadapter';
-import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, ThreadEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
+import { ContinuedEvent, DebugSession, Event, InitializedEvent, TerminatedEvent, StoppedEvent, ThreadEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Breakpoint, IBackend, Variable, VariableObject, ValuesFormattingMode, MIError } from './backend/backend';
 import { MINode } from './backend/mi_parse';
@@ -16,6 +16,28 @@ const relative = posix.relative;
 
 class ExtendedVariable {
 	constructor(public name, public options) {
+	}
+}
+
+class CustomStoppedEvent extends Event implements DebugProtocol.StoppedEvent {
+	public readonly body: {
+		reason: string,
+	};
+	public readonly event: string;
+
+	constructor(reason: string, threadId?: number) {
+		super('custom-stopped', {reason: reason, threadId: threadId});
+	}
+}
+
+class CustomContinuedEvent extends Event implements DebugProtocol.ContinuedEvent {
+	public readonly body: {
+		threadId: number;
+	};
+	public readonly event: string;
+
+	constructor(threadId: number) {
+		super('custom-continued', { threadId: threadId });
 	}
 }
 
@@ -38,6 +60,7 @@ export class MI2DebugSession extends DebugSession {
 	protected miDebugger: MI2;
 	protected commandServer: net.Server;
 	protected serverPath: string;
+	protected currentThreadId: number;
 
 	public constructor(debuggerLinesStartAt1: boolean, isServer: boolean = false) {
 		super(debuggerLinesStartAt1, isServer);
@@ -56,6 +79,7 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.on("signal-stop", this.handlePause.bind(this));
 		this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));
 		this.miDebugger.on("thread-exited", this.threadExitedEvent.bind(this));
+		this.miDebugger.on('running', this.handleRunning.bind(this));
 		this.sendEvent(new InitializedEvent());
 		try {
 			this.commandServer = net.createServer(c => {
@@ -86,6 +110,16 @@ export class MI2DebugSession extends DebugSession {
 		}
 	}
 
+	protected sendStoppedEvent(reason: string, info: MINode) {
+		const threadId = parseInt(info.record("thread-id"));
+		const event = new StoppedEvent(reason, threadId);
+		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info ? info.record("stopped-threads") == "all" : true;
+		this.sendEvent(event);
+		
+		const customEvent = new CustomStoppedEvent(reason, threadId);
+		this.sendEvent(customEvent);
+	}
+
 	protected setValuesFormattingMode(mode: ValuesFormattingMode) {
 		switch (mode) {
 			case "disabled":
@@ -112,31 +146,28 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected handleBreakpoint(info: MINode) {
-		const event = new StoppedEvent("breakpoint", parseInt(info.record("thread-id")));
-		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
-		this.sendEvent(event);
+		this.sendStoppedEvent("breakpoint", info);
 	}
 
 	protected handleBreak(info?: MINode) {
-		const event = new StoppedEvent("step", info ? parseInt(info.record("thread-id")) : 1);
-		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info ? info.record("stopped-threads") == "all" : true;
-		this.sendEvent(event);
+		this.sendStoppedEvent("step", info);
 	}
 
 	protected handlePause(info: MINode) {
-		const event = new StoppedEvent("user request", parseInt(info.record("thread-id")));
-		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
-		this.sendEvent(event);
+		this.sendStoppedEvent("user request", info);
 	}
 
 	protected stopEvent(info: MINode) {
 		if (!this.started)
 			this.crashed = true;
 		if (!this.quit) {
-			const event = new StoppedEvent("exception", parseInt(info.record("thread-id")));
-			(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
-			this.sendEvent(event);
+			this.sendStoppedEvent("exception", info);
 		}
+	}
+
+	protected handleRunning(info: MINode) {
+		this.sendEvent(new ContinuedEvent(this.currentThreadId, true));
+		this.sendEvent(new CustomContinuedEvent(this.currentThreadId));
 	}
 
 	protected threadCreatedEvent(info: MINode) {
@@ -273,11 +304,12 @@ export class MI2DebugSession extends DebugSession {
 				response.body = {
 					threads: []
 				};
-				for (const thread of threads) {
+				for (const thread of threads.threads) {
 					let threadName = thread.name || thread.targetId || "<unnamed>";
 					response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
 				}
 				this.sendResponse(response);
+				this.currentThreadId = threads.currentThreadId;
 			});
 	}
 
@@ -668,6 +700,28 @@ export class MI2DebugSession extends DebugSession {
 		this.sendResponse(response);
 	}
 
+	protected customRequest(command: string, response: DebugProtocol.Response, args: any, request?: DebugProtocol.Request): void {
+		switch (command) {
+			case 'get-register-names':
+				this.miDebugger.getRegisterNames().then((data) => {
+					response.body = data;
+					this.sendResponse(response);
+				});
+				break;
+
+			case 'get-register-values':
+				this.miDebugger.getRegisterValues().then((data) => {
+					response.body = data;
+					this.sendResponse(response);
+				});
+				break;
+
+				default:
+				response.body = { error: 'Invalid command.' };
+				this.sendResponse(response);
+				break;
+		}
+	}
 }
 
 function prettyStringArray(strings) {

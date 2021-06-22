@@ -48,6 +48,11 @@ export interface SSHArguments {
 	bootstrap: string;
 }
 
+export interface RegisterValue {
+	index: number;
+	value: string;
+}
+
 export interface IBackend {
 	load(cwd: string, target: string, procArgs: string, separateConsole: string): Thenable<any>;
 	ssh(args: SSHArguments, cwd: string, target: string, procArgs: string, separateConsole: string, attach: boolean): Thenable<any>;
@@ -65,9 +70,11 @@ export interface IBackend {
 	addBreakPoint(breakpoint: Breakpoint): Thenable<[boolean, Breakpoint]>;
 	removeBreakPoint(breakpoint: Breakpoint): Thenable<boolean>;
 	clearBreakPoints(): Thenable<any>;
-	getThreads(): Thenable<Thread[]>;
+	getThreads(): Thenable<{threads: Thread[], currentThreadId: number}>;
 	getStack(maxLevels: number, thread: number): Thenable<Stack[]>;
 	getStackVariables(thread: number, frame: number): Thenable<Variable[]>;
+	getRegisterNames(): Thenable<string[]>;
+	getRegisterValues(): Thenable<RegisterValue[]>;
 	evalExpression(name: string, thread: number, frame: number): Thenable<any>;
 	isReady(): boolean;
 	changeVariable(name: string, rawValue: string): Thenable<any>;
