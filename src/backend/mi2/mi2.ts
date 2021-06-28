@@ -216,7 +216,7 @@ export class MI2 extends EventEmitter implements IBackend {
 				isExtendedRemote = true;
 				args = this.preargs;
 			} else
-				args = args.concat([executable, target], this.preargs);
+				args = args.concat([executable, target], this.preargs, this.extraargs || []);
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
@@ -243,7 +243,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			if (executable && !nativePath.isAbsolute(executable))
 				executable = nativePath.join(cwd, executable);
 			if (executable)
-				args = args.concat([executable], this.preargs);
+				args = args.concat([executable], this.preargs, this.extraargs || []);
 			else
 				args = this.preargs;
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
