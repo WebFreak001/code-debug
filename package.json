@@ -69,6 +69,9 @@
 				"program": "./out/src/gdb.js",
 				"runtime": "node",
 				"label": "GDB",
+				"languages": [
+					"ada"
+				],
 				"variables": {
 					"FileBasenameNoExt": "code-debug.getFileBasenameNoExt",
 					"FileNameNoExt": "code-debug.getFileNameNoExt"
@@ -461,6 +464,9 @@
 				"program": "./out/src/lldb.js",
 				"runtime": "node",
 				"label": "LLDB",
+				"languages": [
+					"ada"
+				],
 				"variables": {
 					"FileBasenameNoExt": "code-debug.getFileBasenameNoExt",
 					"FileNameNoExt": "code-debug.getFileNameNoExt"
