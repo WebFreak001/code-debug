@@ -41,37 +41,34 @@
 				"title": "Code-Debug: Examine memory location"
 			}
 		],
+		"breakpoints": [
+			{"language": "c"},
+			{"language": "cpp"},
+			{"language": "d"},
+			{"language": "objective-c"},
+			{"language": "fortran"},
+			{"language": "fortran-modern"},
+			{"language": "fortran90"},
+			{"language": "fortran_free-form"},
+			{"language": "fortran_fixed-form"},
+			{"language": "rust"},
+			{"language": "pascal"},
+			{"language": "objectpascal"},
+			{"language": "ada"},
+			{"language": "nim"},
+			{"language": "arm"},
+			{"language": "asm"},
+			{"language": "vala"},
+			{"language": "crystal"},
+			{"language": "kotlin"},
+			{"language": "zig"}
+		],
 		"debuggers": [
 			{
 				"type": "gdb",
-				"extensions": [],
 				"program": "./out/src/gdb.js",
 				"runtime": "node",
 				"label": "GDB",
-				"enableBreakpointsFor": {
-					"languageIds": [
-						"c",
-						"cpp",
-						"d",
-						"objective-c",
-						"fortran",
-						"fortran-modern",
-						"fortran90",
-						"fortran_free-form",
-						"fortran_fixed-form",
-						"rust",
-						"pascal",
-						"objectpascal",
-						"ada",
-						"nim",
-						"arm",
-						"asm",
-						"vala",
-						"crystal",
-						"kotlin",
-						"zig"
-					]
-				},
 				"variables": {
 					"FileBasenameNoExt": "code-debug.getFileBasenameNoExt",
 					"FileNameNoExt": "code-debug.getFileNameNoExt"
@@ -461,46 +458,12 @@
 			},
 			{
 				"type": "lldb-mi",
-				"extensions": [],
 				"program": "./out/src/lldb.js",
 				"runtime": "node",
 				"label": "LLDB",
 				"variables": {
 					"FileBasenameNoExt": "code-debug.getFileBasenameNoExt",
 					"FileNameNoExt": "code-debug.getFileNameNoExt"
-				},
-				"enableBreakpointsFor": {
-					"languageIds": [
-						"c",
-						"ada",
-						"cpp",
-						"cobol",
-						"fortran",
-						"fortran-modern",
-						"fortran90",
-						"fortran_free-form",
-						"fortran_fixed-form",
-						"pascal",
-						"modula",
-						"java",
-						"pli",
-						"objective-c",
-						"objective-cpp",
-						"d",
-						"python",
-						"opencl",
-						"modula3",
-						"haskell",
-						"ocaml",
-						"swift",
-						"julia",
-						"dylan",
-						"mips",
-						"renderscript",
-						"vala",
-						"kotlin",
-						"zig"
-					]
 				},
 				"configurationAttributes": {
 					"launch": {
@@ -780,18 +743,12 @@
 			},
 			{
 				"type": "mago-mi",
-				"extensions": [],
 				"program": "./out/src/mago.js",
 				"runtime": "node",
 				"label": "Mago-MI",
 				"variables": {
 					"FileBasenameNoExt": "code-debug.getFileBasenameNoExt",
 					"FileNameNoExt": "code-debug.getFileNameNoExt"
-				},
-				"enableBreakpointsFor": {
-					"languageIds": [
-						"d"
-					]
 				},
 				"configurationAttributes": {
 					"launch": {
