@@ -268,8 +268,7 @@ export class MI2DebugSession extends DebugSession {
 			this.sendResponse(response);
 			return;
 		}
-		this.miDebugger.getThreads().then(
-			threads => {
+		this.miDebugger.getThreads().then(threads => {
 				response.body = {
 					threads: []
 				};
@@ -278,6 +277,8 @@ export class MI2DebugSession extends DebugSession {
 					response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
 				}
 				this.sendResponse(response);
+			}).catch(error => {
+				this.sendErrorResponse(response, 17, `Could not get threads: ${error}`);
 			});
 	}
 
