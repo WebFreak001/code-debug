@@ -794,8 +794,8 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	protected quote(text: string): string {
-		// only escape if text contains whitespaces
-		return !/\s/g.test(text) ? text : '"' + escape(text) + '"';
+		// only escape if text contains non-word or non-path characters such as whitespace or quotes
+		return /^-|[^\w\d\/_\-\.]/g.test(text) ? ('"' + escape(text) + '"') : text;
 	}
 
 	prettyPrint: boolean = true;
