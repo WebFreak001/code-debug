@@ -263,7 +263,7 @@ export class MI2DebugSession extends DebugSession {
 			this.miDebugger.once("debug-ready", cb);
 	}
 
-	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
+	protected threadsRequest(response: DebugProtocol.ThreadsResponse, request: DebugProtocol.Request, retries = 5, delay = 100): void {
 		if (!this.miDebugger) {
 			this.sendResponse(response);
 			return;
@@ -278,7 +278,14 @@ export class MI2DebugSession extends DebugSession {
 				}
 				this.sendResponse(response);
 			}).catch(error => {
-				this.sendErrorResponse(response, 17, `Could not get threads: ${error}`);
+				if (retries > 1) {
+					// If threads are requested too early after startup we may get the following error:
+					// 'Cannot execute this command while the target is running. Use the interrupt command to stop the target and try again.'
+					// Even without an interrupt, re-trying after some time will solve that issue in some cases.
+					setTimeout(() => this.threadsRequest(response, request, retries - 1, delay), delay);
+				} else {
+					this.sendErrorResponse(response, 17, `Could not get threads: ${error}`);
+				}
 			});
 	}
 
