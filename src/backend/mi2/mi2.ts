@@ -710,24 +710,24 @@ export class MI2 extends EventEmitter implements IBackend {
 		return await this.sendCommand(command);
 	}
 
-	async varCreate(expression: string, name: string = "-"): Promise<VariableObject> {
+	async varCreate(expression: string, name: string = "-", frame: string = "@"): Promise<VariableObject> {
 		if (trace)
 			this.log("stderr", "varCreate");
-		const res = await this.sendCommand(`var-create ${name} @ "${expression}"`);
+		const res = await this.sendCommand(`var-create ${this.quote(name)} ${frame} "${expression}"`);
 		return new VariableObject(res.result(""));
 	}
 
 	async varEvalExpression(name: string): Promise<MINode> {
 		if (trace)
 			this.log("stderr", "varEvalExpression");
-		return this.sendCommand(`var-evaluate-expression ${name}`);
+		return this.sendCommand(`var-evaluate-expression ${this.quote(name)}`);
 	}
 
 	async varListChildren(name: string): Promise<VariableObject[]> {
 		if (trace)
 			this.log("stderr", "varListChildren");
 		//TODO: add `from` and `to` arguments
-		const res = await this.sendCommand(`var-list-children --all-values ${name}`);
+		const res = await this.sendCommand(`var-list-children --all-values ${this.quote(name)}`);
 		const children = res.result("children") || [];
 		const omg: VariableObject[] = children.map(child => new VariableObject(child[1]));
 		return omg;
@@ -736,13 +736,13 @@ export class MI2 extends EventEmitter implements IBackend {
 	async varUpdate(name: string = "*"): Promise<MINode> {
 		if (trace)
 			this.log("stderr", "varUpdate");
-		return this.sendCommand(`var-update --all-values ${name}`);
+		return this.sendCommand(`var-update --all-values ${this.quote(name)}`);
 	}
 
 	async varAssign(name: string, rawValue: string): Promise<MINode> {
 		if (trace)
 			this.log("stderr", "varAssign");
-		return this.sendCommand(`var-assign ${name} ${rawValue}`);
+		return this.sendCommand(`var-assign ${this.quote(name)} ${rawValue}`);
 	}
 
 	logNoNewLine(type: string, msg: string) {
@@ -798,6 +798,11 @@ export class MI2 extends EventEmitter implements IBackend {
 
 	isReady(): boolean {
 		return this.isSSH ? this.sshReady : !!this.process;
+	}
+
+	protected quote(text: string): string {
+		// only escape if text contains non-word or non-path characters such as whitespace or quotes
+		return /^-|[^\w\d\/_\-\.]/g.test(text) ? ('"' + escape(text) + '"') : text;
 	}
 
 	prettyPrint: boolean = true;
