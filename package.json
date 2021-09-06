@@ -42,66 +42,26 @@
 			}
 		],
 		"breakpoints": [
-			{
-				"language": "c"
-			},
-			{
-				"language": "cpp"
-			},
-			{
-				"language": "d"
-			},
-			{
-				"language": "objective-c"
-			},
-			{
-				"language": "fortran"
-			},
-			{
-				"language": "fortran-modern"
-			},
-			{
-				"language": "fortran90"
-			},
-			{
-				"language": "fortran_free-form"
-			},
-			{
-				"language": "fortran_fixed-form"
-			},
-			{
-				"language": "rust"
-			},
-			{
-				"language": "pascal"
-			},
-			{
-				"language": "objectpascal"
-			},
-			{
-				"language": "ada"
-			},
-			{
-				"language": "nim"
-			},
-			{
-				"language": "arm"
-			},
-			{
-				"language": "asm"
-			},
-			{
-				"language": "vala"
-			},
-			{
-				"language": "crystal"
-			},
-			{
-				"language": "kotlin"
-			},
-			{
-				"language": "zig"
-			}
+			{"language": "c"},
+			{"language": "cpp"},
+			{"language": "d"},
+			{"language": "objective-c"},
+			{"language": "fortran"},
+			{"language": "fortran-modern"},
+			{"language": "fortran90"},
+			{"language": "fortran_free-form"},
+			{"language": "fortran_fixed-form"},
+			{"language": "rust"},
+			{"language": "pascal"},
+			{"language": "objectpascal"},
+			{"language": "ada"},
+			{"language": "nim"},
+			{"language": "arm"},
+			{"language": "asm"},
+			{"language": "vala"},
+			{"language": "crystal"},
+			{"language": "kotlin"},
+			{"language": "zig"}
 		],
 		"debuggers": [
 			{
