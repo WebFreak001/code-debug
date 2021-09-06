@@ -3,6 +3,7 @@ import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, OutputEv
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { MI2 } from "./backend/mi2/mi2";
 import { SSHArguments, ValuesFormattingMode } from './backend/backend';
+const untildify = require('untildify');
 
 export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
 	cwd: string;
@@ -97,7 +98,7 @@ class GDBDebugSession extends MI2DebugSession {
 				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`);
 			});
 		} else {
-			this.miDebugger.load(args.cwd, args.target, args.arguments, args.terminal).then(() => {
+			  this.miDebugger.load(untildify(args.cwd), args.target, args.arguments, args.terminal).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
@@ -169,7 +170,7 @@ class GDBDebugSession extends MI2DebugSession {
 					this.sendErrorResponse(response, 102, `Failed to attach: ${err.toString()}`);
 				});
 			} else {
-				this.miDebugger.attach(args.cwd, args.executable, args.target).then(() => {
+				  this.miDebugger.attach(untildify(args.cwd), args.executable, args.target).then(() => {
 					if (args.autorun)
 						args.autorun.forEach(command => {
 							this.miDebugger.sendUserInput(command);
