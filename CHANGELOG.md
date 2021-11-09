@@ -1,3 +1,9 @@
+# Unreleased 0.26.0
+
+* Path Substitions working with attach+ssh configuration #293 (@brownts)
+* Path Substitions working with LLDB #295 (@brownts)
+* Path Substitions working with Windows-Style paths #294 (@brownts)
+
 # 0.25.1
 
 * Remove the need for extra trust for debugging workspaces per guidance "for debug extensions" as noted in the [Workspace Trust Extension Guide](https://github.com/microsoft/vscode/issues/120251#issuecomment-825832603) (@GitMensch)
@@ -6,7 +12,7 @@
 
 # 0.25.0
 
-(Released May 2020)
+(released May 2020)
 
 * Add support for path substitutions (`{"fromPath": "toPath"}`) for GDB and LLDB (@karljs)
 * Support up to 65535 threads instead of 256 threads (@ColdenCullen)
