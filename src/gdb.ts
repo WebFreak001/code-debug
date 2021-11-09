@@ -1,7 +1,7 @@
 import { MI2DebugSession } from './mibase';
 import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
-import { MI2 } from "./backend/mi2/mi2";
+import { MI2, escape } from "./backend/mi2/mi2";
 import { SSHArguments, ValuesFormattingMode } from './backend/backend';
 
 export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
@@ -186,7 +186,7 @@ class GDBDebugSession extends MI2DebugSession {
 	protected setPathSubstitutions(substitutions: { [index: string]: string }): void {
 		if (substitutions) {
 			Object.keys(substitutions).forEach(source => {
-				this.miDebugger.extraCommands.push("gdb-set substitute-path " + source + " " + substitutions[source]);
+				this.miDebugger.extraCommands.push("gdb-set substitute-path \"" + escape(source) + "\" \"" + escape(substitutions[source]) + "\"");
 			})
 		}
 	}

@@ -10,6 +10,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	lldbmipath: string;
 	env: any;
 	debugger_args: string[];
+	pathSubstitutions: { [index: string]: string };
 	arguments: string;
 	autorun: string[];
 	ssh: SSHArguments;
@@ -24,6 +25,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	lldbmipath: string;
 	env: any;
 	debugger_args: string[];
+	pathSubstitutions: { [index: string]: string };
 	executable: string;
 	autorun: string[];
 	valuesFormatting: ValuesFormattingMode;
@@ -44,6 +46,7 @@ class LLDBDebugSession extends MI2DebugSession {
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
+		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = false;
@@ -105,6 +108,7 @@ class LLDBDebugSession extends MI2DebugSession {
 
 	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
 		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
+		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = true;
@@ -127,7 +131,7 @@ class LLDBDebugSession extends MI2DebugSession {
 	protected setPathSubstitutions(substitutions: { [index: string]: string }): void {
 		if (substitutions) {
 			Object.keys(substitutions).forEach(source => {
-				this.miDebugger.extraCommands.push("settings set target.source-map " + source + " " + substitutions[source]);
+				this.miDebugger.extraCommands.push("settings append target.source-map " + source + " " + substitutions[source]);
 			})
 		}
 	}

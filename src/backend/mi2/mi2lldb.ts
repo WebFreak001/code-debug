@@ -19,6 +19,9 @@ export class MI2_LLDB extends MI2 {
 		];
 		if (!attach)
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
+		for (let cmd of this.extraCommands) {
+			cmds.push(this.sendCliCommand(cmd));
+		}
 		return cmds;
 	}
 
@@ -29,11 +32,10 @@ export class MI2_LLDB extends MI2 {
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
-			Promise.all([
-				this.sendCommand("gdb-set target-async on"),
-				this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""),
-				this.sendCommand("target-attach " + target)
-			]).then(() => {
+			const promises = this.initCommands(target, cwd, false, true);
+			promises.push(this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""));
+			promises.push(this.sendCommand("target-attach " + target));
+			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
 				resolve(undefined);
 			}, reject);
