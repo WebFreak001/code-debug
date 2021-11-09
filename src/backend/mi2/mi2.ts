@@ -222,15 +222,12 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
-			const commands = [
-				this.sendCommand("gdb-set target-async on", true),
-				this.sendCommand("environment-directory \"" + escape(cwd) + "\"", true)
-			];
+			const promises = this.initCommands(target, cwd, false, true);
 			if (isExtendedRemote) {
-				commands.push(this.sendCommand("target-select " + target));
-				commands.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
+				promises.push(this.sendCommand("target-select " + target));
+				promises.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
 			}
-			Promise.all(commands).then(() => {
+			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
 				resolve(undefined);
 			}, reject);
@@ -251,11 +248,9 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
-			Promise.all([
-				this.sendCommand("gdb-set target-async on", true),
-				this.sendCommand("environment-directory \"" + escape(cwd) + "\"", true),
-				this.sendCommand("target-select remote " + target)
-			]).then(() => {
+			const promises = this.initCommands(target, cwd, false, true);
+			promises.push(this.sendCommand("target-select remote " + target));
+			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
 				resolve(undefined);
 			}, reject);
@@ -746,7 +741,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		this.emit("msg", type, msg[msg.length - 1] == '\n' ? msg : (msg + "\n"));
 	}
 
-	sendUserInput(command: string, threadId: number = 0, frameLevel: number = 0): Thenable<any> {
+	sendUserInput(command: string, threadId: number = 0, frameLevel: number = 0): Thenable<MINode> {
 		if (command.startsWith("-")) {
 			return this.sendCommand(command.substr(1));
 		} else {
@@ -763,13 +758,13 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.stdin.write(raw + "\n");
 	}
 
-	async sendCliCommand(command: string, threadId: number = 0, frameLevel: number = 0) {
+	sendCliCommand(command: string, threadId: number = 0, frameLevel: number = 0): Thenable<MINode> {
 		let miCommand = "interpreter-exec ";
 		if (threadId != 0) {
 			miCommand += `--thread ${threadId} --frame ${frameLevel} `;
 		}
 		miCommand += `console "${command.replace(/[\\"']/g, '\\$&')}"`;
-		await this.sendCommand(miCommand);
+		return this.sendCommand(miCommand);
 	}
 
 	sendCommand(command: string, suppressFailure: boolean = false): Thenable<MINode> {
