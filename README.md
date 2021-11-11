@@ -84,6 +84,10 @@ port and optionally hostname in `target`.
 This will attach to the running process managed by gdbserver on localhost:2345. You might
 need to hit the start button in the debug bar at the top first to start the program.
 
+Control over whether the debugger should continue executing on connect can be configured
+by setting `stopAtConnect`.  The default value is `false` so that execution will continue
+after connecting.
+
 ### Using ssh for remote debugging
 
 Debugging using ssh automatically converts all paths between client & server and also optionally

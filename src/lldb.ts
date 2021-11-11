@@ -28,6 +28,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	pathSubstitutions: { [index: string]: string };
 	executable: string;
 	autorun: string[];
+	stopAtConnect: boolean;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
@@ -112,7 +113,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.initDebugger();
 		this.quit = false;
 		this.attached = true;
-		this.needContinue = true;
+		this.needContinue = !args.stopAtConnect;
 		this.isSSH = false;
 		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
