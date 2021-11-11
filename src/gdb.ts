@@ -30,6 +30,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	executable: string;
 	remote: boolean;
 	autorun: string[];
+	stopAtConnect: boolean;
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
@@ -125,7 +126,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.initDebugger();
 		this.quit = false;
 		this.attached = !args.remote;
-		this.needContinue = true;
+		this.needContinue = !args.stopAtConnect;
 		this.isSSH = false;
 		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
