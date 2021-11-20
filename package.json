@@ -301,6 +301,11 @@
 								"description": "GDB commands to run when starting to debug",
 								"default": []
 							},
+							"stopAtConnect": {
+								"type": "boolean",
+								"description": "Whether debugger should stop after connecting to target",
+								"default": false
+							},
 							"ssh": {
 								"required": [
 									"host",
@@ -705,6 +710,11 @@
 								"type": "array",
 								"description": "lldb commands to run when starting to debug",
 								"default": []
+							},
+							"stopAtConnect": {
+								"type": "boolean",
+								"description": "Whether debugger should stop after connecting to target",
+								"default": false
 							}
 						}
 					}
