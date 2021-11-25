@@ -1,5 +1,5 @@
 import * as DebugAdapter from 'vscode-debugadapter';
-import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, ThreadEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
+import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, ThreadEvent, OutputEvent, ContinuedEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { Breakpoint, IBackend, Variable, VariableObject, ValuesFormattingMode, MIError } from './backend/backend';
 import { MINode } from './backend/mi_parse';
@@ -19,6 +19,8 @@ class ExtendedVariable {
 	}
 }
 
+export enum RunCommand { CONTINUE, RUN, NONE }
+
 const STACK_HANDLES_START = 1000;
 const VAR_HANDLES_START = 512 * 256 + 1000;
 
@@ -28,7 +30,7 @@ export class MI2DebugSession extends DebugSession {
 	protected useVarObjects: boolean;
 	protected quit: boolean;
 	protected attached: boolean;
-	protected needContinue: boolean;
+	protected initialRunCommand: RunCommand;
 	protected isSSH: boolean;
 	protected trimCWD: string;
 	protected switchCWD: string;
@@ -326,15 +328,46 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
-		// FIXME: Does not seem to get called in january release
-		if (this.needContinue) {
-			this.miDebugger.continue().then(done => {
-				this.sendResponse(response);
-			}, msg => {
-				this.sendErrorResponse(response, 2, `Could not continue: ${msg}`);
-			});
-		} else
+		const promises: Thenable<any>[] = [];
+		switch (this.initialRunCommand) {
+			case RunCommand.CONTINUE:
+				promises.push(this.miDebugger.continue().then(() => {
+					// Some debuggers will provide an out-of-band status that they are stopped
+					// when attaching (e.g., gdb), so the client assumes we are stopped and gets
+					// confused if we start running again on our own.
+					//
+					// If we don't send this event, the client may start requesting data (such as
+					// stack frames, local variables, etc.) since they believe the target is
+					// stopped.  Furthermore the client may not be indicating the proper status
+					// to the user (may indicate stopped when the target is actually running).
+					this.sendEvent(new ContinuedEvent(1, true));
+				}));
+				break;
+			case RunCommand.RUN:
+				promises.push(this.miDebugger.start().then(() => {
+					this.started = true;
+					if (this.crashed)
+						this.handlePause(undefined);
+				}));
+				break;
+			case RunCommand.NONE:
+				// Not all debuggers seem to provide an out-of-band status that they are stopped
+				// when attaching (e.g., lldb), so the client assumes we are running and gets
+				// confused when we don't actually run or continue.  Therefore, we'll force a
+				// stopped event to be sent to the client (just in case) to synchronize the state.
+				const event: DebugProtocol.StoppedEvent = new StoppedEvent("pause", 1);
+				event.body.description = "paused on attach";
+				event.body.allThreadsStopped = true;
+				this.sendEvent(event);
+				break;
+			default:
+				throw new Error('Unhandled run command: ' + RunCommand[this.initialRunCommand]);
+		}
+		Promise.all(promises).then(() => {
 			this.sendResponse(response);
+		}).catch(err => {
+			this.sendErrorResponse(response, 18, `Could not run/continue: ${err.toString()}`);
+		});
 	}
 
 	protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
