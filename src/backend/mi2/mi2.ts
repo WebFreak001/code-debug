@@ -381,15 +381,13 @@ export class MI2 extends EventEmitter implements IBackend {
 
 	start(): Thenable<boolean> {
 		return new Promise((resolve, reject) => {
-			this.once("ui-break-done", () => {
-				this.log("console", "Running executable");
-				this.sendCommand("exec-run").then((info) => {
-					if (info.resultRecords.resultClass == "running")
-						resolve(undefined);
-					else
-						reject();
-				}, reject);
-			});
+			this.log("console", "Running executable");
+			this.sendCommand("exec-run").then((info) => {
+				if (info.resultRecords.resultClass == "running")
+					resolve(undefined);
+				else
+					reject();
+			}, reject);
 		});
 	}
 

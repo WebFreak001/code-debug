@@ -1,4 +1,4 @@
-import { MI2DebugSession } from './mibase';
+import { MI2DebugSession, RunCommand } from './mibase';
 import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { MI2, escape } from "./backend/mi2/mi2";
@@ -56,7 +56,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.initDebugger();
 		this.quit = false;
 		this.attached = false;
-		this.needContinue = false;
+		this.initialRunCommand = RunCommand.RUN;
 		this.isSSH = false;
 		this.started = false;
 		this.crashed = false;
@@ -83,17 +83,7 @@ class GDBDebugSession extends MI2DebugSession {
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
 					});
-				setTimeout(() => {
-					this.miDebugger.emit("ui-break-done");
-				}, 50);
 				this.sendResponse(response);
-				this.miDebugger.start().then(() => {
-					this.started = true;
-					if (this.crashed)
-						this.handlePause(undefined);
-				}, err => {
-					this.sendErrorResponse(response, 100, `Failed to start MI Debugger: ${err.toString()}`);
-				});
 			}, err => {
 				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`);
 			});
@@ -103,17 +93,7 @@ class GDBDebugSession extends MI2DebugSession {
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
 					});
-				setTimeout(() => {
-					this.miDebugger.emit("ui-break-done");
-				}, 50);
 				this.sendResponse(response);
-				this.miDebugger.start().then(() => {
-					this.started = true;
-					if (this.crashed)
-						this.handlePause(undefined);
-				}, err => {
-					this.sendErrorResponse(response, 100, `Failed to Start MI Debugger: ${err.toString()}`);
-				});
 			}, err => {
 				this.sendErrorResponse(response, 103, `Failed to load MI Debugger: ${err.toString()}`);
 			});
@@ -126,7 +106,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.initDebugger();
 		this.quit = false;
 		this.attached = !args.remote;
-		this.needContinue = !args.stopAtConnect;
+		this.initialRunCommand = !!args.stopAtConnect ? RunCommand.NONE : RunCommand.CONTINUE;
 		this.isSSH = false;
 		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
@@ -151,9 +131,6 @@ class GDBDebugSession extends MI2DebugSession {
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
 					});
-				setTimeout(() => {
-					this.miDebugger.emit("ui-break-done");
-				}, 50);
 				this.sendResponse(response);
 			}, err => {
 				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`);

@@ -1,4 +1,4 @@
-import { MI2DebugSession } from './mibase';
+import { MI2DebugSession, RunCommand } from './mibase';
 import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, OutputEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { MI2_LLDB } from "./backend/mi2/mi2lldb";
@@ -51,7 +51,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.initDebugger();
 		this.quit = false;
 		this.attached = false;
-		this.needContinue = false;
+		this.initialRunCommand = RunCommand.RUN;
 		this.isSSH = false;
 		this.started = false;
 		this.crashed = false;
@@ -78,15 +78,7 @@ class LLDBDebugSession extends MI2DebugSession {
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
 					});
-				setTimeout(() => {
-					this.miDebugger.emit("ui-break-done");
-				}, 50);
 				this.sendResponse(response);
-				this.miDebugger.start().then(() => {
-					this.started = true;
-					if (this.crashed)
-						this.handlePause(undefined);
-				});
 			});
 		} else {
 			this.miDebugger.load(args.cwd, args.target, args.arguments, undefined).then(() => {
@@ -94,15 +86,7 @@ class LLDBDebugSession extends MI2DebugSession {
 					args.autorun.forEach(command => {
 						this.miDebugger.sendUserInput(command);
 					});
-				setTimeout(() => {
-					this.miDebugger.emit("ui-break-done");
-				}, 50);
 				this.sendResponse(response);
-				this.miDebugger.start().then(() => {
-					this.started = true;
-					if (this.crashed)
-						this.handlePause(undefined);
-				});
 			});
 		}
 	}
@@ -113,7 +97,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.initDebugger();
 		this.quit = false;
 		this.attached = true;
-		this.needContinue = !args.stopAtConnect;
+		this.initialRunCommand = !!args.stopAtConnect ? RunCommand.NONE : RunCommand.CONTINUE;
 		this.isSSH = false;
 		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
