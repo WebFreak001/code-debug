@@ -164,6 +164,11 @@
 								"description": "GDB commands to run when starting to debug",
 								"default": []
 							},
+							"stopAtEntry": {
+								"type": ["boolean", "string"],
+								"description": "Whether debugger should stop at application entry point",
+								"default": false
+							},
 							"ssh": {
 								"required": [
 									"host",
@@ -304,6 +309,11 @@
 							"stopAtConnect": {
 								"type": "boolean",
 								"description": "Whether debugger should stop after connecting to target",
+								"default": false
+							},
+							"stopAtEntry": {
+								"type": ["boolean", "string"],
+								"description": "Whether debugger should stop at application entry point",
 								"default": false
 							},
 							"ssh": {
@@ -579,6 +589,11 @@
 								"description": "lldb commands to run when starting to debug",
 								"default": []
 							},
+							"stopAtEntry": {
+								"type": ["boolean", "string"],
+								"description": "Whether debugger should stop at application entry point",
+								"default": false
+							},
 							"ssh": {
 								"required": [
 									"host",
@@ -714,6 +729,11 @@
 							"stopAtConnect": {
 								"type": "boolean",
 								"description": "Whether debugger should stop after connecting to target",
+								"default": false
+							},
+							"stopAtEntry": {
+								"type": ["boolean", "string"],
+								"description": "Whether debugger should stop at application entry point",
 								"default": false
 							}
 						}

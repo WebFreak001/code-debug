@@ -14,6 +14,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	arguments: string;
 	terminal: string;
 	autorun: string[];
+	stopAtEntry: boolean | string;
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
@@ -31,6 +32,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	remote: boolean;
 	autorun: string[];
 	stopAtConnect: boolean;
+	stopAtEntry: boolean | string;
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
@@ -64,6 +66,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
+		this.stopAtEntry = args.stopAtEntry;
 		if (args.ssh !== undefined) {
 			if (args.ssh.forwardX11 === undefined)
 				args.ssh.forwardX11 = true;
@@ -112,6 +115,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
+		this.stopAtEntry = args.stopAtEntry;
 		if (args.ssh !== undefined) {
 			if (args.ssh.forwardX11 === undefined)
 				args.ssh.forwardX11 = true;

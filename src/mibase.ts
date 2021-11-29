@@ -31,6 +31,7 @@ export class MI2DebugSession extends DebugSession {
 	protected quit: boolean;
 	protected attached: boolean;
 	protected initialRunCommand: RunCommand;
+	protected stopAtEntry: boolean | string;
 	protected isSSH: boolean;
 	protected trimCWD: string;
 	protected switchCWD: string;
@@ -329,6 +330,31 @@ export class MI2DebugSession extends DebugSession {
 
 	protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
 		const promises: Thenable<any>[] = [];
+		let entryPoint: string = undefined;
+		let runToStart: boolean = false;
+		// Setup temporary breakpoint for the entry point if needed.
+		switch (this.initialRunCommand) {
+			case RunCommand.CONTINUE:
+			case RunCommand.NONE:
+				if (typeof this.stopAtEntry == 'boolean' && this.stopAtEntry)
+					entryPoint = "main"; // sensible default
+				else if (typeof this.stopAtEntry == 'string')
+					entryPoint = this.stopAtEntry;
+				break;
+			case RunCommand.RUN:
+				if (typeof this.stopAtEntry == 'boolean' && this.stopAtEntry) {
+					if (this.miDebugger.features.includes("exec-run-start-option"))
+						runToStart = true;
+					else
+						entryPoint = "main"; // sensible fallback
+				} else if (typeof this.stopAtEntry == 'string')
+					entryPoint = this.stopAtEntry;
+				break;
+			default:
+				throw new Error('Unhandled run command: ' + RunCommand[this.initialRunCommand]);
+		}
+		if (entryPoint)
+			promises.push(this.miDebugger.setEntryBreakPoint(entryPoint));
 		switch (this.initialRunCommand) {
 			case RunCommand.CONTINUE:
 				promises.push(this.miDebugger.continue().then(() => {
@@ -344,7 +370,7 @@ export class MI2DebugSession extends DebugSession {
 				}));
 				break;
 			case RunCommand.RUN:
-				promises.push(this.miDebugger.start().then(() => {
+				promises.push(this.miDebugger.start(runToStart).then(() => {
 					this.started = true;
 					if (this.crashed)
 						this.handlePause(undefined);
