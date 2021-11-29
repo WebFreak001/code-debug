@@ -330,7 +330,7 @@ export class MI2DebugSession extends DebugSession {
 
 	protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
 		const promises: Thenable<any>[] = [];
-		let entryPoint: string = undefined;
+		let entryPoint: string | undefined = undefined;
 		let runToStart: boolean = false;
 		// Setup temporary breakpoint for the entry point if needed.
 		switch (this.initialRunCommand) {
