@@ -974,9 +974,10 @@
 		"compile": "tsc -watch -p ./"
 	},
 	"dependencies": {
+		"ssh2": "^0.8.9",
+		"untildify": "^4.0.0",
 		"vscode-debugadapter": "^1.40.0",
-		"vscode-debugprotocol": "^1.40.0",
-		"ssh2": "^0.8.9"
+		"vscode-debugprotocol": "^1.40.0"
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.6",
