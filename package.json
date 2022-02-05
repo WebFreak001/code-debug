@@ -98,7 +98,8 @@
 				"configurationAttributes": {
 					"launch": {
 						"required": [
-							"target"
+							"target",
+							"cwd"
 						],
 						"properties": {
 							"target": {
@@ -233,7 +234,8 @@
 					},
 					"attach": {
 						"required": [
-							"target"
+							"target",
+							"cwd"
 						],
 						"properties": {
 							"target": {
