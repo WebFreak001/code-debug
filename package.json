@@ -996,7 +996,7 @@
 		"compile": "tsc -watch -p ./"
 	},
 	"dependencies": {
-		"ssh2": "^1.5.0",
+		"ssh2": "^1.6.0",
 		"vscode-debugadapter": "^1.40.0",
 		"vscode-debugprotocol": "^1.40.0"
 	},
