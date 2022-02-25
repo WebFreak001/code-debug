@@ -15,7 +15,16 @@ export class MI2_LLDB extends MI2 {
 				target = nativePath.join(cwd, target);
 		}
 		const cmds = [
-			this.sendCommand("gdb-set target-async on")
+			this.sendCommand("gdb-set target-async on"),
+			new Promise(resolve => {
+				this.sendCommand("list-features").then(done => {
+					this.features = done.result("features");
+					resolve(undefined);
+				}, err => {
+					this.features = [];
+					resolve(undefined);
+				});
+			})
 		];
 		if (!attach)
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));

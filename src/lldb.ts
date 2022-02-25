@@ -13,6 +13,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	pathSubstitutions: { [index: string]: string };
 	arguments: string;
 	autorun: string[];
+	stopAtEntry: boolean | string;
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
@@ -29,6 +30,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	executable: string;
 	autorun: string[];
 	stopAtConnect: boolean;
+	stopAtEntry: boolean | string;
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
@@ -59,6 +61,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
+		this.stopAtEntry = args.stopAtEntry;
 		if (args.ssh !== undefined) {
 			if (args.ssh.forwardX11 === undefined)
 				args.ssh.forwardX11 = true;
@@ -103,6 +106,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
+		this.stopAtEntry = args.stopAtEntry;
 		this.miDebugger.attach(args.cwd, args.executable, args.target).then(() => {
 			if (args.autorun)
 				args.autorun.forEach(command => {

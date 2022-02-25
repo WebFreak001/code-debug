@@ -191,6 +191,16 @@ export class MI2 extends EventEmitter implements IBackend {
 		}
 		const cmds = [
 			this.sendCommand("gdb-set target-async on", true),
+			new Promise(resolve => {
+				this.sendCommand("list-features").then(done => {
+					this.features = done.result("features");
+					resolve(undefined);
+				}, () => {
+					// Default to no supported features on error
+					this.features = [];
+					resolve(undefined);
+				});
+			}),
 			this.sendCommand("environment-directory \"" + escape(cwd) + "\"", true)
 		];
 		if (!attach)
@@ -379,10 +389,14 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	start(): Thenable<boolean> {
+	start(runToStart: boolean): Thenable<boolean> {
+		const options: string[] = [];
+		if (runToStart)
+			options.push("--start");
+		const startCommand: string = ["exec-run"].concat(options).join(" ");
 		return new Promise((resolve, reject) => {
 			this.log("console", "Running executable");
-			this.sendCommand("exec-run").then((info) => {
+			this.sendCommand(startCommand).then((info) => {
 				if (info.resultRecords.resultClass == "running")
 					resolve(undefined);
 				else
@@ -507,6 +521,10 @@ export class MI2 extends EventEmitter implements IBackend {
 		if (trace)
 			this.log("stderr", "setBreakPointCondition");
 		return this.sendCommand("break-condition " + bkptNum + " " + condition);
+	}
+
+	setEntryBreakPoint(entryPoint: string): Thenable<any> {
+		return this.sendCommand("break-insert -t -f " + entryPoint);
 	}
 
 	addBreakPoint(breakpoint: Breakpoint): Thenable<[boolean, Breakpoint]> {
@@ -794,6 +812,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	prettyPrint: boolean = true;
 	printCalls: boolean;
 	debugOutput: boolean;
+	features: string[];
 	public procEnv: any;
 	protected isSSH: boolean;
 	protected sshReady: boolean;

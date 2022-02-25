@@ -54,6 +54,29 @@ in `stdout` for the application, `stderr` for errors and `log` for log messages.
 Some exceptions/signals like segmentation faults will be catched and displayed but
 it does not support for example most D exceptions.
 
+Support exists for stopping at the entry point of the application.  This is controlled
+through the `stopAtEntry` setting.  This value may be either a boolean or a string.  In
+the case of a boolean value of `false` (the default), this setting is disabled.  In the
+case of a boolean value of `true`, if this is a launch configuration and the debugger
+supports the `start` (or `exec-run --start` MI feature, more specifically), than this
+will be used to run to the entry point of the application.  Note that this appears to
+work fine for GDB, but LLDB doesn't necessarily seem to adhere to this, even though it may
+indicate that it supports this feature.  The alternative configuration option for the
+`stopAtEntry` setting is to specify a string where the string represents the entry point
+itself.  In this situation a temporary breakpoint will be set at the specified entry point
+and a normal run will occur for a launch configuration.  This (setting a temporary
+breakpoint) is also the behavior that occurs when the debugger does not support the
+`start` feature and the `stopAtEntry` was set to `true`.  In that case the entry point will
+default to "main".  Thus, the most portable way to use this configuration is to explicitly
+specify the entry point of the application.  In the case of an attach configuration, similar
+behavior will occur, however since there is no equivalent of the `start` command for
+attaching, a boolean value of `true` for the `stopAtEntry` setting in a launch configuration
+will automatically default to an entry point of "main", while a string value for this
+setting will be interpreted as the entry point, causing a temporary breakpoint to be set at
+that location prior to continuing execution.  Note that stopping at the entry point for the
+attach configuration assumes that the entry point has not yet been entered at the time of
+attach, otherwise this will have no affect.
+
 ### Attaching to existing processes
 
 Attaching to existing processes currently only works by specifying the PID in the
