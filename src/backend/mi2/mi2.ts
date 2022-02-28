@@ -635,19 +635,26 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	async getStack(maxLevels: number, thread: number): Promise<Stack[]> {
+	async getStack(startFrame: number, maxLevels: number, thread: number): Promise<Stack[]> {
 		if (trace) this.log("stderr", "getStack");
 
-		let command = "stack-list-frames";
-		if (thread != 0) {
-			command += ` --thread ${thread}`;
-		}
-		if (maxLevels) {
-			command += " 0 " + maxLevels;
-		}
-		const result = await this.sendCommand(command);
+		const options: string[] = [];
+
+		if (thread != 0)
+			options.push("--thread " + thread);
+
+		const depth: number = (await this.sendCommand(["stack-info-depth"].concat(options).join(" "))).result("depth").valueOf();
+		const lowFrame: number = startFrame ? startFrame : 0;
+		const highFrame: number = (maxLevels ? Math.min(depth, lowFrame + maxLevels) : depth) - 1;
+
+		if (highFrame < lowFrame)
+			return [];
+
+		options.push(lowFrame.toString());
+		options.push(highFrame.toString());
+
+		const result = await this.sendCommand(["stack-list-frames"].concat(options).join(" "));
 		const stack = result.result("stack");
-		const ret: Stack[] = [];
 		return stack.map(element => {
 			const level = MINode.valueOf(element, "@frame.level");
 			const addr = MINode.valueOf(element, "@frame.addr");
