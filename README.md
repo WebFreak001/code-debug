@@ -101,6 +101,7 @@ port and optionally hostname in `target`.
 "request": "attach",
 "executable": "./bin/executable",
 "target": ":2345",
+"cwd": "${workspaceRoot}",
 "remote": true
 ```
 
@@ -111,7 +112,7 @@ Control over whether the debugger should continue executing on connect can be co
 by setting `stopAtConnect`.  The default value is `false` so that execution will continue
 after connecting.
 
-### Using ssh for remote debugging
+### Using ssh for debugging on remote
 
 Debugging using ssh automatically converts all paths between client & server and also optionally
 redirects X11 output from the server to the client. Simply add a `ssh` object in your `launch`
