@@ -57,7 +57,6 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.isSSH = false;
 		this.started = false;
 		this.crashed = false;
-		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
@@ -102,7 +101,6 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.attached = true;
 		this.initialRunCommand = !!args.stopAtConnect ? RunCommand.NONE : RunCommand.CONTINUE;
 		this.isSSH = false;
-		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
