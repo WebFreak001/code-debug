@@ -219,14 +219,15 @@ export class MI2 extends EventEmitter implements IBackend {
 			let args = [];
 			if (executable && !nativePath.isAbsolute(executable))
 				executable = nativePath.join(cwd, executable);
-			if (!executable)
-				executable = "-p";
 			let isExtendedRemote = false;
+			args = this.preargs.concat(this.extraargs || []);
 			if (target.startsWith("extended-remote")) {
 				isExtendedRemote = true;
-				args = this.preargs;
-			} else
-				args = args.concat([executable, target], this.preargs);
+			} else {
+				if (!executable)
+					executable = "-p";
+				args = args.concat([executable, target]);
+			}
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
@@ -235,7 +236,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			const promises = this.initCommands(target, cwd, false, true);
 			if (isExtendedRemote) {
 				promises.push(this.sendCommand("target-select " + target));
-				promises.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
+				if (executable)
+					promises.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
 			}
 			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
@@ -249,10 +251,9 @@ export class MI2 extends EventEmitter implements IBackend {
 			let args = [];
 			if (executable && !nativePath.isAbsolute(executable))
 				executable = nativePath.join(cwd, executable);
+			args = this.preargs.concat(this.extraargs || []);
 			if (executable)
-				args = args.concat([executable], this.preargs);
-			else
-				args = this.preargs;
+				args = args.concat([executable]);
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
