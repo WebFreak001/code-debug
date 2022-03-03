@@ -37,7 +37,6 @@ export class MI2DebugSession extends DebugSession {
 	protected switchCWD: string;
 	protected started: boolean;
 	protected crashed: boolean;
-	protected debugReady: boolean;
 	protected miDebugger: MI2;
 	protected commandServer: net.Server;
 	protected serverPath: string;
@@ -59,7 +58,7 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.on("signal-stop", this.handlePause.bind(this));
 		this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));
 		this.miDebugger.on("thread-exited", this.threadExitedEvent.bind(this));
-		this.sendEvent(new InitializedEvent());
+		this.miDebugger.once("debug-ready", (() => this.sendEvent(new InitializedEvent())));
 		try {
 			this.commandServer = net.createServer(c => {
 				c.on("data", data => {
@@ -202,68 +201,54 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
-		const cb = (() => {
-			this.debugReady = true;
-			const all = [];
-			args.breakpoints.forEach(brk => {
-				all.push(this.miDebugger.addBreakPoint({ raw: brk.name, condition: brk.condition, countCondition: brk.hitCondition }));
+		const all = [];
+		args.breakpoints.forEach(brk => {
+			all.push(this.miDebugger.addBreakPoint({ raw: brk.name, condition: brk.condition, countCondition: brk.hitCondition }));
+		});
+		Promise.all(all).then(brkpoints => {
+			const finalBrks = [];
+			brkpoints.forEach(brkp => {
+				if (brkp[0])
+					finalBrks.push({ line: brkp[1].line });
+			});
+			response.body = {
+				breakpoints: finalBrks
+			};
+			this.sendResponse(response);
+		}, msg => {
+			this.sendErrorResponse(response, 10, msg.toString());
+		});
+	}
+
+	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
+		this.miDebugger.clearBreakPoints(args.source.path).then(() => {
+			let path = args.source.path;
+			if (this.isSSH) {
+				// trimCWD is the local path, switchCWD is the ssh path
+				path = systemPath.relative(this.trimCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
+				path = resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
+			}
+			const all = args.breakpoints.map(brk => {
+				return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
 			});
 			Promise.all(all).then(brkpoints => {
 				const finalBrks = [];
 				brkpoints.forEach(brkp => {
+					// TODO: Currently all breakpoints returned are marked as verified,
+					// which leads to verified breakpoints on a broken lldb.
 					if (brkp[0])
-						finalBrks.push({ line: brkp[1].line });
+						finalBrks.push(new DebugAdapter.Breakpoint(true, brkp[1].line));
 				});
 				response.body = {
 					breakpoints: finalBrks
 				};
 				this.sendResponse(response);
 			}, msg => {
-				this.sendErrorResponse(response, 10, msg.toString());
-			});
-		}).bind(this);
-		if (this.debugReady)
-			cb();
-		else
-			this.miDebugger.once("debug-ready", cb);
-	}
-
-	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-		const cb = (() => {
-			this.debugReady = true;
-			this.miDebugger.clearBreakPoints(args.source.path).then(() => {
-				let path = args.source.path;
-				if (this.isSSH) {
-					// trimCWD is the local path, switchCWD is the ssh path
-					path = systemPath.relative(this.trimCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
-					path = resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
-				}
-				const all = args.breakpoints.map(brk => {
-					return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
-				});
-				Promise.all(all).then(brkpoints => {
-					const finalBrks = [];
-					brkpoints.forEach(brkp => {
-						// TODO: Currently all breakpoints returned are marked as verified,
-						// which leads to verified breakpoints on a broken lldb.
-						if (brkp[0])
-							finalBrks.push(new DebugAdapter.Breakpoint(true, brkp[1].line));
-					});
-					response.body = {
-						breakpoints: finalBrks
-					};
-					this.sendResponse(response);
-				}, msg => {
-					this.sendErrorResponse(response, 9, msg.toString());
-				});
-			}, msg => {
 				this.sendErrorResponse(response, 9, msg.toString());
 			});
-		}).bind(this);
-		if (this.debugReady)
-			cb();
-		else
-			this.miDebugger.once("debug-ready", cb);
+		}, msg => {
+			this.sendErrorResponse(response, 9, msg.toString());
+		});
 	}
 
 	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
