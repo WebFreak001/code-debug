@@ -52,8 +52,9 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.on("stopped", this.stopEvent.bind(this));
 		this.miDebugger.on("msg", this.handleMsg.bind(this));
 		this.miDebugger.on("breakpoint", this.handleBreakpoint.bind(this));
+		this.miDebugger.on("watchpoint", this.handleBreak.bind(this));	// consider to parse old/new, too (otherwise it is in the console only)
 		this.miDebugger.on("step-end", this.handleBreak.bind(this));
-		this.miDebugger.on("step-out-end", this.handleBreak.bind(this));
+		// this.miDebugger.on("step-out-end", this.handleBreak.bind(this));  // was combined into step-end
 		this.miDebugger.on("step-other", this.handleBreak.bind(this));
 		this.miDebugger.on("signal-stop", this.handlePause.bind(this));
 		this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));

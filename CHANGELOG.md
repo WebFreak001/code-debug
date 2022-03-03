@@ -11,6 +11,8 @@
 * New `stopAtConnect` configuration #299, #302 (@brownts)
 * New `stopAtEntry` configuration to run debugger to application's entry point #306 (@brownts)
 * fix for race conditions on startup where breakpoints were not hit #304 (@brownts)
+* prevent "Not implemented stop reason (assuming exception)" in many cases #316 (@GitMensch),
+  initial recognition of watchpoints
 * fix additional race conditions with setting breakpoints #313 (@brownts)
 
 # 0.25.1

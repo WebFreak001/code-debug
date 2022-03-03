@@ -349,24 +349,65 @@ export class MI2 extends EventEmitter implements IBackend {
 									this.emit("running", parsed);
 								else if (record.asyncClass == "stopped") {
 									const reason = parsed.record("reason");
-									if (trace)
-										this.log("stderr", "stop: " + reason);
-									if (reason == "breakpoint-hit")
-										this.emit("breakpoint", parsed);
-									else if (reason == "end-stepping-range")
-										this.emit("step-end", parsed);
-									else if (reason == "function-finished")
-										this.emit("step-out-end", parsed);
-									else if (reason == "signal-received")
-										this.emit("signal-stop", parsed);
-									else if (reason == "exited-normally")
-										this.emit("exited-normally", parsed);
-									else if (reason == "exited") { // exit with error code != 0
-										this.log("stderr", "Program exited with code " + parsed.record("exit-code"));
-										this.emit("exited-normally", parsed);
+									if (reason === undefined) {
+										if (trace)
+											this.log("stderr", "stop (no reason given)");
+										// attaching to a process stops, but does not provide a reason
+										// also python generated interrupt seems to only produce this
+										this.emit("step-other", parsed);
 									} else {
-										this.log("console", "Not implemented stop reason (assuming exception): " + reason);
-										this.emit("stopped", parsed);
+										if (trace)
+											this.log("stderr", "stop: " + reason);
+										switch (reason) {
+										case "breakpoint-hit":
+											this.emit("breakpoint", parsed);
+											break;
+										case "watchpoint-trigger":
+										case "read-watchpoint-trigger":
+										case "access-watchpoint-trigger":
+											this.emit("watchpoint", parsed);
+											break;
+										case "function-finished":
+											// identical result -> send step-end
+											// this.emit("step-out-end", parsed);
+											// break;
+										case "location-reached":
+										case "end-stepping-range":
+											this.emit("step-end", parsed);
+											break;
+										case "watchpoint-scope":
+										case "solib-event":
+										case "syscall-entry":
+										case "syscall-return":
+											// TODO: inform the user
+											this.emit("step-end", parsed);
+											break;
+										case "fork":
+										case "vfork":
+										case "exec":
+											// TODO: inform the user, possibly add second inferiour
+											this.emit("step-end", parsed);
+											break;
+										case "signal-received":
+											this.emit("signal-stop", parsed);
+											break;
+										case "exited-normally":
+											this.emit("exited-normally", parsed);
+											break;
+										case "exited": // exit with error code != 0
+											this.log("stderr", "Program exited with code " + parsed.record("exit-code"));
+											this.emit("exited-normally", parsed);
+											break;
+										// case "exited-signalled":	// consider handling that explicit possible
+										// 	this.log("stderr", "Program exited because of signal " + parsed.record("signal"));
+										// 	this.emit("stoped", parsed);
+										// 	break;
+
+										default:
+											this.log("console", "Not implemented stop reason (assuming exception): " + reason);
+											this.emit("stopped", parsed);
+											break;
+										}
 									}
 								} else
 									this.log("log", JSON.stringify(parsed));
