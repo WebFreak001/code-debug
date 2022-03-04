@@ -4,9 +4,9 @@
 * SSH2 module updated from deprecated 0.8.9 to current 1.6.0 (@GitMensch),
   allowing connections with more modern key algorithms, improved error handling (including user messages passed on) and other improvements.  
   See [SSH2 Update Notices](https://github.com/mscdex/ssh2/issues/935) for more details.
-* Path Substitions working with attach+ssh configuration #293 (@brownts)
-* Path Substitions working with LLDB #295 (@brownts)
-* Path Substitions working with Windows-Style paths #294 (@brownts)
+* Path Substitutions working with attach+ssh configuration #293 (@brownts)
+* Path Substitutions working with LLDB #295 (@brownts)
+* Path Substitutions working with Windows-Style paths #294 (@brownts)
 * Breakpoints may be deleted when not recognized correctly #259 fixing #230 (@kvinwang)
 * New `stopAtConnect` configuration #299, #302 (@brownts)
 * New `stopAtEntry` configuration to run debugger to application's entry point #306 (@brownts)
@@ -14,6 +14,7 @@
 * prevent "Not implemented stop reason (assuming exception)" in many cases #316 (@GitMensch),
   initial recognition of watchpoints
 * fix additional race conditions with setting breakpoints #313 (@brownts)
+* fix stack frame expansion in editor via use of the `startFrame` parameter #312 (@brownts)
 
 # 0.25.1
 

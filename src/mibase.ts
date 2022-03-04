@@ -280,7 +280,7 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
-		this.miDebugger.getStack(args.levels, args.threadId).then(stack => {
+		this.miDebugger.getStack(args.startFrame, args.levels, args.threadId).then(stack => {
 			const ret: StackFrame[] = [];
 			stack.forEach(element => {
 				let source = undefined;
