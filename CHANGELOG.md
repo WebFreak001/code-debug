@@ -10,6 +10,8 @@
 * Breakpoints may be deleted when not recognized correctly #259 fixing #230 (@kvinwang)
 * New `stopAtConnect` configuration #299, #302 (@brownts)
 * New `stopAtEntry` configuration to run debugger to application's entry point #306 (@brownts)
+* New `ssh.sourceFileMap` configuration to allow multiple substitutions between local and ssh-remote and separate ssh working directory #298 (@GitMensch)
+* fix path translation for SSH to Win32 and for extended-remote without executable (attach to process) #323 (@GitMensch)
 * fix for race conditions on startup where breakpoints were not hit #304 (@brownts)
 * prevent "Not implemented stop reason (assuming exception)" in many cases #316 (@GitMensch),
   initial recognition of watchpoints
