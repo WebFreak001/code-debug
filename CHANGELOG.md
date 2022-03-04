@@ -15,6 +15,7 @@
   initial recognition of watchpoints
 * fix additional race conditions with setting breakpoints #313 (@brownts)
 * fix stack frame expansion in editor via use of the `startFrame` parameter #312 (@brownts)
+* allow specification of port/x11port via variable (as numeric string) #265 (@GitMensch)
 
 # 0.25.1
 

@@ -130,6 +130,7 @@ request.
 	"password": "password123",
 	"user": "remoteUser",
 	"x11host": "localhost",
+	// x11port may also be specified as string containing only numbers (useful to use configuration variables)
 	"x11port": 6000,
 	// Optional, content will be executed on the SSH host before the debugger call.
 	"bootstrap": "source /home/remoteUser/some-env"

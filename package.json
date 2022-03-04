@@ -188,7 +188,7 @@
 										"description": "Path of project on the remote"
 									},
 									"port": {
-										"type": "number",
+										"type": ["number", "string"],
 										"description": "Remote port number",
 										"default": 22
 									},
@@ -215,7 +215,7 @@
 										"default": true
 									},
 									"x11port": {
-										"type": "number",
+										"type": ["number", "string"],
 										"description": "Port to redirect X11 data to (by default port = display + 6000)",
 										"default": 6000
 									},
@@ -336,7 +336,7 @@
 										"description": "Path of project on the remote"
 									},
 									"port": {
-										"type": "number",
+										"type": ["number", "string"],
 										"description": "Remote port number",
 										"default": 22
 									},
@@ -363,7 +363,7 @@
 										"default": true
 									},
 									"x11port": {
-										"type": "number",
+										"type": ["number", "string"],
 										"description": "Port to redirect X11 data to (by default port = display + 6000)",
 										"default": 6000
 									},
@@ -614,7 +614,7 @@
 										"description": "Path of project on the remote"
 									},
 									"port": {
-										"type": "number",
+										"type": ["number", "string"],
 										"description": "Remote port number",
 										"default": 22
 									},
@@ -641,7 +641,7 @@
 										"default": true
 									},
 									"x11port": {
-										"type": "number",
+										"type": ["number", "string"],
 										"description": "Port to redirect X11 data to (by default port = display + 6000)",
 										"default": 6000
 									},
