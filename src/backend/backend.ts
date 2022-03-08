@@ -46,6 +46,7 @@ export interface SSHArguments {
 	x11port: number;
 	x11host: string;
 	bootstrap: string;
+	sourceFileMap: { [index: string]: string };
 }
 
 export interface IBackend {
@@ -66,7 +67,7 @@ export interface IBackend {
 	removeBreakPoint(breakpoint: Breakpoint): Thenable<boolean>;
 	clearBreakPoints(source?: string): Thenable<any>;
 	getThreads(): Thenable<Thread[]>;
-	getStack(maxLevels: number, thread: number): Thenable<Stack[]>;
+	getStack(startFrame: number, maxLevels: number, thread: number): Thenable<Stack[]>;
 	getStackVariables(thread: number, frame: number): Thenable<Variable[]>;
 	evalExpression(name: string, thread: number, frame: number): Thenable<any>;
 	isReady(): boolean;

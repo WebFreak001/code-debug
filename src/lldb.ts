@@ -57,7 +57,6 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.isSSH = false;
 		this.started = false;
 		this.crashed = false;
-		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
@@ -74,8 +73,7 @@ class LLDBDebugSession extends MI2DebugSession {
 			if (args.ssh.remotex11screen === undefined)
 				args.ssh.remotex11screen = 0;
 			this.isSSH = true;
-			this.trimCWD = args.cwd.replace(/\\/g, "/");
-			this.switchCWD = args.ssh.cwd;
+			this.setSourceFileMap(args.ssh.sourceFileMap, args.ssh.cwd, args.cwd);
 			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, undefined, false).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {
@@ -102,7 +100,6 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.attached = true;
 		this.initialRunCommand = !!args.stopAtConnect ? RunCommand.NONE : RunCommand.CONTINUE;
 		this.isSSH = false;
-		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;

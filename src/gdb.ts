@@ -62,7 +62,6 @@ class GDBDebugSession extends MI2DebugSession {
 		this.isSSH = false;
 		this.started = false;
 		this.crashed = false;
-		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
@@ -79,8 +78,7 @@ class GDBDebugSession extends MI2DebugSession {
 			if (args.ssh.remotex11screen === undefined)
 				args.ssh.remotex11screen = 0;
 			this.isSSH = true;
-			this.trimCWD = args.cwd.replace(/\\/g, "/");
-			this.switchCWD = args.ssh.cwd;
+			this.setSourceFileMap(args.ssh.sourceFileMap, args.ssh.cwd, args.cwd);
 			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, args.terminal, false).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {
@@ -111,7 +109,6 @@ class GDBDebugSession extends MI2DebugSession {
 		this.attached = !args.remote;
 		this.initialRunCommand = !!args.stopAtConnect ? RunCommand.NONE : RunCommand.CONTINUE;
 		this.isSSH = false;
-		this.debugReady = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
@@ -128,8 +125,7 @@ class GDBDebugSession extends MI2DebugSession {
 			if (args.ssh.remotex11screen === undefined)
 				args.ssh.remotex11screen = 0;
 			this.isSSH = true;
-			this.trimCWD = args.cwd.replace(/\\/g, "/");
-			this.switchCWD = args.ssh.cwd;
+			this.setSourceFileMap(args.ssh.sourceFileMap, args.ssh.cwd, args.cwd);
 			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, "", undefined, true).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {

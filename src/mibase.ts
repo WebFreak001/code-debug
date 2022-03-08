@@ -11,9 +11,6 @@ import * as net from "net";
 import * as os from "os";
 import * as fs from "fs";
 
-const resolve = posix.resolve;
-const relative = posix.relative;
-
 class ExtendedVariable {
 	constructor(public name, public options) {
 	}
@@ -33,11 +30,9 @@ export class MI2DebugSession extends DebugSession {
 	protected initialRunCommand: RunCommand;
 	protected stopAtEntry: boolean | string;
 	protected isSSH: boolean;
-	protected trimCWD: string;
-	protected switchCWD: string;
+	protected sourceFileMap: Map<string,string>;
 	protected started: boolean;
 	protected crashed: boolean;
-	protected debugReady: boolean;
 	protected miDebugger: MI2;
 	protected commandServer: net.Server;
 	protected serverPath: string;
@@ -53,13 +48,14 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.on("stopped", this.stopEvent.bind(this));
 		this.miDebugger.on("msg", this.handleMsg.bind(this));
 		this.miDebugger.on("breakpoint", this.handleBreakpoint.bind(this));
+		this.miDebugger.on("watchpoint", this.handleBreak.bind(this));	// consider to parse old/new, too (otherwise it is in the console only)
 		this.miDebugger.on("step-end", this.handleBreak.bind(this));
-		this.miDebugger.on("step-out-end", this.handleBreak.bind(this));
+		// this.miDebugger.on("step-out-end", this.handleBreak.bind(this));  // was combined into step-end
 		this.miDebugger.on("step-other", this.handleBreak.bind(this));
 		this.miDebugger.on("signal-stop", this.handlePause.bind(this));
 		this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));
 		this.miDebugger.on("thread-exited", this.threadExitedEvent.bind(this));
-		this.sendEvent(new InitializedEvent());
+		this.miDebugger.once("debug-ready", (() => this.sendEvent(new InitializedEvent())));
 		try {
 			this.commandServer = net.createServer(c => {
 				c.on("data", data => {
@@ -202,68 +198,62 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
-		const cb = (() => {
-			this.debugReady = true;
-			const all = [];
-			args.breakpoints.forEach(brk => {
-				all.push(this.miDebugger.addBreakPoint({ raw: brk.name, condition: brk.condition, countCondition: brk.hitCondition }));
+		const all = [];
+		args.breakpoints.forEach(brk => {
+			all.push(this.miDebugger.addBreakPoint({ raw: brk.name, condition: brk.condition, countCondition: brk.hitCondition }));
+		});
+		Promise.all(all).then(brkpoints => {
+			const finalBrks = [];
+			brkpoints.forEach(brkp => {
+				if (brkp[0])
+					finalBrks.push({ line: brkp[1].line });
+			});
+			response.body = {
+				breakpoints: finalBrks
+			};
+			this.sendResponse(response);
+		}, msg => {
+			this.sendErrorResponse(response, 10, msg.toString());
+		});
+	}
+
+	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
+		this.miDebugger.clearBreakPoints(args.source.path).then(() => {
+			let path = args.source.path;
+			if (this.isSSH) {
+				// convert local path to ssh path
+				if (path.indexOf("\\") != -1)
+					path = path.replace(/\\/g, "/").toLowerCase();
+				// ideCWD is the local path, gdbCWD is the ssh path, both had the replacing \ -> / done up-front
+				for (let [ideCWD, gdbCWD] of this.sourceFileMap) {
+					if (path.startsWith(ideCWD)) {
+						path = posix.relative(ideCWD, path);
+						path = posix.join(gdbCWD, path); // we combined a guaranteed path with relative one (works with GDB both on GNU/Linux and Win32)
+						break;
+					}
+				}
+			}
+			const all = args.breakpoints.map(brk => {
+				return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
 			});
 			Promise.all(all).then(brkpoints => {
 				const finalBrks = [];
 				brkpoints.forEach(brkp => {
+					// TODO: Currently all breakpoints returned are marked as verified,
+					// which leads to verified breakpoints on a broken lldb.
 					if (brkp[0])
-						finalBrks.push({ line: brkp[1].line });
+						finalBrks.push(new DebugAdapter.Breakpoint(true, brkp[1].line));
 				});
 				response.body = {
 					breakpoints: finalBrks
 				};
 				this.sendResponse(response);
 			}, msg => {
-				this.sendErrorResponse(response, 10, msg.toString());
-			});
-		}).bind(this);
-		if (this.debugReady)
-			cb();
-		else
-			this.miDebugger.once("debug-ready", cb);
-	}
-
-	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-		const cb = (() => {
-			this.debugReady = true;
-			this.miDebugger.clearBreakPoints(args.source.path).then(() => {
-				let path = args.source.path;
-				if (this.isSSH) {
-					// trimCWD is the local path, switchCWD is the ssh path
-					path = systemPath.relative(this.trimCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
-					path = resolve(this.switchCWD.replace(/\\/g, "/"), path.replace(/\\/g, "/"));
-				}
-				const all = args.breakpoints.map(brk => {
-					return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
-				});
-				Promise.all(all).then(brkpoints => {
-					const finalBrks = [];
-					brkpoints.forEach(brkp => {
-						// TODO: Currently all breakpoints returned are marked as verified,
-						// which leads to verified breakpoints on a broken lldb.
-						if (brkp[0])
-							finalBrks.push(new DebugAdapter.Breakpoint(true, brkp[1].line));
-					});
-					response.body = {
-						breakpoints: finalBrks
-					};
-					this.sendResponse(response);
-				}, msg => {
-					this.sendErrorResponse(response, 9, msg.toString());
-				});
-			}, msg => {
 				this.sendErrorResponse(response, 9, msg.toString());
 			});
-		}).bind(this);
-		if (this.debugReady)
-			cb();
-		else
-			this.miDebugger.once("debug-ready", cb);
+		}, msg => {
+			this.sendErrorResponse(response, 9, msg.toString());
+		});
 	}
 
 	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
@@ -294,22 +284,30 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
-		this.miDebugger.getStack(args.levels, args.threadId).then(stack => {
+		this.miDebugger.getStack(args.startFrame, args.levels, args.threadId).then(stack => {
 			const ret: StackFrame[] = [];
 			stack.forEach(element => {
 				let source = undefined;
-				let file = element.file;
-				if (file) {
+				let path = element.file;
+				if (path) {
 					if (this.isSSH) {
-						// trimCWD is the local path, switchCWD is the ssh path
-						file = relative(this.switchCWD.replace(/\\/g, "/"), file.replace(/\\/g, "/"));
-						file = systemPath.resolve(this.trimCWD.replace(/\\/g, "/"), file.replace(/\\/g, "/"));
+						// convert ssh path to local path
+						if (path.indexOf("\\") != -1)
+							path = path.replace(/\\/g, "/").toLowerCase();
+						// ideCWD is the local path, gdbCWD is the ssh path, both had the replacing \ -> / done up-front
+						for (let [ideCWD, gdbCWD] of this.sourceFileMap) {
+							if (path.startsWith(gdbCWD)) {
+								path = posix.relative(gdbCWD, path);	// only operates on "/" paths
+								path = systemPath.resolve(ideCWD, path);	// will do the conversion to "\" on Win32
+								break;
+							}
+						}
 					} else if (process.platform === "win32") {
-						if (file.startsWith("\\cygdrive\\") || file.startsWith("/cygdrive/")) {
-							file = file[10] + ":" + file.substr(11); // replaces /cygdrive/c/foo/bar.txt with c:/foo/bar.txt
+						if (path.startsWith("\\cygdrive\\") || path.startsWith("/cygdrive/")) {
+							path = path[10] + ":" + path.substr(11); // replaces /cygdrive/c/foo/bar.txt with c:/foo/bar.txt
 						}
 					}
-					source = new Source(element.fileName, file);
+					source = new Source(element.fileName, path);
 				}
 
 				ret.push(new StackFrame(
@@ -726,6 +724,31 @@ export class MI2DebugSession extends DebugSession {
 
 	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
 		this.sendResponse(response);
+	}
+
+	private addSourceFileMapEntry(gdbCWD :string, ideCWD : string): void {
+		// if it looks like a Win32 path convert to "/"-style for comparisions and to all-lower-case
+		if (ideCWD.indexOf("\\") != -1)
+			ideCWD = ideCWD.replace(/\\/g, "/").toLowerCase();
+		if (!ideCWD.endsWith("/"))
+			ideCWD = ideCWD + "/"
+		// ensure that we only replace complete paths
+		if (gdbCWD.indexOf("\\") != -1)
+			gdbCWD = gdbCWD.replace(/\\/g, "/").toLowerCase();
+		if (!gdbCWD.endsWith("/"))
+			gdbCWD = gdbCWD + "/"
+		this.sourceFileMap.set(ideCWD, gdbCWD);
+	}
+
+	protected setSourceFileMap(configMap: { [index: string]: string }, fallbackGDB :string, fallbackIDE : string): void {
+		this.sourceFileMap = new Map<string, string>();
+		if (configMap === undefined) {
+			this.addSourceFileMapEntry(fallbackGDB, fallbackIDE);
+		} else {
+			for (let [gdbPath, localPath] of Object.entries(configMap)) {
+				this.addSourceFileMapEntry(gdbPath, localPath);
+			})
+		}
 	}
 
 }

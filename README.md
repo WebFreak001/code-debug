@@ -115,8 +115,8 @@ after connecting.
 ### Using ssh for debugging on remote
 
 Debugging using ssh automatically converts all paths between client & server and also optionally
-redirects X11 output from the server to the client. Simply add a `ssh` object in your `launch`
-request.
+redirects X11 output from the server to the client.  
+Simply add a `ssh` object in your `launch` request.
 
 ```
 "request": "launch",
@@ -130,14 +130,18 @@ request.
 	"password": "password123",
 	"user": "remoteUser",
 	"x11host": "localhost",
+	// x11port may also be specified as string containing only numbers (useful to use configuration variables)
 	"x11port": 6000,
 	// Optional, content will be executed on the SSH host before the debugger call.
 	"bootstrap": "source /home/remoteUser/some-env"
 }
 ```
 
-`cwd` will be used to trim off local paths and `ssh.cwd` will map them to the server. This is
+`ssh.sourceFileMap` will be used to trim off local paths and map them to the server. This is
 required for basically everything except watched variables or user commands to work.
+
+For backward compatibility you can also use `cwd` and `ssh.cwd` for the mapping, this is only used
+if the newer `ssh.sourceFileMap` is not configured.
 
 For X11 forwarding to work you first need to enable it in your Display Manager and allow the
 connections. To allow connections you can either add an entry for applications or run `xhost +`
