@@ -189,7 +189,7 @@ export class MI2 extends EventEmitter implements IBackend {
 
 	protected initCommands(target: string, cwd: string, ssh: boolean = false, attach: boolean = false) {
 		if (ssh) {
-			if (!path.isAbsolute(target))
+			if (!path.isAbsolute(target) && (!/^[a-zA-Z]:/.test))
 				target = path.join(cwd, target);
 		} else {
 			if (!nativePath.isAbsolute(target))

@@ -747,7 +747,7 @@ export class MI2DebugSession extends DebugSession {
 		} else {
 			for (let [gdbPath, localPath] of Object.entries(configMap)) {
 				this.addSourceFileMapEntry(gdbPath, localPath);
-			})
+			}
 		}
 	}
 
