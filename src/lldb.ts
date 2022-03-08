@@ -73,8 +73,7 @@ class LLDBDebugSession extends MI2DebugSession {
 			if (args.ssh.remotex11screen === undefined)
 				args.ssh.remotex11screen = 0;
 			this.isSSH = true;
-			this.trimCWD = args.cwd.replace(/\\/g, "/");
-			this.switchCWD = args.ssh.cwd;
+			this.setSourceFileMap(args.ssh.sourceFileMap, args.ssh.cwd, args.cwd);
 			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, undefined, false).then(() => {
 				if (args.autorun)
 					args.autorun.forEach(command => {

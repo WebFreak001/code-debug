@@ -149,7 +149,10 @@ export class MI2 extends EventEmitter implements IBackend {
 					sshCMD += " -p " + target;
 				this.sshConn.exec(sshCMD, execArgs, (err, stream) => {
 					if (err) {
-						this.log("stderr", "Could not run " + this.application + " over ssh!");
+						this.log("stderr", "Could not run " + this.application + "(" + sshCMD +") over ssh!");
+						if (err === undefined) {
+							err = "<reason unknown>"
+						}
 						this.log("stderr", err.toString());
 						this.emit("quit");
 						reject();
@@ -173,7 +176,10 @@ export class MI2 extends EventEmitter implements IBackend {
 					}, reject);
 				});
 			}).on("error", (err) => {
-				this.log("stderr", "Could not run " + this.application + " over ssh!");
+				this.log("stderr", "Error running " + this.application + " over ssh!");
+				if (err === undefined) {
+					err = "<reason unknown>"
+				}
 				this.log("stderr", err.toString());
 				this.emit("quit");
 				reject();
@@ -219,14 +225,15 @@ export class MI2 extends EventEmitter implements IBackend {
 			let args = [];
 			if (executable && !nativePath.isAbsolute(executable))
 				executable = nativePath.join(cwd, executable);
-			if (!executable)
-				executable = "-p";
 			let isExtendedRemote = false;
 			if (target.startsWith("extended-remote")) {
 				isExtendedRemote = true;
 				args = this.preargs;
-			} else
+			} else {
+				if (!executable)
+					executable = "-p";
 				args = args.concat([executable, target], this.preargs);
+			}
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
@@ -235,7 +242,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			const promises = this.initCommands(target, cwd, false, true);
 			if (isExtendedRemote) {
 				promises.push(this.sendCommand("target-select " + target));
-				promises.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
+				if (executable)
+					promises.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
 			}
 			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
