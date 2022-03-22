@@ -5,9 +5,7 @@ import { parseMI, MINode } from '../mi_parse';
 import * as linuxTerm from '../linux/console';
 import * as net from "net";
 import * as fs from "fs";
-import { posix } from "path";
-import * as nativePath from "path";
-const path = posix;
+import * as path from "path";
 import { Client } from "ssh2";
 
 export function escape(str: string) {
@@ -51,8 +49,8 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	load(cwd: string, target: string, procArgs: string, separateConsole: string): Thenable<any> {
-		if (!nativePath.isAbsolute(target))
-			target = nativePath.join(cwd, target);
+		if (!path.isAbsolute(target))
+			target = path.join(cwd, target);
 		return new Promise((resolve, reject) => {
 			this.isSSH = false;
 			const args = this.preargs.concat(this.extraargs || []);
@@ -166,7 +164,7 @@ export class MI2 extends EventEmitter implements IBackend {
 						this.emit("quit");
 						this.sshConn.end();
 					}).bind(this));
-					const promises = this.initCommands(target, cwd, true, attach);
+					const promises = this.initCommands(target, cwd, attach);
 					promises.push(this.sendCommand("environment-cd \"" + escape(cwd) + "\""));
 					if (procArgs && procArgs.length && !attach)
 						promises.push(this.sendCommand("exec-arguments " + procArgs));
@@ -187,14 +185,17 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	protected initCommands(target: string, cwd: string, ssh: boolean = false, attach: boolean = false) {
-		if (ssh) {
-			if (!path.isAbsolute(target) && (!/^[a-zA-Z]:/.test))
-				target = path.join(cwd, target);
-		} else {
-			if (!nativePath.isAbsolute(target))
-				target = nativePath.join(cwd, target);
-		}
+	protected initCommands(target: string, cwd: string, attach: boolean = false) {
+		// We need to account for the possibility of the path type used by the debugger being different
+		// than the path type where the extension is running (e.g., SSH from Linux to Windows machine).
+		// Since the CWD is expected to be an absolute path in the debugger's environment, we can test
+		// that to determine the path type used by the debugger and use the result of that test to
+		// select the correct API to check whether the target path is an absolute path.
+		const debuggerPath = path.posix.isAbsolute(cwd) ? path.posix : path.win32;
+
+		if (!debuggerPath.isAbsolute(target))
+			target = debuggerPath.join(cwd, target);
+
 		const cmds = [
 			this.sendCommand("gdb-set target-async on", true),
 			new Promise(resolve => {
@@ -223,8 +224,8 @@ export class MI2 extends EventEmitter implements IBackend {
 	attach(cwd: string, executable: string, target: string): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			let args = [];
-			if (executable && !nativePath.isAbsolute(executable))
-				executable = nativePath.join(cwd, executable);
+			if (executable && !path.isAbsolute(executable))
+				executable = path.join(cwd, executable);
 			let isExtendedRemote = false;
 			if (target.startsWith("extended-remote")) {
 				isExtendedRemote = true;
@@ -239,7 +240,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
-			const promises = this.initCommands(target, cwd, false, true);
+			const promises = this.initCommands(target, cwd, true);
 			if (isExtendedRemote) {
 				promises.push(this.sendCommand("target-select " + target));
 				if (executable)
@@ -255,8 +256,8 @@ export class MI2 extends EventEmitter implements IBackend {
 	connect(cwd: string, executable: string, target: string): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			let args = [];
-			if (executable && !nativePath.isAbsolute(executable))
-				executable = nativePath.join(cwd, executable);
+			if (executable && !path.isAbsolute(executable))
+				executable = path.join(cwd, executable);
 			if (executable)
 				args = args.concat([executable], this.preargs);
 			else
@@ -266,7 +267,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
-			const promises = this.initCommands(target, cwd, false, true);
+			const promises = this.initCommands(target, cwd, true);
 			promises.push(this.sendCommand("target-select remote " + target));
 			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
@@ -712,9 +713,9 @@ export class MI2 extends EventEmitter implements IBackend {
 			let file: string = MINode.valueOf(element, "@frame.fullname");
 			if (file) {
 				if (this.isSSH)
-					file = posix.normalize(file);
+					file = path.posix.normalize(file);
 				else
-					file = nativePath.normalize(file);
+					file = path.normalize(file);
 			}
 
 			let line = 0;
