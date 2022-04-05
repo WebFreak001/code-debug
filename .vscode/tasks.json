@@ -10,6 +10,9 @@
 {
 	"version": "2.0.0",
 
+	// Run in a shell so "npm" command is properly resolved to "npm.cmd" on Windows systems.
+	"type": "shell",
+
 	// we want to run npm
 	"command": "npm",
 

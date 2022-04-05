@@ -1,19 +1,20 @@
 import { MI2, escape } from "./mi2";
 import { Breakpoint } from "../backend";
 import * as ChildProcess from "child_process";
-import { posix } from "path";
-import * as nativePath from "path";
-const path = posix;
+import * as path from "path";
 
 export class MI2_LLDB extends MI2 {
-	protected initCommands(target: string, cwd: string, ssh: boolean = false, attach: boolean = false) {
-		if (ssh) {
-			if (!path.isAbsolute(target))
-				target = path.join(cwd, target);
-		} else {
-			if (!nativePath.isAbsolute(target))
-				target = nativePath.join(cwd, target);
-		}
+	protected initCommands(target: string, cwd: string, attach: boolean = false) {
+		// We need to account for the possibility of the path type used by the debugger being different
+		// than the path type where the extension is running (e.g., SSH from Linux to Windows machine).
+		// Since the CWD is expected to be an absolute path in the debugger's environment, we can test
+		// that to determine the path type used by the debugger and use the result of that test to
+		// select the correct API to check whether the target path is an absolute path.
+		const debuggerPath = path.posix.isAbsolute(cwd) ? path.posix : path.win32;
+
+		if (!debuggerPath.isAbsolute(target))
+			target = debuggerPath.join(cwd, target);
+
 		const cmds = [
 			this.sendCommand("gdb-set target-async on"),
 			new Promise(resolve => {
@@ -41,7 +42,7 @@ export class MI2_LLDB extends MI2 {
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
-			const promises = this.initCommands(target, cwd, false, true);
+			const promises = this.initCommands(target, cwd, true);
 			promises.push(this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""));
 			promises.push(this.sendCommand("target-attach " + target));
 			Promise.all(promises).then(() => {
