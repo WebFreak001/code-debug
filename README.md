@@ -151,4 +151,52 @@ Because some builds requires one or more environment files to be sourced before 
 command, you can use the `ssh.bootstrap` option to add some extra commands which will be prepended
 to the debugger call (using `&&` to join both).
 
+### Extra Debugger Arguments
+
+Additional arguments can be supplied to the debugger if needed.  These will be added when
+the debugger executable (e.g., gdb, lldb-mi, etc.) is launched.  Extra debugger arguments
+are supplied via the `debugger_args` setting.  Note that the behavior of escaping these
+options depends on the environment in which the debugger is started.  For non-SSH
+debugging, the options are passed directly to the application and therefore no escaping is
+necessary (other than what is necessary for the JSON configuration). However, as a result
+of the options being passed directly to the application, care must be taken to place
+switches and switch values as separate entities in `debugger_args`, if they would normally
+be separated by a space.   For example, supplying the option and value
+`-iex "set $foo = \"bar\""` would consist of the following `debugger_args`:
+```json
+"debugger_args" : ["-iex", "set $foo = \"bar\""]
+```
+If `=` is used to associate switches with their values, than the switch and value should
+be placed together instead.  In fact, the following example shows 4 different ways in
+which to specify the same switch and value, using both short and long format, as well as
+switch values supplied as a separate parameter or supplied via the `=`:
+- ```json
+  "debugger_args" : ["-iex", "set $foo = \"bar\""]
+  ```
+- ```json
+  "debugger_args" : ["-iex=set $foo = \"bar\""]
+  ```
+- ```json
+  "debugger_args" : ["--init-eval-command", "set $foo = \"bar\""]
+  ```
+- ```json
+  "debugger_args" : ["--init-eval-command=set $foo = \"bar\""]
+  ```
+Where escaping is really necessary is when running the debugger over SSH.  In this case,
+the options are not passed directly to the application, but are instead combined with the
+application name, joined together with any other options, and sent to the remote system to
+be parsed and executed.  Thus, depending on the remote system, different escaping may be
+necessary.  The following shows how the same command as above needs to be escaped
+differently based on whether the remote system is a POSIX or a Windows system.
+- SSH to Linux machine:
+  ```json
+  "debugger_args": ["-iex", "'set $foo = \"bar\"'"]
+  ```
+- SSH to Windows machine:
+  ```json
+  "debugger_args": ["-iex", "\"set $foo = \\\"bar\\\"\""]
+  ```
+You may need to experiment to find the correct escaping necessary for the command to be
+sent to the debugger as you intended.
+
 ## [Issues](https://github.com/WebFreak001/code-debug)
