@@ -141,7 +141,7 @@ export class MI2 extends EventEmitter implements IBackend {
 						screen: args.remotex11screen
 					};
 				}
-				let sshCMD = this.application + " " + this.preargs.join(" ");
+				let sshCMD = this.application + " " + this.preargs.concat(this.extraargs || []).join(" ");
 				if (args.bootstrap) sshCMD = args.bootstrap + " && " + sshCMD;
 				if (attach)
 					sshCMD += " -p " + target;
