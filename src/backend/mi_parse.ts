@@ -129,7 +129,7 @@ const resultRecordRegex = /^(\d*)\^(done|running|connected|error|exit)/;
 const newlineRegex = /^\r\n?/;
 const endRegex = /^\(gdb\)\r\n?/;
 const variableRegex = /^([a-zA-Z_\-][a-zA-Z0-9_\-]*)/;
-const asyncClassRegex = /^(.*?),/;
+const asyncClassRegex = /^[^,\r\n]+/;
 
 export function parseMI(output: string): MINode {
 	/*
@@ -270,11 +270,11 @@ export function parseMI(output: string): MINode {
 
 		if (match[2]) {
 			const classMatch = asyncClassRegex.exec(output);
-			output = output.substr(classMatch[1].length);
+			output = output.substring(classMatch[0].length);
 			const asyncRecord = {
 				isStream: false,
 				type: asyncRecordType[match[2]],
-				asyncClass: classMatch[1],
+				asyncClass: classMatch[0],
 				output: []
 			};
 			let result;
