@@ -2,6 +2,16 @@ import * as assert from 'assert';
 import { parseMI, MINode } from '../../backend/mi_parse';
 
 suite("MI Parse", () => {
+	test("Very simple out of band record", () => {
+		const parsed = parseMI(`*stopped`);
+		assert.ok(parsed);
+		assert.strictEqual(parsed.token, undefined);
+		assert.strictEqual(parsed.outOfBandRecord.length, 1);
+		assert.strictEqual(parsed.outOfBandRecord[0].isStream, false);
+		assert.strictEqual(parsed.outOfBandRecord[0].asyncClass, "stopped");
+		assert.strictEqual(parsed.outOfBandRecord[0].output.length, 0);
+		assert.strictEqual(parsed.resultRecords, undefined);
+	});
 	test("Simple out of band record", () => {
 		const parsed = parseMI(`4=thread-exited,id="3",group-id="i1"`);
 		assert.ok(parsed);
