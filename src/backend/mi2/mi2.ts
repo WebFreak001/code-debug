@@ -143,8 +143,6 @@ export class MI2 extends EventEmitter implements IBackend {
 				}
 				let sshCMD = this.application + " " + this.preargs.concat(this.extraargs || []).join(" ");
 				if (args.bootstrap) sshCMD = args.bootstrap + " && " + sshCMD;
-				if (attach)
-					sshCMD += " -p " + target;
 				this.sshConn.exec(sshCMD, execArgs, (err, stream) => {
 					if (err) {
 						this.log("stderr", "Could not run " + this.application + "(" + sshCMD +") over ssh!");
@@ -166,7 +164,10 @@ export class MI2 extends EventEmitter implements IBackend {
 					}).bind(this));
 					const promises = this.initCommands(target, cwd, attach);
 					promises.push(this.sendCommand("environment-cd \"" + escape(cwd) + "\""));
-					if (procArgs && procArgs.length && !attach)
+					if (attach) {
+						// Attach to local process
+						promises.push(this.sendCommand("target-attach " + target));
+					} else if (procArgs && procArgs.length)
 						promises.push(this.sendCommand("exec-arguments " + procArgs));
 					Promise.all(promises).then(() => {
 						this.emit("debug-ready");
@@ -226,25 +227,22 @@ export class MI2 extends EventEmitter implements IBackend {
 			let args = [];
 			if (executable && !path.isAbsolute(executable))
 				executable = path.join(cwd, executable);
-			let isExtendedRemote = false;
 			args = this.preargs.concat(this.extraargs || []);
-			if (target.startsWith("extended-remote")) {
-				isExtendedRemote = true;
-			} else {
-				if (!executable)
-					executable = "-p";
-				args = args.concat([executable, target]);
-			}
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
 			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
 			const promises = this.initCommands(target, cwd, true);
-			if (isExtendedRemote) {
+			if (target.startsWith("extended-remote")) {
 				promises.push(this.sendCommand("target-select " + target));
 				if (executable)
 					promises.push(this.sendCommand("file-symbol-file \"" + escape(executable) + "\""));
+			} else {
+				// Attach to local process
+				if (executable)
+					promises.push(this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""));
+				promises.push(this.sendCommand("target-attach " + target));
 			}
 			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
