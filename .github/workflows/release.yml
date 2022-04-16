@@ -1,40 +1,100 @@
-name: Release vsix to OpenVSX and VSCode marketplace
+name: Release
 on:
   release:
     types: [published]
 
 jobs:
   release:
-    name: "Release"
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        node-version: ['16.x']
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@master
-    
-    - name: Set Node.js 14.x
-      uses: actions/setup-node@master
+    #
+    # Basic Setup
+    #
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
       with:
-        version: 14.x
+        node-version: ${{ matrix.node-version }}
 
-    - name: npm install
-      run: npm install
+    #
+    # Audit Versions for Consistency
+    #
+    - name: Query package.json Version
+      id: package
+      run: node -e "console.log('::set-output name=version::' + require('./package.json').version)"
 
-    - name: typescript
-      run: npx tsc
+    - name: Query package-lock.json Version
+      id: package-lock
+      run: node -e "console.log('::set-output name=version::' + require('./package-lock.json').version)"
+
+    - name: Query Latest Changelog Version
+      id: changelog
+      shell: bash
+      run: echo ::set-output name=version::$(grep --perl-regexp "^# " --max-count=1 CHANGELOG.md | awk '{print $2}')
+
+    - name: Audit package.json/package-lock.json/CHANGELOG.md/git tag Version Consistency
+      shell: bash
+      run: >
+        test ${{ steps.package.outputs.version }} = ${{ steps.package-lock.outputs.version }} -a \
+             ${{ steps.package.outputs.version }} = ${{ steps.changelog.outputs.version }}    -a \
+             refs/tags/v${{ steps.package.outputs.version }} = ${{ github.ref }}
+
+    #
+    # Install Dependencies
+    #
+    # NOTE:
+    # Use the `clean-install` instead of just `install` so that the versions identified in the
+    # package-lock.json file are used instead of attempting to install later versions that might
+    # exist.  This drives consistency between what the developers have been using and what is to
+    # be released.
+    #
+    # NOTE:
+    # Use the `--no-optional` switch to prevent installation of the `ssh2` optional dependency
+    # (i.e., `cpu-features`) package which is used to provide accelerated crypto functionality,
+    # but which is a native add-on and would require platform specific packages.
+    #
+    - name: Install Module Dependencies
+      run: npm clean-install --no-optional
+
+    #
+    # Package and Upload Extension
+    #
+    # NOTE:
+    # The "vscode:prepublish" script in package.json will be executed to compile the extension
+    # prior to packaging.
+    #
+    - name: Package Extension into .vsix file
+      id: asset
+      shell: bash
+      run: >
+        npx vsce package;
+        echo ::set-output name=vsix_path::$(ls *.vsix)
+
+    - name: Upload .vsix file to Github as release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ steps.asset.outputs.vsix_path }}
+        asset_name: ${{ steps.asset.outputs.vsix_path }}
+        asset_content_type: application/zip
+
+    #
+    # Publish Extension
+    #
+    - name: Publish to VSCode Extension Marketplace
+      env:
+        VSCE_PAT: ${{ secrets.VS_MARKETPLACE_TOKEN }}
+      run: npx vsce publish --packagePath ${{ steps.asset.outputs.vsix_path }}
 
     - name: Publish to Open VSX Registry
-      uses: HaaLeo/publish-vscode-extension@v0
-      id: publishToOpenVSX
-      with:
-        pat: ${{ secrets.OPEN_VSX_TOKEN }}
-    - name: Publish to Visual Studio Marketplace
-      uses: HaaLeo/publish-vscode-extension@v0
-      with:
-        pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
-        registryUrl: https://marketplace.visualstudio.com
-        extensionFile: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
-        packagePath: ''
-    - name: Upload
-      uses: djn24/add-asset-to-release@v1
-      with:
-        token: ${{secrets.GITHUB_TOKEN}}
-        path: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
+      env:
+        OVSX_PAT: ${{ secrets.OPEN_VSX_TOKEN }}
+      run: npx ovsx publish ${{ steps.asset.outputs.vsix_path }}

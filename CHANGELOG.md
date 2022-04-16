@@ -1,4 +1,4 @@
-# Unreleased 0.26.0
+# 0.26.0
 
 * vscode dependency was increased from 1.28 to 1.55 along with the debug-adapter protocol to get rid of some outdated dependencies (@GitMensch)
 * SSH2 module updated from deprecated 0.8.9 to current 1.6.0 (@GitMensch),
