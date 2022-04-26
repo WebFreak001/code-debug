@@ -29,19 +29,23 @@
 
 [0.26.0]: https://github.com/WebFreak001/code-debug/compare/v0.25.1...v0.26.0
 
-# 0.25.1
+# [0.25.1]
 
 * Remove the need for extra trust for debugging workspaces per guidance "for debug extensions" as noted in the [Workspace Trust Extension Guide](https://github.com/microsoft/vscode/issues/120251#issuecomment-825832603) (@GitMensch)
 * Fix simple value formatting list parsing with empty string as first argument (@nomtats)
 * don't abort if `set target-async` or `cd` fails in attach (brings in line with existing behavior from launch)
 
-# 0.25.0
+[0.25.1]: https://github.com/WebFreak001/code-debug/compare/f2923480e45874324ca94badbe35c7ed80a5e172...v0.25.1
+
+# [0.25.0]
 
 (released May 2020)
 
 * Add support for path substitutions (`{"fromPath": "toPath"}`) for GDB and LLDB (@karljs)
 * Support up to 65535 threads instead of 256 threads (@ColdenCullen)
 * Improve thread names on embedded GDB, makes not all threads always have the same name (with @anshulrouthu)
+
+[0.25.0]: https://github.com/WebFreak001/code-debug/compare/5ac331e7b1e809a47de94fbbfdf389287dba7803...f2923480e45874324ca94badbe35c7ed80a5e172
 
 # 0.24.0
 
@@ -50,14 +54,18 @@
 * Implement "Jump to Cursor" to skip instructions
 * Fix memory dump for theia
 
-# 0.23.1
+[0.24.0]: https://github.com/WebFreak001/code-debug/compare/53b6c346f1bf5907a9d1fd5455fdc52f310d5355...5ac331e7b1e809a47de94fbbfdf389287dba7803
+
+# [0.23.1]
 
 Fixes:
 * Breakpoints in SSH in other working directories properly resolved
 * Undefined/null paths don't crash stacktrace
 * Added kotlin to language list
 
-# 0.23.0
+[0.23.1]: https://github.com/WebFreak001/code-debug/compare/38d72bd1cc0aeeb1ed80424b145acaa713713a09...53b6c346f1bf5907a9d1fd5455fdc52f310d5355
+
+# [0.23.0]
 
 (released March 2019)
 
@@ -67,7 +75,9 @@ Fixes:
 * Project code improvements (@simark)
 * Initial configurations contain valueFormatting now (@Yanpas)
 
-# 0.22.0
+[0.23.0]: https://github.com/WebFreak001/code-debug/compare/628492ba6cb5971944dcf6417931d9fa2fe43c9b...38d72bd1cc0aeeb1ed80424b145acaa713713a09
+
+# [0.22.0]
 
 (released March 2018)
 
@@ -75,6 +85,8 @@ Fixes:
 * Support multi-threading (@LeszekSwirski)
 * Fixed GDB expansion logic with floats (Marcel Ball)
 * Fixed attach to PID template (@gentoo90)
+
+[0.22.0]: https://github.com/WebFreak001/code-debug/compare/ef8245259ac808c1517b16be064f9663a879d86d...628492ba6cb5971944dcf6417931d9fa2fe43c9b
 
 # 0.21.0 / 0.21.1 / 0.21.2
 
