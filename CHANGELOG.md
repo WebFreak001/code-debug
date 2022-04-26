@@ -1,4 +1,10 @@
-# 0.26.0
+# [Unreleased]
+## Fixed
+* Fixes #342 - Local variables not displayed more than 2 stack frames deep - PR #345 (@brownts)
+
+[Unreleased]: https://github.com/WebFreak001/code-debug/compare/v0.26.0...HEAD
+
+# [0.26.0] - 2022-04-16
 
 * vscode dependency was increased from 1.28 to 1.55 along with the debug-adapter protocol to get rid of some outdated dependencies (@GitMensch)
 * SSH2 module updated from deprecated 0.8.9 to current 1.6.0 (@GitMensch),
@@ -20,6 +26,8 @@
 * allow specification of port/x11port via variable (as numeric string) #265 (@GitMensch)
 * Extra debugger arguments now work in all configurations #316, #338 fixing #206 (@GitMensch, @brownts)
 * Attaching to local PID now performs initialization prior to attaching #341 fixing #329 (@brownts)
+
+[0.26.0]: https://github.com/WebFreak001/code-debug/compare/v0.25.1...v0.26.0
 
 # 0.25.1
 

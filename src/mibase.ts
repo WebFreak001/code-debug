@@ -16,14 +16,21 @@ class ExtendedVariable {
 	}
 }
 
+class VariableScope {
+	constructor (public readonly name: string, public readonly threadId: number, public readonly level: number) {
+	}
+
+	public static variableName (handle: number, name: string): string {
+		return `var_${handle}_${name}`;
+	}
+}
+
 export enum RunCommand { CONTINUE, RUN, NONE }
 
-const STACK_HANDLES_START = 1000;
-const VAR_HANDLES_START = 512 * 256 + 1000;
-
 export class MI2DebugSession extends DebugSession {
-	protected variableHandles = new Handles<string | VariableObject | ExtendedVariable>(VAR_HANDLES_START);
+	protected variableHandles = new Handles<VariableScope | string | VariableObject | ExtendedVariable>();
 	protected variableHandlesReverse: { [id: string]: number } = {};
+	protected scopeHandlesReverse: { [key: string]: number } = {};
 	protected useVarObjects: boolean;
 	protected quit: boolean;
 	protected attached: boolean;
@@ -176,8 +183,10 @@ export class MI2DebugSession extends DebugSession {
 		try {
 			if (this.useVarObjects) {
 				let name = args.name;
-				if (args.variablesReference >= VAR_HANDLES_START) {
-					const parent = this.variableHandles.get(args.variablesReference) as VariableObject;
+				const parent = this.variableHandles.get(args.variablesReference);
+				if (parent instanceof VariableScope) {
+					name = VariableScope.variableName(args.variablesReference, name);
+				} else if (parent instanceof VariableObject) {
 					name = `${parent.name}.${name}`;
 				}
 
@@ -396,7 +405,23 @@ export class MI2DebugSession extends DebugSession {
 
 	protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
 		const scopes = new Array<Scope>();
-		scopes.push(new Scope("Local", STACK_HANDLES_START + (parseInt(args.frameId as any) || 0), false));
+		const [threadId, level] = this.frameIdToThreadAndLevel(args.frameId);
+
+		const createScope = (scopeName: string, expensive: boolean): Scope => {
+			const key: string = scopeName + ":" + threadId + ":" + level;
+			let handle: number;
+			
+			if (this.scopeHandlesReverse.hasOwnProperty(key)) {
+				handle = this.scopeHandlesReverse[key];
+			} else {
+				handle = this.variableHandles.create(new VariableScope(scopeName, threadId, level));
+				this.scopeHandlesReverse[key] = handle;
+			}
+
+			return new Scope(scopeName, handle, expensive);
+		}
+
+		scopes.push(createScope("Local", false));
 
 		response.body = {
 			scopes: scopes
@@ -406,12 +431,7 @@ export class MI2DebugSession extends DebugSession {
 
 	protected async variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): Promise<void> {
 		const variables: DebugProtocol.Variable[] = [];
-		let id: number | string | VariableObject | ExtendedVariable;
-		if (args.variablesReference < VAR_HANDLES_START) {
-			id = args.variablesReference - STACK_HANDLES_START;
-		} else {
-			id = this.variableHandles.get(args.variablesReference);
-		}
+		const id: VariableScope | string | VariableObject | ExtendedVariable = this.variableHandles.get(args.variablesReference);
 
 		const createVariable = (arg, options?) => {
 			if (options)
@@ -431,15 +451,14 @@ export class MI2DebugSession extends DebugSession {
 			return varObj.isCompound() ? id : 0;
 		};
 
-		if (typeof id == "number") {
+		if (id instanceof VariableScope) {
 			let stack: Variable[];
 			try {
-				const [threadId, level] = this.frameIdToThreadAndLevel(id);
-				stack = await this.miDebugger.getStackVariables(threadId, level);
+				stack = await this.miDebugger.getStackVariables(id.threadId, id.level);
 				for (const variable of stack) {
 					if (this.useVarObjects) {
 						try {
-							const varObjName = `var_${id}_${variable.name}`;
+							const varObjName = VariableScope.variableName(args.variablesReference, variable.name);
 							let varObj: VariableObject;
 							try {
 								const changes = await this.miDebugger.varUpdate(varObjName);
