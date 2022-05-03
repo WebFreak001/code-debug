@@ -1,5 +1,6 @@
 # [Unreleased]
 ## Fixed
+* Fixes #346 - Case-sensitivity not respected in SSH path mapping - PR #352 (@brownts)
 * Fixes #342 - Local variables not displayed more than 2 stack frames deep - PR #345 (@brownts)
 
 [Unreleased]: https://github.com/WebFreak001/code-debug/compare/v0.26.0...HEAD

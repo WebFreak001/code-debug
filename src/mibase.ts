@@ -5,11 +5,11 @@ import { Breakpoint, IBackend, Variable, VariableObject, ValuesFormattingMode, M
 import { MINode } from './backend/mi_parse';
 import { expandValue, isExpandable } from './backend/gdb_expansion';
 import { MI2 } from './backend/mi2/mi2';
-import { posix } from "path";
 import * as systemPath from "path";
 import * as net from "net";
 import * as os from "os";
 import * as fs from "fs";
+import { SourceFileMap } from "./source_file_map";
 
 class ExtendedVariable {
 	constructor(public name, public options) {
@@ -37,7 +37,7 @@ export class MI2DebugSession extends DebugSession {
 	protected initialRunCommand: RunCommand;
 	protected stopAtEntry: boolean | string;
 	protected isSSH: boolean;
-	protected sourceFileMap: Map<string,string>;
+	protected sourceFileMap: SourceFileMap;
 	protected started: boolean;
 	protected crashed: boolean;
 	protected miDebugger: MI2;
@@ -231,16 +231,7 @@ export class MI2DebugSession extends DebugSession {
 			let path = args.source.path;
 			if (this.isSSH) {
 				// convert local path to ssh path
-				if (path.indexOf("\\") != -1)
-					path = path.replace(/\\/g, "/").toLowerCase();
-				// ideCWD is the local path, gdbCWD is the ssh path, both had the replacing \ -> / done up-front
-				for (let [ideCWD, gdbCWD] of this.sourceFileMap) {
-					if (path.startsWith(ideCWD)) {
-						path = posix.relative(ideCWD, path);
-						path = posix.join(gdbCWD, path); // we combined a guaranteed path with relative one (works with GDB both on GNU/Linux and Win32)
-						break;
-					}
-				}
+				path = this.sourceFileMap.toRemotePath(path);
 			}
 			const all = args.breakpoints.map(brk => {
 				return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
@@ -301,16 +292,7 @@ export class MI2DebugSession extends DebugSession {
 				if (path) {
 					if (this.isSSH) {
 						// convert ssh path to local path
-						if (path.indexOf("\\") != -1)
-							path = path.replace(/\\/g, "/").toLowerCase();
-						// ideCWD is the local path, gdbCWD is the ssh path, both had the replacing \ -> / done up-front
-						for (let [ideCWD, gdbCWD] of this.sourceFileMap) {
-							if (path.startsWith(gdbCWD)) {
-								path = posix.relative(gdbCWD, path);	// only operates on "/" paths
-								path = systemPath.resolve(ideCWD, path);	// will do the conversion to "\" on Win32
-								break;
-							}
-						}
+						path = this.sourceFileMap.toLocalPath(path);
 					} else if (process.platform === "win32") {
 						if (path.startsWith("\\cygdrive\\") || path.startsWith("/cygdrive/")) {
 							path = path[10] + ":" + path.substr(11); // replaces /cygdrive/c/foo/bar.txt with c:/foo/bar.txt
@@ -745,28 +727,11 @@ export class MI2DebugSession extends DebugSession {
 		this.sendResponse(response);
 	}
 
-	private addSourceFileMapEntry(gdbCWD :string, ideCWD : string): void {
-		// if it looks like a Win32 path convert to "/"-style for comparisions and to all-lower-case
-		if (ideCWD.indexOf("\\") != -1)
-			ideCWD = ideCWD.replace(/\\/g, "/").toLowerCase();
-		if (!ideCWD.endsWith("/"))
-			ideCWD = ideCWD + "/"
-		// ensure that we only replace complete paths
-		if (gdbCWD.indexOf("\\") != -1)
-			gdbCWD = gdbCWD.replace(/\\/g, "/").toLowerCase();
-		if (!gdbCWD.endsWith("/"))
-			gdbCWD = gdbCWD + "/"
-		this.sourceFileMap.set(ideCWD, gdbCWD);
-	}
-
-	protected setSourceFileMap(configMap: { [index: string]: string }, fallbackGDB :string, fallbackIDE : string): void {
-		this.sourceFileMap = new Map<string, string>();
+	protected setSourceFileMap(configMap: { [index: string]: string }, fallbackGDB: string, fallbackIDE: string): void {
 		if (configMap === undefined) {
-			this.addSourceFileMapEntry(fallbackGDB, fallbackIDE);
+			this.sourceFileMap = new SourceFileMap({[fallbackGDB]: fallbackIDE});
 		} else {
-			for (let [gdbPath, localPath] of Object.entries(configMap)) {
-				this.addSourceFileMapEntry(gdbPath, localPath);
-			}
+			this.sourceFileMap = new SourceFileMap(configMap);
 		}
 	}
 
