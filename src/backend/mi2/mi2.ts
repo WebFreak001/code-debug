@@ -7,6 +7,7 @@ import * as net from "net";
 import * as fs from "fs";
 import * as path from "path";
 import { Client } from "ssh2";
+import { MI2DebugSession } from "../../mibase";
 
 export function escape(str: string) {
 	return str.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
@@ -25,7 +26,7 @@ function couldBeOutput(line: string) {
 const trace = false;
 
 export class MI2 extends EventEmitter implements IBackend {
-	constructor(public application: string, public preargs: string[], public extraargs: string[], procEnv: any, public extraCommands: string[] = []) {
+	constructor(private dbg_session: MI2DebugSession, public application: string, public preargs: string[], public extraargs: string[], procEnv: any, public extraCommands: string[] = []) {
 		super();
 
 		if (procEnv) {
@@ -538,6 +539,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	goto(filename: string, line: number): Thenable<Boolean> {
 		if (trace)
 			this.log("stderr", "goto");
+		filename = this.dbg_session.apply_sourceFileMapping(filename);
 		return new Promise((resolve, reject) => {
 			const target: string = '"' + (filename ? escape(filename) + ":" : "") + line + '"';
 			this.sendCommand("break-insert -t " + target).then(() => {

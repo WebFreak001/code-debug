@@ -48,7 +48,7 @@ class LLDBDebugSession extends MI2DebugSession {
 	}
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
+		this.miDebugger = new MI2_LLDB(this, args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
@@ -93,7 +93,7 @@ class LLDBDebugSession extends MI2DebugSession {
 	}
 
 	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
+		this.miDebugger = new MI2_LLDB(this, args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;

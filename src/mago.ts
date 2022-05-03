@@ -50,7 +50,7 @@ class MagoDebugSession extends MI2DebugSession {
 	}
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.miDebugger = new MI2_Mago(args.magomipath || "mago-mi", ["-q"], args.debugger_args, args.env);
+		this.miDebugger = new MI2_Mago(this, args.magomipath || "mago-mi", ["-q"], args.debugger_args, args.env);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = false;
@@ -71,7 +71,7 @@ class MagoDebugSession extends MI2DebugSession {
 	}
 
 	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		this.miDebugger = new MI2_Mago(args.magomipath || "mago-mi", [], args.debugger_args, args.env);
+		this.miDebugger = new MI2_Mago(this, args.magomipath || "mago-mi", [], args.debugger_args, args.env);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = true;

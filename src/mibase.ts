@@ -226,6 +226,14 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
+	apply_sourceFileMapping(path: string): string {
+		if (this.isSSH) {
+			// convert local path to ssh path
+			return this.sourceFileMap.toRemotePath(path);
+		}
+		return path;
+	}
+
 	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
 		this.miDebugger.clearBreakPoints(args.source.path).then(() => {
 			let path = args.source.path;
