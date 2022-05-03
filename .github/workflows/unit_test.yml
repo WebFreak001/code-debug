@@ -1,0 +1,24 @@
+name: Unit Test Project
+on:
+  push:
+  pull_request:
+jobs:
+  unit_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+
+    - name: Install Module Dependencies
+      run: npm clean-install --no-optional
+
+    - name: Compile Project
+      run: npx tsc --project ./
+
+    - name: Test Project
+      run: xvfb-run --auto-servernum node ./out/src/test/runTest.js

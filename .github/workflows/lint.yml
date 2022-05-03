@@ -1,0 +1,21 @@
+name: Lint Project
+on:
+  push:
+  pull_request:
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+
+    - name: Install Module Dependencies
+      run: npm clean-install --no-optional
+
+    - name: Lint Project
+      run: npx tslint --project tsconfig.json
