@@ -46,5 +46,11 @@
 			],
 			"preLaunchTask": "npm"
 		}
+	],
+	"compounds": [
+		{
+			"name": "Extension Debugging (Extension + Debug Server)",
+			"configurations": ["Launch Extension", "code-debug server"]
+		},
 	]
 }
