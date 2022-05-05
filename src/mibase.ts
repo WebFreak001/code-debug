@@ -708,7 +708,8 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
-		this.miDebugger.goto(args.source.path, args.line).then(done => {
+		const path: string = this.isSSH ? this.sourceFileMap.toRemotePath(args.source.path) : args.source.path;
++		this.miDebugger.goto(path, args.line).then(done => {
 			response.body = {
 				targets: [{
 					id: 1,
