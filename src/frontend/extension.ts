@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		const fileName = vscode.window.activeTextEditor.document.fileName;
 		const ext = path.extname(fileName);
-		return fileName.substr(0, fileName.length - ext.length);
+		return fileName.substring(0, fileName.length - ext.length);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand("code-debug.getFileBasenameNoExt", () => {
 		if (!vscode.window.activeTextEditor || !vscode.window.activeTextEditor.document || !vscode.window.activeTextEditor.document.fileName) {
@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 		const fileName = path.basename(vscode.window.activeTextEditor.document.fileName);
 		const ext = path.extname(fileName);
-		return fileName.substr(0, fileName.length - ext.length);
+		return fileName.substring(0, fileName.length - ext.length);
 	}));
 }
 
@@ -35,16 +35,16 @@ function getMemoryRange(range: string) {
 	range = range.replace(/\s+/g, "").toLowerCase();
 	let index;
 	if ((index = range.indexOf("+")) != -1) {
-		const from = range.substr(0, index);
-		let length = range.substr(index + 1);
+		const from = range.substring(0, index);
+		let length = range.substring(index + 1);
 		if (!memoryLocationRegex.exec(from))
 			return undefined;
 		if (memoryLocationRegex.exec(length))
-			length = parseInt(length.substr(2), 16).toString();
+			length = parseInt(length.substring(2), 16).toString();
 		return "from=" + encodeURIComponent(from) + "&length=" + encodeURIComponent(length);
 	} else if ((index = range.indexOf("-")) != -1) {
-		const from = range.substr(0, index);
-		const to = range.substr(index + 1);
+		const from = range.substring(0, index);
+		const to = range.substring(index + 1);
 		if (!memoryLocationRegex.exec(from))
 			return undefined;
 		if (!memoryLocationRegex.exec(to))
@@ -94,14 +94,14 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 			let highlightAt = -1;
 			const splits = uri.query.split("&");
 			if (splits[0].split("=")[0] == "at") {
-				const loc = parseInt(splits[0].split("=")[1].substr(2), 16);
+				const loc = parseInt(splits[0].split("=")[1].substring(2), 16);
 				highlightAt = 64;
 				from = Math.max(loc - 64, 0);
 				to = Math.max(loc + 768, 0);
 			} else if (splits[0].split("=")[0] == "from") {
-				from = parseInt(splits[0].split("=")[1].substr(2), 16);
+				from = parseInt(splits[0].split("=")[1].substring(2), 16);
 				if (splits[1].split("=")[0] == "to") {
-					to = parseInt(splits[1].split("=")[1].substr(2), 16);
+					to = parseInt(splits[1].split("=")[1].substring(2), 16);
 				} else if (splits[1].split("=")[0] == "length") {
 					to = from + parseInt(splits[1].split("=")[1]);
 				} else return reject("Invalid Range");
@@ -124,7 +124,7 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 					}
 					index++;
 
-					const digit = hexString.substr(i, 2);
+					const digit = hexString.substring(i, i + 2);
 					const digitNum = parseInt(digit, 16);
 					if (digitNum >= 32 && digitNum <= 126)
 						asciiLine += String.fromCharCode(digitNum);

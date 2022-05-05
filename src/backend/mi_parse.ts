@@ -36,7 +36,7 @@ function parseString(str: string): string {
 				bufIndex += ret.write('\v', bufIndex);
 			else if (str[i] == '0')
 				bufIndex += ret.write('\0', bufIndex);
-			else if (m = octalMatch.exec(str.substr(i))) {
+			else if (m = octalMatch.exec(str.substring(i))) {
 				ret.writeUInt8(parseInt(m[0], 8), bufIndex++);
 				i += 2;
 			} else
@@ -89,7 +89,7 @@ export class MINode implements MIInfo {
 		do {
 			let target = pathRegex.exec(path);
 			if (target) {
-				path = path.substr(target[0].length);
+				path = path.substring(target[0].length);
 				if (current.length && typeof current != "string") {
 					const found = [];
 					for (const element of current) {
@@ -105,11 +105,11 @@ export class MINode implements MIInfo {
 				} else return undefined;
 			} else if (path[0] == '@') {
 				current = [current];
-				path = path.substr(1);
+				path = path.substring(1);
 			} else {
 				target = indexRegex.exec(path);
 				if (target) {
-					path = path.substr(target[0].length);
+					path = path.substring(target[0].length);
 					const i = parseInt(target[1]);
 					if (current.length && typeof current != "string" && i >= 0 && i < current.length) {
 						current = current[i];
@@ -168,7 +168,7 @@ export function parseMI(output: string): MINode {
 			return "";
 		let stringEnd = 1;
 		let inString = true;
-		let remaining = output.substr(1);
+		let remaining = output.substring(1);
 		let escaped = false;
 		while (inString) {
 			if (escaped)
@@ -178,16 +178,16 @@ export function parseMI(output: string): MINode {
 			else if (remaining[0] == '"')
 				inString = false;
 
-			remaining = remaining.substr(1);
+			remaining = remaining.substring(1);
 			stringEnd++;
 		}
 		let str;
 		try {
-			str = parseString(output.substr(0, stringEnd));
+			str = parseString(output.substring(0, stringEnd));
 		} catch (e) {
-			str = output.substr(0, stringEnd);
+			str = output.substring(0, stringEnd);
 		}
-		output = output.substr(stringEnd);
+		output = output.substring(stringEnd);
 		return str;
 	};
 
@@ -198,9 +198,9 @@ export function parseMI(output: string): MINode {
 			return undefined;
 		const oldContent = output;
 		const canBeValueList = output[0] == '[';
-		output = output.substr(1);
+		output = output.substring(1);
 		if (output[0] == '}' || output[0] == ']') {
-			output = output.substr(1); // ] or }
+			output = output.substring(1); // ] or }
 			return [];
 		}
 		if (canBeValueList) {
@@ -211,7 +211,7 @@ export function parseMI(output: string): MINode {
 				const remaining = output;
 				while ((value = parseCommaValue()) !== undefined)
 					values.push(value);
-				output = output.substr(1); // ]
+				output = output.substring(1); // ]
 				return values;
 			}
 		}
@@ -221,7 +221,7 @@ export function parseMI(output: string): MINode {
 			results.push(result);
 			while (result = parseCommaResult())
 				results.push(result);
-			output = output.substr(1); // }
+			output = output.substring(1); // }
 			return results;
 		}
 		output = (canBeValueList ? '[' : '{') + output;
@@ -241,7 +241,7 @@ export function parseMI(output: string): MINode {
 		const variableMatch = variableRegex.exec(output);
 		if (!variableMatch)
 			return undefined;
-		output = output.substr(variableMatch[0].length + 1);
+		output = output.substring(variableMatch[0].length + 1);
 		const variable = variableMatch[1];
 		return [variable, parseValue()];
 	};
@@ -249,21 +249,21 @@ export function parseMI(output: string): MINode {
 	parseCommaValue = () => {
 		if (output[0] != ',')
 			return undefined;
-		output = output.substr(1);
+		output = output.substring(1);
 		return parseValue();
 	};
 
 	parseCommaResult = () => {
 		if (output[0] != ',')
 			return undefined;
-		output = output.substr(1);
+		output = output.substring(1);
 		return parseResult();
 	};
 
 	let match = undefined;
 
 	while (match = outOfBandRecordRegex.exec(output)) {
-		output = output.substr(match[0].length);
+		output = output.substring(match[0].length);
 		if (match[1] && token === undefined && match[1] !== "undefined") {
 			token = parseInt(match[1]);
 		}
@@ -294,7 +294,7 @@ export function parseMI(output: string): MINode {
 	}
 
 	if (match = resultRecordRegex.exec(output)) {
-		output = output.substr(match[0].length);
+		output = output.substring(match[0].length);
 		if (match[1] && token === undefined) {
 			token = parseInt(match[1]);
 		}

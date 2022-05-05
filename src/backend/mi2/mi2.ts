@@ -282,8 +282,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.buffer += data.toString("utf8");
 		const end = this.buffer.lastIndexOf('\n');
 		if (end != -1) {
-			this.onOutput(this.buffer.substr(0, end));
-			this.buffer = this.buffer.substr(end + 1);
+			this.onOutput(this.buffer.substring(0, end));
+			this.buffer = this.buffer.substring(end + 1);
 		}
 		if (this.buffer.length) {
 			if (this.onOutputPartial(this.buffer)) {
@@ -299,8 +299,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.errbuf += data.toString("utf8");
 		const end = this.errbuf.lastIndexOf('\n');
 		if (end != -1) {
-			this.onOutputStderr(this.errbuf.substr(0, end));
-			this.errbuf = this.errbuf.substr(end + 1);
+			this.onOutputStderr(this.errbuf.substring(0, end));
+			this.errbuf = this.errbuf.substring(end + 1);
 		}
 		if (this.errbuf.length) {
 			this.logNoNewLine("stderr", this.errbuf);
@@ -583,7 +583,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			let location = "";
 			if (breakpoint.countCondition) {
 				if (breakpoint.countCondition[0] == ">")
-					location += "-i " + numRegex.exec(breakpoint.countCondition.substr(1))[0] + " ";
+					location += "-i " + numRegex.exec(breakpoint.countCondition.substring(1))[0] + " ";
 				else {
 					const match = numRegex.exec(breakpoint.countCondition)[0];
 					if (match.length != breakpoint.countCondition.length) {
@@ -820,7 +820,7 @@ export class MI2 extends EventEmitter implements IBackend {
 
 	sendUserInput(command: string, threadId: number = 0, frameLevel: number = 0): Thenable<MINode> {
 		if (command.startsWith("-")) {
-			return this.sendCommand(command.substr(1));
+			return this.sendCommand(command.substring(1));
 		} else {
 			return this.sendCliCommand(command, threadId, frameLevel);
 		}

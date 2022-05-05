@@ -37,7 +37,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		let stringEnd = 1;
 		let inString = true;
 		const charStr = value[0];
-		let remaining = value.substr(1);
+		let remaining = value.substring(1);
 		let escaped = false;
 		while (inString) {
 			if (escaped)
@@ -47,11 +47,11 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			else if (remaining[0] == charStr)
 				inString = false;
 
-			remaining = remaining.substr(1);
+			remaining = remaining.substring(1);
 			stringEnd++;
 		}
-		const str = value.substr(0, stringEnd).trim();
-		value = value.substr(stringEnd).trim();
+		const str = value.substring(0, stringEnd).trim();
+		value = value.substring(stringEnd).trim();
 		return str;
 	};
 
@@ -72,7 +72,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 					if (namespace) {
 						while (name.startsWith("*")) {
 							prefix += "*";
-							name = name.substr(1);
+							name = name.substring(1);
 						}
 						namespace = namespace + pointerCombineChar + name;
 					} else
@@ -89,15 +89,15 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		if (value[0] != '{')
 			return undefined;
 		const oldContent = value;
-		value = value.substr(1).trim();
+		value = value.substring(1).trim();
 		if (value[0] == '}') {
-			value = value.substr(1).trim();
+			value = value.substring(1).trim();
 			return [];
 		}
 		if (value.startsWith("...")) {
-			value = value.substr(3).trim();
+			value = value.substring(3).trim();
 			if (value[0] == '}') {
-				value = value.substr(1).trim();
+				value = value.substring(1).trim();
 				return <any> "<...>";
 			}
 		}
@@ -124,7 +124,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 				stack.pop();
 				values.push(createValue("[" + i + "]", val));
 			}
-			value = value.substr(1).trim(); // }
+			value = value.substring(1).trim(); // }
 			return values;
 		}
 
@@ -134,7 +134,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			results.push(result);
 			while (result = parseCommaResult(true))
 				results.push(result);
-			value = value.substr(1).trim(); // }
+			value = value.substring(1).trim(); // }
 			return results;
 		}
 
@@ -149,35 +149,35 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			primitive = undefined;
 		else if (value.startsWith("true")) {
 			primitive = "true";
-			value = value.substr(4).trim();
+			value = value.substring(4).trim();
 		} else if (value.startsWith("false")) {
 			primitive = "false";
-			value = value.substr(5).trim();
+			value = value.substring(5).trim();
 		} else if (match = nullpointerRegex.exec(value)) {
 			primitive = "<nullptr>";
-			value = value.substr(match[0].length).trim();
+			value = value.substring(match[0].length).trim();
 		} else if (match = referenceStringRegex.exec(value)) {
-			value = value.substr(match[1].length).trim();
+			value = value.substring(match[1].length).trim();
 			primitive = parseCString();
 		} else if (match = referenceRegex.exec(value)) {
 			primitive = "*" + match[0];
-			value = value.substr(match[0].length).trim();
+			value = value.substring(match[0].length).trim();
 		} else if (match = cppReferenceRegex.exec(value)) {
 			primitive = match[0];
-			value = value.substr(match[0].length).trim();
+			value = value.substring(match[0].length).trim();
 		} else if (match = charRegex.exec(value)) {
 			primitive = match[1];
-			value = value.substr(match[0].length - 1);
+			value = value.substring(match[0].length - 1);
 			primitive += " " + parseCString();
 		} else if (match = numberRegex.exec(value)) {
 			primitive = match[0];
-			value = value.substr(match[0].length).trim();
+			value = value.substring(match[0].length).trim();
 		} else if (match = variableRegex.exec(value)) {
 			primitive = match[0];
-			value = value.substr(match[0].length).trim();
+			value = value.substring(match[0].length).trim();
 		} else if (match = errorRegex.exec(value)) {
 			primitive = match[0];
-			value = value.substr(match[0].length).trim();
+			value = value.substring(match[0].length).trim();
 		} else {
 			primitive = value;
 		}
@@ -199,7 +199,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		const variableMatch = resultRegex.exec(value);
 		if (!variableMatch)
 			return undefined;
-		value = value.substr(variableMatch[0].length).trim();
+		value = value.substring(variableMatch[0].length).trim();
 		const name = variable = variableMatch[1];
 		if (pushToStack)
 			stack.push(variable);
@@ -240,7 +240,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		value = value.trim();
 		if (value[0] != ',')
 			return undefined;
-		value = value.substr(1).trim();
+		value = value.substring(1).trim();
 		return parseValue();
 	};
 
@@ -248,7 +248,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		value = value.trim();
 		if (value[0] != ',')
 			return undefined;
-		value = value.substr(1).trim();
+		value = value.substring(1).trim();
 		return parseResult(pushToStack);
 	};
 

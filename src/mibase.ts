@@ -71,8 +71,8 @@ export class MI2DebugSession extends DebugSession {
 					let func = rawCmd;
 					let args = [];
 					if (spaceIndex != -1) {
-						func = rawCmd.substr(0, spaceIndex);
-						args = JSON.parse(rawCmd.substr(spaceIndex + 1));
+						func = rawCmd.substring(0, spaceIndex);
+						args = JSON.parse(rawCmd.substring(spaceIndex + 1));
 					}
 					Promise.resolve(this.miDebugger[func].apply(this.miDebugger, args)).then(data => {
 						c.write(data.toString());
@@ -296,7 +296,7 @@ export class MI2DebugSession extends DebugSession {
 						path = this.sourceFileMap.toLocalPath(path);
 					} else if (process.platform === "win32") {
 						if (path.startsWith("\\cygdrive\\") || path.startsWith("/cygdrive/")) {
-							path = path[10] + ":" + path.substr(11); // replaces /cygdrive/c/foo/bar.txt with c:/foo/bar.txt
+							path = path[10] + ":" + path.substring(11); // replaces /cygdrive/c/foo/bar.txt with c:/foo/bar.txt
 						}
 					}
 					source = new Source(element.fileName, path);
