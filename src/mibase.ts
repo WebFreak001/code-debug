@@ -57,7 +57,7 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.on("breakpoint", this.handleBreakpoint.bind(this));
 		this.miDebugger.on("watchpoint", this.handleBreak.bind(this));	// consider to parse old/new, too (otherwise it is in the console only)
 		this.miDebugger.on("step-end", this.handleBreak.bind(this));
-		// this.miDebugger.on("step-out-end", this.handleBreak.bind(this));  // was combined into step-end
+		//this.miDebugger.on("step-out-end", this.handleBreak.bind(this));  // was combined into step-end
 		this.miDebugger.on("step-other", this.handleBreak.bind(this));
 		this.miDebugger.on("signal-stop", this.handlePause.bind(this));
 		this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));
@@ -159,6 +159,7 @@ export class MI2DebugSession extends DebugSession {
 
 		if (this.serverPath)
 			fs.unlink(this.serverPath, (err) => {
+				// tslint:disable-next-line: no-console
 				console.error("Failed to unlink debug server");
 			});
 	}
@@ -266,7 +267,7 @@ export class MI2DebugSession extends DebugSession {
 					threads: []
 				};
 				for (const thread of threads) {
-					let threadName = thread.name || thread.targetId || "<unnamed>";
+					const threadName = thread.name || thread.targetId || "<unnamed>";
 					response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
 				}
 				this.sendResponse(response);
@@ -353,7 +354,7 @@ export class MI2DebugSession extends DebugSession {
 					//
 					// If we don't send this event, the client may start requesting data (such as
 					// stack frames, local variables, etc.) since they believe the target is
-					// stopped.  Furthermore the client may not be indicating the proper status
+					// stopped.  Furthermore, the client may not be indicating the proper status
 					// to the user (may indicate stopped when the target is actually running).
 					this.sendEvent(new ContinuedEvent(1, true));
 				}));
@@ -392,7 +393,7 @@ export class MI2DebugSession extends DebugSession {
 		const createScope = (scopeName: string, expensive: boolean): Scope => {
 			const key: string = scopeName + ":" + threadId + ":" + level;
 			let handle: number;
-			
+
 			if (this.scopeHandlesReverse.hasOwnProperty(key)) {
 				handle = this.scopeHandlesReverse[key];
 			} else {
@@ -401,7 +402,7 @@ export class MI2DebugSession extends DebugSession {
 			}
 
 			return new Scope(scopeName, handle, expensive);
-		}
+		};
 
 		scopes.push(createScope("Local", false));
 
@@ -505,7 +506,7 @@ export class MI2DebugSession extends DebugSession {
 			// Variable members
 			let variable;
 			try {
-				// TODO: this evals on an (effectively) unknown thread for multithreaded programs.
+				// TODO: this evaluates on an (effectively) unknown thread for multithreaded programs.
 				variable = await this.miDebugger.evalExpression(JSON.stringify(id), 0, 0);
 				try {
 					let expanded = expandValue(createVariable, variable.result("value"), id, variable);
@@ -563,7 +564,7 @@ export class MI2DebugSession extends DebugSession {
 						this.sendResponse(response);
 					};
 					const addOne = async () => {
-						// TODO: this evals on an (effectively) unknown thread for multithreaded programs.
+						// TODO: this evaluates on an (effectively) unknown thread for multithreaded programs.
 						const variable = await this.miDebugger.evalExpression(JSON.stringify(`${varReq.name}+${arrIndex})`), 0, 0);
 						try {
 							const expanded = expandValue(createVariable, variable.result("value"), varReq.name, variable);
@@ -709,7 +710,7 @@ export class MI2DebugSession extends DebugSession {
 
 	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
 		const path: string = this.isSSH ? this.sourceFileMap.toRemotePath(args.source.path) : args.source.path;
-+		this.miDebugger.goto(path, args.line).then(done => {
+		this.miDebugger.goto(path, args.line).then(done => {
 			response.body = {
 				targets: [{
 					id: 1,

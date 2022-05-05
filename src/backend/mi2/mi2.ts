@@ -145,9 +145,9 @@ export class MI2 extends EventEmitter implements IBackend {
 				if (args.bootstrap) sshCMD = args.bootstrap + " && " + sshCMD;
 				this.sshConn.exec(sshCMD, execArgs, (err, stream) => {
 					if (err) {
-						this.log("stderr", "Could not run " + this.application + "(" + sshCMD +") over ssh!");
+						this.log("stderr", "Could not run " + this.application + "(" + sshCMD + ") over ssh!");
 						if (err === undefined) {
-							err = "<reason unknown>"
+							err = "<reason unknown>";
 						}
 						this.log("stderr", err.toString());
 						this.emit("quit");
@@ -177,7 +177,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			}).on("error", (err) => {
 				this.log("stderr", "Error running " + this.application + " over ssh!");
 				if (err === undefined) {
-					err = "<reason unknown>"
+					err = "<reason unknown>";
 				}
 				this.log("stderr", err.toString());
 				this.emit("quit");
@@ -188,7 +188,7 @@ export class MI2 extends EventEmitter implements IBackend {
 
 	protected initCommands(target: string, cwd: string, attach: boolean = false) {
 		// We need to account for the possibility of the path type used by the debugger being different
-		// than the path type where the extension is running (e.g., SSH from Linux to Windows machine).
+		// from the path type where the extension is running (e.g., SSH from Linux to Windows machine).
 		// Since the CWD is expected to be an absolute path in the debugger's environment, we can test
 		// that to determine the path type used by the debugger and use the result of that test to
 		// select the correct API to check whether the target path is an absolute path.
@@ -215,7 +215,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
 		if (this.prettyPrint)
 			cmds.push(this.sendCommand("enable-pretty-printing"));
-		for (let cmd of this.extraCommands) {
+		for (const cmd of this.extraCommands) {
 			cmds.push(this.sendCommand(cmd));
 		}
 
@@ -374,7 +374,7 @@ export class MI2 extends EventEmitter implements IBackend {
 											this.emit("watchpoint", parsed);
 											break;
 										case "function-finished":
-											// identical result -> send step-end
+											// identical result → send step-end
 											// this.emit("step-out-end", parsed);
 											// break;
 										case "location-reached":
@@ -391,7 +391,7 @@ export class MI2 extends EventEmitter implements IBackend {
 										case "fork":
 										case "vfork":
 										case "exec":
-											// TODO: inform the user, possibly add second inferiour
+											// TODO: inform the user, possibly add second inferior
 											this.emit("step-end", parsed);
 											break;
 										case "signal-received":
@@ -406,7 +406,7 @@ export class MI2 extends EventEmitter implements IBackend {
 											break;
 										// case "exited-signalled":	// consider handling that explicit possible
 										// 	this.log("stderr", "Program exited because of signal " + parsed.record("signal"));
-										// 	this.emit("stoped", parsed);
+										// 	this.emit("stopped", parsed);
 										// 	break;
 
 										default:

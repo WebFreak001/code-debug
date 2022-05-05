@@ -118,7 +118,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		if (substitutions) {
 			Object.keys(substitutions).forEach(source => {
 				this.miDebugger.extraCommands.push("settings append target.source-map " + source + " " + substitutions[source]);
-			})
+			});
 		}
 	}
 }

@@ -111,14 +111,14 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 			conn.write("examineMemory " + JSON.stringify([from, to - from + 1]));
 			conn.once("data", data => {
 				let formattedCode = "                  00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F\n";
-				var index: number = from;
+				let index: number = from;
 				const hexString = data.toString();
 				let x = 0;
 				let asciiLine = "";
 				let byteNo = 0;
 				for (let i = 0; i < hexString.length; i += 2) {
 					if (x == 0) {
-						var addr = index.toString(16);
+						let addr = index.toString(16);
 						while (addr.length < 16) addr = '0' + addr;
 						formattedCode += addr + "  ";
 					}
@@ -165,7 +165,7 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 }
 
 function center(str: string, width: number): string {
-	var left = true;
+	let left = true;
 	while (str.length < width) {
 		if (left) str = ' ' + str;
 		else str = str + ' ';

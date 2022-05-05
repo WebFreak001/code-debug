@@ -191,7 +191,7 @@ suite("MI Parse", () => {
 	test("empty string value first and last", () => {
 		const parsed = parseMI(`15^done,register-names=["","r0","pc","","xpsr","","control",""]`);
 		const result = parsed.result('register-names');
-		assert.deepEqual(result, ["","r0","pc","","xpsr","","control", ""]);
+		assert.deepEqual(result, ["", "r0", "pc", "", "xpsr", "", "control", ""]);
 	});
 	test("empty array values", () => {
 		const parsed = parseMI(`15^done,foo={x=[],y="y"}`);

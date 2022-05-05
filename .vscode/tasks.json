@@ -5,24 +5,29 @@
 // ${fileDirname}: the current opened file's dirname
 // ${fileExtname}: the current opened file's extension
 // ${cwd}: the current working directory of the spawned process
-
-// A task runner that calls a custom npm script that compiles the extension.
 {
 	"version": "2.0.0",
-
-	// Run in a shell so "npm" command is properly resolved to "npm.cmd" on Windows systems.
-	"type": "shell",
-
-	// we want to run npm
-	"command": "npm",
-
-	// we run the custom script "compile" as defined in package.json
-	"args": ["run", "compile", "--loglevel", "silent"],
-
-	// The tsc compiler is started in background mode
-	"isBackground": true,
-
-	// use the standard tsc in watch mode problem matcher to find compile problems in the output.
-	"problemMatcher": "$tsc-watch",
-	"tasks": []
+	"tasks": [
+		{
+			// A task runner that calls a custom npm script that compiles the extension.
+			"label": "compile",
+			// Run in a shell so "npm" command is properly resolved to "npm.cmd" on Windows systems.
+			"type": "shell",
+			// we want to run npm
+			"command": "npm",
+			// we run the custom script "compile" as defined in package.json
+			"args": [
+				"run",
+				"compile",
+				"--loglevel",
+				"silent"
+			],
+			// The tsc compiler is started in background mode
+			"isBackground": true,
+			// use the standard tsc in watch mode problem matcher to find compile problems in the output.
+			"problemMatcher": "$tsc-watch",
+			// that's our build
+			"group": "build"
+		}
+	]
 }

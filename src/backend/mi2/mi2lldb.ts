@@ -29,7 +29,7 @@ export class MI2_LLDB extends MI2 {
 		];
 		if (!attach)
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
-		for (let cmd of this.extraCommands) {
+		for (const cmd of this.extraCommands) {
 			cmds.push(this.sendCliCommand(cmd));
 		}
 		return cmds;
@@ -64,7 +64,7 @@ export class MI2_LLDB extends MI2 {
 			// LLDB doesn't allow quoting the whole argument but rather only the file
 			const target: string = (filename ? '"' + escape(filename) + '":' : "") + line;
 			this.sendCliCommand("jump " + target).then(() => {
-				this.emit("step-other", null);
+				this.emit("step-other", undefined);
 				resolve(true);
 			}, reject);
 		});
