@@ -114,6 +114,7 @@ export class MINode implements MIInfo {
 					if (current.length && typeof current != "string" && i >= 0 && i < current.length) {
 						current = current[i];
 					} else if (i == 0) {
+						// empty
 					} else return undefined;
 				} else return undefined;
 			}

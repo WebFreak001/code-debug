@@ -1,11 +1,11 @@
+/* eslint-disable no-console */
 import * as path from 'path';
 
 import { runTests } from 'vscode-test';
-// tslint:disable: no-console
 
 async function main() {
 	try {
-// The folder containing the Extension Manifest package.json
+		// The folder containing the Extension Manifest package.json
 		// Passed to `--extensionDevelopmentPath`
 		const extensionDevelopmentPath = path.resolve(__dirname, '../../');
 

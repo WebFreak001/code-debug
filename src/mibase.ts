@@ -159,7 +159,7 @@ export class MI2DebugSession extends DebugSession {
 
 		if (this.serverPath)
 			fs.unlink(this.serverPath, (err) => {
-				// tslint:disable-next-line: no-console
+				// eslint-disable-next-line no-console
 				console.error("Failed to unlink debug server");
 			});
 	}
@@ -263,17 +263,17 @@ export class MI2DebugSession extends DebugSession {
 			return;
 		}
 		this.miDebugger.getThreads().then(threads => {
-				response.body = {
-					threads: []
-				};
-				for (const thread of threads) {
-					const threadName = thread.name || thread.targetId || "<unnamed>";
-					response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
-				}
-				this.sendResponse(response);
-			}).catch(error => {
-				this.sendErrorResponse(response, 17, `Could not get threads: ${error}`);
-			});
+			response.body = {
+				threads: []
+			};
+			for (const thread of threads) {
+				const threadName = thread.name || thread.targetId || "<unnamed>";
+				response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
+			}
+			this.sendResponse(response);
+		}).catch(error => {
+			this.sendErrorResponse(response, 17, `Could not get threads: ${error}`);
+		});
 	}
 
 	// Supports 65535 threads.
@@ -366,7 +366,7 @@ export class MI2DebugSession extends DebugSession {
 						this.handlePause(undefined);
 				}));
 				break;
-			case RunCommand.NONE:
+			case RunCommand.NONE: {
 				// Not all debuggers seem to provide an out-of-band status that they are stopped
 				// when attaching (e.g., lldb), so the client assumes we are running and gets
 				// confused when we don't actually run or continue.  Therefore, we'll force a
@@ -376,6 +376,7 @@ export class MI2DebugSession extends DebugSession {
 				event.body.allThreadsStopped = true;
 				this.sendEvent(event);
 				break;
+			}
 			default:
 				throw new Error('Unhandled run command: ' + RunCommand[this.initialRunCommand]);
 		}

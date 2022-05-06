@@ -115,7 +115,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			values.push(createValue("[0]", val));
 			const remaining = value;
 			let i = 0;
-			while (true) {
+			for (;;) {
 				stack.push("[" + (++i) + "]");
 				if (!(val = parseCommaValue())) {
 					stack.pop();

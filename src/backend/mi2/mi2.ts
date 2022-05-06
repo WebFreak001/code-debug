@@ -38,7 +38,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			// Overwrite with user specified variables
 			for (const key in procEnv) {
 				if (procEnv.hasOwnProperty(key)) {
-					if (procEnv === null)
+					if (procEnv === undefined)
 						delete env[key];
 					else
 						env[key] = procEnv[key];
@@ -120,8 +120,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			if (args.useAgent) {
 				connectionArgs.agent = process.env.SSH_AUTH_SOCK;
 			} else if (args.keyfile) {
-				if (require("fs").existsSync(args.keyfile))
-					connectionArgs.privateKey = require("fs").readFileSync(args.keyfile);
+				if (fs.existsSync(args.keyfile))
+					connectionArgs.privateKey = fs.readFileSync(args.keyfile);
 				else {
 					this.log("stderr", "SSH key file does not exist!");
 					this.emit("quit");
@@ -365,54 +365,54 @@ export class MI2 extends EventEmitter implements IBackend {
 										if (trace)
 											this.log("stderr", "stop: " + reason);
 										switch (reason) {
-										case "breakpoint-hit":
-											this.emit("breakpoint", parsed);
-											break;
-										case "watchpoint-trigger":
-										case "read-watchpoint-trigger":
-										case "access-watchpoint-trigger":
-											this.emit("watchpoint", parsed);
-											break;
-										case "function-finished":
+											case "breakpoint-hit":
+												this.emit("breakpoint", parsed);
+												break;
+											case "watchpoint-trigger":
+											case "read-watchpoint-trigger":
+											case "access-watchpoint-trigger":
+												this.emit("watchpoint", parsed);
+												break;
+											case "function-finished":
 											// identical result → send step-end
 											// this.emit("step-out-end", parsed);
 											// break;
-										case "location-reached":
-										case "end-stepping-range":
-											this.emit("step-end", parsed);
-											break;
-										case "watchpoint-scope":
-										case "solib-event":
-										case "syscall-entry":
-										case "syscall-return":
+											case "location-reached":
+											case "end-stepping-range":
+												this.emit("step-end", parsed);
+												break;
+											case "watchpoint-scope":
+											case "solib-event":
+											case "syscall-entry":
+											case "syscall-return":
 											// TODO: inform the user
-											this.emit("step-end", parsed);
-											break;
-										case "fork":
-										case "vfork":
-										case "exec":
+												this.emit("step-end", parsed);
+												break;
+											case "fork":
+											case "vfork":
+											case "exec":
 											// TODO: inform the user, possibly add second inferior
-											this.emit("step-end", parsed);
-											break;
-										case "signal-received":
-											this.emit("signal-stop", parsed);
-											break;
-										case "exited-normally":
-											this.emit("exited-normally", parsed);
-											break;
-										case "exited": // exit with error code != 0
-											this.log("stderr", "Program exited with code " + parsed.record("exit-code"));
-											this.emit("exited-normally", parsed);
-											break;
-										// case "exited-signalled":	// consider handling that explicit possible
-										// 	this.log("stderr", "Program exited because of signal " + parsed.record("signal"));
-										// 	this.emit("stopped", parsed);
-										// 	break;
+												this.emit("step-end", parsed);
+												break;
+											case "signal-received":
+												this.emit("signal-stop", parsed);
+												break;
+											case "exited-normally":
+												this.emit("exited-normally", parsed);
+												break;
+											case "exited": // exit with error code != 0
+												this.log("stderr", "Program exited with code " + parsed.record("exit-code"));
+												this.emit("exited-normally", parsed);
+												break;
+												// case "exited-signalled":	// consider handling that explicit possible
+												// 	this.log("stderr", "Program exited because of signal " + parsed.record("signal"));
+												// 	this.emit("stopped", parsed);
+												// 	break;
 
-										default:
-											this.log("console", "Not implemented stop reason (assuming exception): " + reason);
-											this.emit("stopped", parsed);
-											break;
+											default:
+												this.log("console", "Not implemented stop reason (assuming exception): " + reason);
+												this.emit("stopped", parsed);
+												break;
 										}
 									}
 								} else
