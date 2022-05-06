@@ -28,6 +28,24 @@
 			"problemMatcher": "$tsc-watch",
 			// that's our build
 			"group": "build"
+		},
+		{
+			"label": "npm:lint",
+			"detail": "Lint (ESLint) Project",
+			"type": "shell",
+			"command": "npm",
+			"group": "build",
+			"args": ["run", "lint"],
+			"problemMatcher": "$eslint-compact"
+		},
+		{
+			"label": "npm:lint-fix",
+			"detail": "Lint Project with Auto-fix",
+			"type": "shell",
+			"command": "npm",
+			"group": "build",
+			"args": ["run", "lint-and-fix"],
+			"problemMatcher": "$eslint-compact"
 		}
 	]
 }

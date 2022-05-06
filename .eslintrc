@@ -1,0 +1,49 @@
+{
+	"env": {
+		"es6": true,
+		"node": true
+	},
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/eslint-recommended",
+//        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": 6,
+		"project": "./tsconfig.json",
+		"sourceType": "module"
+	},
+	"plugins": [
+		"eslint-plugin-deprecation",
+		"eslint-plugin-no-null",
+		"@typescript-eslint"
+	],
+	"root": true,
+	"rules": {
+		// Configure additional checks
+		"comma-spacing": "error",
+		"deprecation/deprecation": "error",
+		"no-null/no-null": "error",
+		"eol-last": "error",
+		"indent": ["error", "tab", {"SwitchCase": 1}],
+		"no-console": "error",
+		"no-trailing-spaces": "error",
+		"prefer-const": ["error", {"ignoreReadBeforeAssign": true}],
+		"semi": "error",
+		"space-infix-ops": "error",
+		"@typescript-eslint/ban-tslint-comment": "error",
+
+		// Disable some recommended checks (until we can address them)
+		"no-cond-assign": "off",
+		"no-fallthrough": "off",
+		"no-prototype-builtins": "off",
+		"no-useless-escape": "off",
+		"prefer-spread": "off",
+		"@typescript-eslint/ban-types": "off",
+		"@typescript-eslint/no-explicit-any": "off",
+		"@typescript-eslint/no-inferrable-types": "off",
+		"@typescript-eslint/no-unused-vars": "off"
+	}
+  }

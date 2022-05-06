@@ -42,26 +42,66 @@
 			}
 		],
 		"breakpoints": [
-			{"language": "c"},
-			{"language": "cpp"},
-			{"language": "d"},
-			{"language": "objective-c"},
-			{"language": "fortran"},
-			{"language": "fortran-modern"},
-			{"language": "fortran90"},
-			{"language": "fortran_free-form"},
-			{"language": "fortran_fixed-form"},
-			{"language": "rust"},
-			{"language": "pascal"},
-			{"language": "objectpascal"},
-			{"language": "ada"},
-			{"language": "nim"},
-			{"language": "arm"},
-			{"language": "asm"},
-			{"language": "vala"},
-			{"language": "crystal"},
-			{"language": "kotlin"},
-			{"language": "zig"}
+			{
+				"language": "c"
+			},
+			{
+				"language": "cpp"
+			},
+			{
+				"language": "d"
+			},
+			{
+				"language": "objective-c"
+			},
+			{
+				"language": "fortran"
+			},
+			{
+				"language": "fortran-modern"
+			},
+			{
+				"language": "fortran90"
+			},
+			{
+				"language": "fortran_free-form"
+			},
+			{
+				"language": "fortran_fixed-form"
+			},
+			{
+				"language": "rust"
+			},
+			{
+				"language": "pascal"
+			},
+			{
+				"language": "objectpascal"
+			},
+			{
+				"language": "ada"
+			},
+			{
+				"language": "nim"
+			},
+			{
+				"language": "arm"
+			},
+			{
+				"language": "asm"
+			},
+			{
+				"language": "vala"
+			},
+			{
+				"language": "crystal"
+			},
+			{
+				"language": "kotlin"
+			},
+			{
+				"language": "zig"
+			}
 		],
 		"debuggers": [
 			{
@@ -166,7 +206,10 @@
 								"default": []
 							},
 							"stopAtEntry": {
-								"type": ["boolean", "string"],
+								"type": [
+									"boolean",
+									"string"
+								],
 								"description": "Whether debugger should stop at application entry point",
 								"default": false
 							},
@@ -184,7 +227,10 @@
 										"description": "Remote host name/ip to connect to"
 									},
 									"port": {
-										"type": ["number", "string"],
+										"type": [
+											"number",
+											"string"
+										],
 										"description": "Remote port number",
 										"default": 22
 									},
@@ -222,7 +268,10 @@
 										"default": true
 									},
 									"x11port": {
-										"type": ["number", "string"],
+										"type": [
+											"number",
+											"string"
+										],
 										"description": "Port to redirect X11 data to (by default port = display + 6000)",
 										"default": 6000
 									},
@@ -321,7 +370,10 @@
 								"default": false
 							},
 							"stopAtEntry": {
-								"type": ["boolean", "string"],
+								"type": [
+									"boolean",
+									"string"
+								],
 								"description": "Whether debugger should stop at application entry point",
 								"default": false
 							},
@@ -339,7 +391,10 @@
 										"description": "Remote host name/ip to connect to"
 									},
 									"port": {
-										"type": ["number", "string"],
+										"type": [
+											"number",
+											"string"
+										],
 										"description": "Remote port number",
 										"default": 22
 									},
@@ -377,7 +432,10 @@
 										"default": true
 									},
 									"x11port": {
-										"type": ["number", "string"],
+										"type": [
+											"number",
+											"string"
+										],
 										"description": "Port to redirect X11 data to (by default port = display + 6000)",
 										"default": 6000
 									},
@@ -609,7 +667,10 @@
 								"default": []
 							},
 							"stopAtEntry": {
-								"type": ["boolean", "string"],
+								"type": [
+									"boolean",
+									"string"
+								],
 								"description": "Whether debugger should stop at application entry point",
 								"default": false
 							},
@@ -627,7 +688,10 @@
 										"description": "Remote host name/ip to connect to"
 									},
 									"port": {
-										"type": ["number", "string"],
+										"type": [
+											"number",
+											"string"
+										],
 										"description": "Remote port number",
 										"default": 22
 									},
@@ -670,7 +734,10 @@
 										"default": "localhost"
 									},
 									"x11port": {
-										"type": ["number", "string"],
+										"type": [
+											"number",
+											"string"
+										],
 										"description": "Port to redirect X11 data to (by default port = display + 6000)",
 										"default": 6000
 									},
@@ -758,7 +825,10 @@
 								"default": false
 							},
 							"stopAtEntry": {
-								"type": ["boolean", "string"],
+								"type": [
+									"boolean",
+									"string"
+								],
 								"description": "Whether debugger should stop at application entry point",
 								"default": false
 							}
@@ -1017,7 +1087,9 @@
 	},
 	"scripts": {
 		"vscode:prepublish": "tsc -p ./",
-		"compile": "tsc -watch -p ./"
+		"compile": "tsc -watch -p ./",
+		"lint": "eslint . --ext .ts --format compact",
+		"lint-and-fix": "eslint . --ext .ts --fix --format compact"
 	},
 	"dependencies": {
 		"ssh2": "^1.6.0",
@@ -1028,8 +1100,12 @@
 		"@types/mocha": "^5.2.6",
 		"@types/node": "^11.11.3",
 		"@types/vscode": "^1.55.0",
+		"@typescript-eslint/eslint-plugin": "^5.22.0",
+		"@typescript-eslint/parser": "^5.22.0",
+		"eslint": "^8.14.0",
+		"eslint-plugin-deprecation": "^1.3.2",
+		"eslint-plugin-no-null": "^1.0.2",
 		"mocha": "^9.1.3",
-		"tslint": "^5.20.1",
 		"typescript": "^3.9.3",
 		"vscode-test": "1.3.0"
 	},
