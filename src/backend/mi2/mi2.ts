@@ -25,27 +25,30 @@ function couldBeOutput(line: string) {
 const trace = false;
 
 export class MI2 extends EventEmitter implements IBackend {
-	constructor(public application: string, public preargs: string[], public extraargs: string[], procEnv: any, public extraCommands: string[] = []) {
+	constructor(public application: string, public preargs: string[], public extraargs: string[], procEnv: any, envFile: string, public extraCommands: string[] = []) {
 		super();
 
-		if (procEnv) {
-			const env = {};
-			// Duplicate process.env so we don't override it
-			for (const key in process.env)
-				if (process.env.hasOwnProperty(key))
-					env[key] = process.env[key];
+		if (!(envFile || procEnv))
+			return;
 
-			// Overwrite with user specified variables
-			for (const key in procEnv) {
-				if (procEnv.hasOwnProperty(key)) {
-					if (procEnv === undefined)
-						delete env[key];
-					else
-						env[key] = procEnv[key];
-				}
-			}
-			this.procEnv = env;
+		// FIXME: if actuall debugged process is Win32, which we only know _after_ connect,
+		//        then the keys must be read via hashmap using only upper-case for hashing
+		//        ... or entered/compared in upper-case --> possibly postpone this
+		const env = {};
+		// Duplicate process.env so we don't override it
+		for (const key in process.env)
+			if (process.env.hasOwnProperty(key))
+				env[key] = process.env[key];
+
+		// Overwrite with user specified variables
+		if (envFile) {
+			mergeEnv(env, readEnvFile(envFile));
 		}
+		if (procEnv) {
+			mergeEnv(env, procEnv);
+		}
+
+		this.procEnv = env;
 	}
 
 	load(cwd: string, target: string, procArgs: string, separateConsole: string): Thenable<any> {
@@ -886,3 +889,32 @@ export class MI2 extends EventEmitter implements IBackend {
 	protected stream;
 	protected sshConn;
 }
+function readEnvFile(filename: string): { [key: string]: string } {
+	const env = {};
+	if (!fs.existsSync(filename)) {
+		return env;
+	}
+	const buffer = fs.readFileSync(filename, 'utf8');
+	buffer.split('\n').forEach( line => {
+		// using a match which will automatically ignore "wrong" lines including
+		// lines that are empty or start with a "#", or //, or ...
+		const m = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/);
+		if (m != undefined) {
+			env[m[1]] = m[2] || '';
+		}
+	});
+
+	throw new Error("Function not implemented.");
+}
+
+function mergeEnv(env: {}, buffer: { [key: string]: string; }) {
+	for (const key in buffer) {
+		if (buffer.hasOwnProperty(key)) {
+			if (buffer === undefined)
+				delete env[key];
+			else
+				env[key] = buffer[key];
+		}
+	}
+}
+

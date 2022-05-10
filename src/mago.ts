@@ -9,6 +9,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	target: string;
 	magomipath: string;
 	env: any;
+	envFile: string;
 	debugger_args: string[];
 	arguments: string;
 	autorun: string[];
@@ -22,6 +23,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	target: string;
 	magomipath: string;
 	env: any;
+	envFile: string;
 	debugger_args: string[];
 	executable: string;
 	autorun: string[];
@@ -50,7 +52,7 @@ class MagoDebugSession extends MI2DebugSession {
 	}
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.miDebugger = new MI2_Mago(args.magomipath || "mago-mi", ["-q"], args.debugger_args, args.env);
+		this.miDebugger = new MI2_Mago(args.magomipath || "mago-mi", ["-q"], args.debugger_args, args.env, args.envFile);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = false;
@@ -71,7 +73,7 @@ class MagoDebugSession extends MI2DebugSession {
 	}
 
 	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		this.miDebugger = new MI2_Mago(args.magomipath || "mago-mi", [], args.debugger_args, args.env);
+		this.miDebugger = new MI2_Mago(args.magomipath || "mago-mi", [], args.debugger_args, args.env, args.envFile);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = true;

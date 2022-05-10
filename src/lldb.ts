@@ -9,6 +9,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	target: string;
 	lldbmipath: string;
 	env: any;
+	envFile: string;
 	debugger_args: string[];
 	pathSubstitutions: { [index: string]: string };
 	arguments: string;
@@ -25,6 +26,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	target: string;
 	lldbmipath: string;
 	env: any;
+	envFile: string;
 	debugger_args: string[];
 	pathSubstitutions: { [index: string]: string };
 	executable: string;
@@ -48,7 +50,7 @@ class LLDBDebugSession extends MI2DebugSession {
 	}
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
+		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env, args.envFile);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
@@ -93,7 +95,7 @@ class LLDBDebugSession extends MI2DebugSession {
 	}
 
 	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
+		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env, args.envFile);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
