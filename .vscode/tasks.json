@@ -46,6 +46,23 @@
 			"group": "build",
 			"args": ["run", "lint-and-fix"],
 			"problemMatcher": "$eslint-compact"
+		},
+		// Ctrl + Shift + P (Command Palette), then select "Tasks: Run Test Task" and select "npm:test"
+		{
+			"label": "npm:test",
+			"detail": "Run Project Tests",
+			"type": "shell",
+			"command": "npm",
+			"group": "test",
+			"args": ["test"]
+		},
+		{
+			"label": "npm:coverage",
+			"detail": "Run Test Coverage Report",
+			"type": "shell",
+			"command": "npm",
+			"group": "test",
+			"args": ["run", "coverage"]
 		}
 	]
 }

@@ -1,5 +1,10 @@
 # Debug
 
+[![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/webfreak.debug?label=VS%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=webfreak.debug)
+[![Open VSX Registry](https://img.shields.io/open-vsx/v/webfreak/debug?label=Open%20VSX)](https://open-vsx.org/extension/webfreak/debug)
+[![GitHub CI Status](https://img.shields.io/github/workflow/status/WebFreak001/code-debug/Unit%20Test%20Project?label=CI&logo=GitHub)](https://github.com/WebFreak001/code-debug/actions/workflows/unit_test.yml)
+[![Coverage Status](https://img.shields.io/codecov/c/github/WebFreak001/code-debug)](https://codecov.io/github/WebFreak001/code-debug)
+
 Native VSCode debugger. Supports both GDB and LLDB.
 
 ## Installation

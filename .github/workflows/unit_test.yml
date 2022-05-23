@@ -1,7 +1,11 @@
 name: Unit Test Project
 on:
   push:
+    paths:
+      - '**.ts'
   pull_request:
+    paths:
+      - '**.ts'
 jobs:
   unit_test:
     runs-on: ubuntu-latest
@@ -17,8 +21,14 @@ jobs:
     - name: Install Module Dependencies
       run: npm clean-install --no-optional
 
-    - name: Compile Project
-      run: npx tsc --project ./
-
     - name: Test Project
-      run: xvfb-run --auto-servernum node ./out/src/test/runTest.js
+      run: npm test
+
+    - name: Generate Test Coverage
+      run: npm run coverage
+
+    - name: Report Test Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        directory: ./coverage
+        verbose: true
