@@ -33,7 +33,7 @@ If you are on OS X you can add `lldb-mi` to your path using
 ![Default config with a red circle around the target](images/tutorial2.png)
 
 Now you need to change `target` to the application you want to debug relative
-to the cwd. (Which is the workspace root by default)
+to the `cwd`. (Which is the workspace root by default)
 
 Additionally you can set `terminal` if you want to run the program in a separate terminal with
 support for input. On Windows set it to an empty string (`""`) to enable this feature. On linux
@@ -56,7 +56,7 @@ While running you will get a console where you can manually type GDB/LLDB comman
 commands prepended with a hyphen `-`. The console shows all output separated
 in `stdout` for the application, `stderr` for errors and `log` for log messages.
 
-Some exceptions/signals like segmentation faults will be catched and displayed but
+Some exceptions/signals like segmentation faults will be caught and displayed but
 it does not support for example most D exceptions.
 
 Support exists for stopping at the entry point of the application.  This is controlled
@@ -99,7 +99,7 @@ This will attach to PID 4285 which should already run. GDB will pause the progra
 ### Using `gdbserver` for remote debugging (GDB only)
 
 You can also connect to a gdbserver instance and debug using that. For that modify the
-`launch.json` by setting `request` to `"attach"` and `remote` to `true` and specifing the
+`launch.json` by setting `request` to `"attach"` and `remote` to `true` and specifying the
 port and optionally hostname in `target`.
 
 ```

@@ -1,0 +1,17 @@
+Codecov
+GDB
+gdbserver
+LLDB
+Microcontroller
+PID
+POSIX
+PPA
+prepended
+TCP
+theia
+VM
+VSIX
+VSX
+watchpoints
+Wireshark
+WSL

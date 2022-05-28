@@ -1091,7 +1091,11 @@
 		"coverage": "nyc npm test",
 		"compile": "tsc -watch -p ./",
 		"lint": "eslint . --ext .ts --format compact",
-		"lint-and-fix": "eslint . --ext .ts --fix --format compact"
+		"lint-and-fix": "eslint . --ext .ts --fix --format compact",
+		"spellcheck-docs": "cspell lint **/*.md",
+		"lint-docs": "markdownlint **/*.md",
+		"prettier-write-docs": "prettier --write **/*.md",
+		"prettier-check-docs": "prettier --check **/*.md"
 	},
 	"dependencies": {
 		"ssh2": "^1.6.0",
@@ -1105,11 +1109,14 @@
 		"@types/vscode": "^1.55.0",
 		"@typescript-eslint/eslint-plugin": "^5.22.0",
 		"@typescript-eslint/parser": "^5.22.0",
+		"cspell": "^6.0.0",
 		"eslint": "^8.14.0",
 		"eslint-plugin-deprecation": "^1.3.2",
 		"eslint-plugin-no-null": "^1.0.2",
+		"markdownlint-cli": "^0.31.1",
 		"mocha": "^9.1.3",
 		"nyc": "^15.1.0",
+		"prettier": "^2.6.2",
 		"ts-node": "^10.8.0",
 		"typescript": "^3.9.3"
 	},

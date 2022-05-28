@@ -1,0 +1,31 @@
+name: Lint Project Documentation
+on:
+  push:
+    paths:
+      - '**.md'
+  pull_request:
+    paths:
+      - '**.md'
+jobs:
+  lint_docs:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+
+    - name: Install Module Dependencies
+      run: npm clean-install --no-optional
+
+    - name: Spellcheck Project Documentation
+      run: npm run spellcheck-docs
+
+    - name: Stylecheck Project Documentation
+      run: npm run prettier-check-docs
+
+    - name: Lint Project Documentation
+      run: npm run lint-docs

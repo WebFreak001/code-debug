@@ -1,9 +1,20 @@
+# List of paths and files to exclude from the packaged extension.
+.github/**
 .vscode/**
 typings/**
-out/test/**
+out/src/test/**
 test/**
 src/**
 **/*.map
 .gitignore
+.markdownlintignore
+.markdownlint.yml
+.mocharc.yml
+.nycrc.yml
+.prettierignore
+.prettierrc
+cspell.json
+cspell-dict.txt
+HACKING.md
 tsconfig.json
 vsc-extension-quickstart.md

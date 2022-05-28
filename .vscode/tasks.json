@@ -63,6 +63,43 @@
 			"command": "npm",
 			"group": "test",
 			"args": ["run", "coverage"]
+		},
+		{
+			"label": "npm:lint-docs",
+			"detail": "Lint Project Documentation",
+			"type": "shell",
+			"command": "npm",
+			"group": "build",
+			"args": ["run", "lint-docs"],
+			"problemMatcher": "$markdownlint"
+		},
+		{
+			"label": "npm:spellcheck-docs",
+			"detail": "Spellcheck Project Documentation",
+			"type": "shell",
+			"command": "npm",
+			"group": "build",
+			"args": ["run", "spellcheck-docs"],
+			"problemMatcher": {
+				"fileLocation": "absolute",
+				"owner": "spellcheck-docs",
+				"pattern": {
+					"regexp": "^(.+)?:(\\d+):(\\d+) - (.+)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"message": 4
+				},
+				"severity": "info"
+			}
+		},
+		{
+			"label": "npm:prettier-write-docs",
+			"detail": "Reformat Project Documentation",
+			"type": "shell",
+			"command": "npm",
+			"group": "build",
+			"args": ["run", "prettier-write-docs"]
 		}
 	]
 }

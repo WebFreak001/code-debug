@@ -1,6 +1,18 @@
 // Place your settings in this file to overwrite default and user settings.
 {
 	"editor.insertSpaces": false,
+	"[markdown]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true,
+		"editor.rulers": [80],
+		"editor.wordWrap": "bounded",
+		"editor.wordWrapColumn": 80
+	},
+	"files.associations": {
+		// VSCode defaults these to Markdown instead of ignore files
+		".markdownlintignore": "ignore",
+		".prettierignore": "ignore"
+	},
 	"files.exclude": {
 		"out": false // set this to true to hide the "out" folder with the compiled JS files
 	},

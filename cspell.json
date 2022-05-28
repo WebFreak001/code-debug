@@ -1,0 +1,33 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "enabledLanguageIds": [
+        "markdown"
+    ],
+    "languageSettings": [
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                // don't spellcheck inside code fences
+                "/```(?:.|\\n)+?^\\s*```/m",
+                // don't spellcheck inside code quoting
+                "/(?<!`)`[^`]+?`/",
+                // don't spellcheck GitHub user names
+                "/@\\w+/"
+            ],
+            "dictionaries": [
+                "cspell-dict.txt"
+            ]
+        }
+    ],
+    "minWordLength": 1,
+    "dictionaryDefinitions": [
+        {
+            "name": "cspell-dict.txt",
+            "path": "./cspell-dict.txt",
+            "description": "Custom Workspace Dictionary",
+            "addWords": true,
+            "scope": "workspace"
+        }
+    ]
+}

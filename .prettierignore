@@ -1,0 +1,7 @@
+# Temporarily ignored until they can be updated to abide by the style rules.
+CHANGELOG.md
+README.md
+
+**/.github
+**/.vscode-test
+node_modules

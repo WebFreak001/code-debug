@@ -1,0 +1,6 @@
+# Temporarily ignored until they can be updated to abide by the lint rules.
+CHANGELOG.md
+README.md
+
+# Don't lint markdown belonging to dependency modules.
+node_modules
