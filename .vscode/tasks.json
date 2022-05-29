@@ -27,7 +27,10 @@
 			// use the standard tsc in watch mode problem matcher to find compile problems in the output.
 			"problemMatcher": "$tsc-watch",
 			// that's our build
-			"group": "build"
+			"group":{
+				"kind": "build",
+				"isDefault": true
+			}
 		},
 		{
 			"label": "npm:lint",
@@ -53,7 +56,10 @@
 			"detail": "Run Project Tests",
 			"type": "shell",
 			"command": "npm",
-			"group": "test",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
 			"args": ["test"]
 		},
 		{
