@@ -48,7 +48,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		}
 	}
 
-	load(cwd: string, target: string, procArgs: string, separateConsole: string): Thenable<any> {
+	load(cwd: string, target: string, procArgs: string, separateConsole: string, autorun: string[]): Thenable<any> {
 		if (!path.isAbsolute(target))
 			target = path.join(cwd, target);
 		return new Promise((resolve, reject) => {
@@ -65,6 +65,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			if (process.platform == "win32") {
 				if (separateConsole !== undefined)
 					promises.push(this.sendCommand("gdb-set new-console on"));
+				promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 				Promise.all(promises).then(() => {
 					this.emit("debug-ready");
 					resolve(undefined);
@@ -73,12 +74,14 @@ export class MI2 extends EventEmitter implements IBackend {
 				if (separateConsole !== undefined) {
 					linuxTerm.spawnTerminalEmulator(separateConsole).then(tty => {
 						promises.push(this.sendCommand("inferior-tty-set " + tty));
+						promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 						Promise.all(promises).then(() => {
 							this.emit("debug-ready");
 							resolve(undefined);
 						}, reject);
 					});
 				} else {
+					promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 					Promise.all(promises).then(() => {
 						this.emit("debug-ready");
 						resolve(undefined);
@@ -88,7 +91,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	ssh(args: SSHArguments, cwd: string, target: string, procArgs: string, separateConsole: string, attach: boolean): Thenable<any> {
+	ssh(args: SSHArguments, cwd: string, target: string, procArgs: string, separateConsole: string, attach: boolean, autorun: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			this.isSSH = true;
 			this.sshReady = false;
@@ -169,6 +172,7 @@ export class MI2 extends EventEmitter implements IBackend {
 						promises.push(this.sendCommand("target-attach " + target));
 					} else if (procArgs && procArgs.length)
 						promises.push(this.sendCommand("exec-arguments " + procArgs));
+					promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 					Promise.all(promises).then(() => {
 						this.emit("debug-ready");
 						resolve(undefined);
@@ -222,7 +226,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		return cmds;
 	}
 
-	attach(cwd: string, executable: string, target: string): Thenable<any> {
+	attach(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			let args = [];
 			if (executable && !path.isAbsolute(executable))
@@ -244,6 +248,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					promises.push(this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""));
 				promises.push(this.sendCommand("target-attach " + target));
 			}
+			promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
 				resolve(undefined);
@@ -251,7 +256,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	connect(cwd: string, executable: string, target: string): Thenable<any> {
+	connect(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			let args = [];
 			if (executable && !path.isAbsolute(executable))
@@ -266,6 +271,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
 			const promises = this.initCommands(target, cwd, true);
 			promises.push(this.sendCommand("target-select remote " + target));
+			promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
 				resolve(undefined);

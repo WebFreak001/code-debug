@@ -35,7 +35,7 @@ export class MI2_LLDB extends MI2 {
 		return cmds;
 	}
 
-	attach(cwd: string, executable: string, target: string): Thenable<any> {
+	attach(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			const args = this.preargs.concat(this.extraargs || []);
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
@@ -46,6 +46,7 @@ export class MI2_LLDB extends MI2 {
 			const promises = this.initCommands(target, cwd, true);
 			promises.push(this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""));
 			promises.push(this.sendCommand("target-attach " + target));
+			promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 			Promise.all(promises).then(() => {
 				this.emit("debug-ready");
 				resolve(undefined);

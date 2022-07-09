@@ -74,20 +74,16 @@ class LLDBDebugSession extends MI2DebugSession {
 				args.ssh.remotex11screen = 0;
 			this.isSSH = true;
 			this.setSourceFileMap(args.ssh.sourceFileMap, args.ssh.cwd, args.cwd);
-			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, undefined, false).then(() => {
-				if (args.autorun)
-					args.autorun.forEach(command => {
-						this.miDebugger.sendUserInput(command);
-					});
+			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, undefined, false, args.autorun || []).then(() => {
 				this.sendResponse(response);
+			}, err => {
+				this.sendErrorResponse(response, 106, `Failed to SSH: ${err.toString()}`);
 			});
 		} else {
-			this.miDebugger.load(args.cwd, args.target, args.arguments, undefined).then(() => {
-				if (args.autorun)
-					args.autorun.forEach(command => {
-						this.miDebugger.sendUserInput(command);
-					});
+			this.miDebugger.load(args.cwd, args.target, args.arguments, undefined, args.autorun || []).then(() => {
 				this.sendResponse(response);
+			}, err => {
+				this.sendErrorResponse(response, 107, `Failed to load MI Debugger: ${err.toString()}`);
 			});
 		}
 	}
@@ -104,12 +100,10 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		this.stopAtEntry = args.stopAtEntry;
-		this.miDebugger.attach(args.cwd, args.executable, args.target).then(() => {
-			if (args.autorun)
-				args.autorun.forEach(command => {
-					this.miDebugger.sendUserInput(command);
-				});
+		this.miDebugger.attach(args.cwd, args.executable, args.target, args.autorun || []).then(() => {
 			this.sendResponse(response);
+		}, err => {
+			this.sendErrorResponse(response, 108, `Failed to attach: ${err.toString()}`);
 		});
 	}
 

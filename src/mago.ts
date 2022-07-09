@@ -61,12 +61,10 @@ class MagoDebugSession extends MI2DebugSession {
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
-		this.miDebugger.load(args.cwd, args.target, args.arguments, undefined).then(() => {
-			if (args.autorun)
-				args.autorun.forEach(command => {
-					this.miDebugger.sendUserInput(command);
-				});
+		this.miDebugger.load(args.cwd, args.target, args.arguments, undefined, args.autorun || []).then(() => {
 			this.sendResponse(response);
+		}, err => {
+			this.sendErrorResponse(response, 109, `Failed to load MI Debugger: ${err.toString()}`);
 		});
 	}
 
@@ -80,12 +78,10 @@ class MagoDebugSession extends MI2DebugSession {
 		this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
-		this.miDebugger.attach(args.cwd, args.executable, args.target).then(() => {
-			if (args.autorun)
-				args.autorun.forEach(command => {
-					this.miDebugger.sendUserInput(command);
-				});
+		this.miDebugger.attach(args.cwd, args.executable, args.target, args.autorun || []).then(() => {
 			this.sendResponse(response);
+		}, err => {
+			this.sendErrorResponse(response, 110, `Failed to attach: ${err.toString()}`);
 		});
 	}
 }

@@ -79,21 +79,13 @@ class GDBDebugSession extends MI2DebugSession {
 				args.ssh.remotex11screen = 0;
 			this.isSSH = true;
 			this.setSourceFileMap(args.ssh.sourceFileMap, args.ssh.cwd, args.cwd);
-			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, args.terminal, false).then(() => {
-				if (args.autorun)
-					args.autorun.forEach(command => {
-						this.miDebugger.sendUserInput(command);
-					});
+			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, args.arguments, args.terminal, false, args.autorun || []).then(() => {
 				this.sendResponse(response);
 			}, err => {
-				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`);
+				this.sendErrorResponse(response, 105, `Failed to SSH: ${err.toString()}`);
 			});
 		} else {
-			this.miDebugger.load(args.cwd, args.target, args.arguments, args.terminal).then(() => {
-				if (args.autorun)
-					args.autorun.forEach(command => {
-						this.miDebugger.sendUserInput(command);
-					});
+			this.miDebugger.load(args.cwd, args.target, args.arguments, args.terminal, args.autorun || []).then(() => {
 				this.sendResponse(response);
 			}, err => {
 				this.sendErrorResponse(response, 103, `Failed to load MI Debugger: ${err.toString()}`);
@@ -126,32 +118,20 @@ class GDBDebugSession extends MI2DebugSession {
 				args.ssh.remotex11screen = 0;
 			this.isSSH = true;
 			this.setSourceFileMap(args.ssh.sourceFileMap, args.ssh.cwd, args.cwd);
-			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, "", undefined, true).then(() => {
-				if (args.autorun)
-					args.autorun.forEach(command => {
-						this.miDebugger.sendUserInput(command);
-					});
+			this.miDebugger.ssh(args.ssh, args.ssh.cwd, args.target, "", undefined, true, args.autorun || []).then(() => {
 				this.sendResponse(response);
 			}, err => {
-				this.sendErrorResponse(response, 102, `Failed to SSH: ${err.toString()}`);
+				this.sendErrorResponse(response, 104, `Failed to SSH: ${err.toString()}`);
 			});
 		} else {
 			if (args.remote) {
-				this.miDebugger.connect(args.cwd, args.executable, args.target).then(() => {
-					if (args.autorun)
-						args.autorun.forEach(command => {
-							this.miDebugger.sendUserInput(command);
-						});
+				this.miDebugger.connect(args.cwd, args.executable, args.target, args.autorun || []).then(() => {
 					this.sendResponse(response);
 				}, err => {
 					this.sendErrorResponse(response, 102, `Failed to attach: ${err.toString()}`);
 				});
 			} else {
-				this.miDebugger.attach(args.cwd, args.executable, args.target).then(() => {
-					if (args.autorun)
-						args.autorun.forEach(command => {
-							this.miDebugger.sendUserInput(command);
-						});
+				this.miDebugger.attach(args.cwd, args.executable, args.target, args.autorun || []).then(() => {
 					this.sendResponse(response);
 				}, err => {
 					this.sendErrorResponse(response, 101, `Failed to attach: ${err.toString()}`);
