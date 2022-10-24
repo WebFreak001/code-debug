@@ -228,12 +228,12 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-		this.miDebugger.clearBreakPoints(args.source.path).then(() => {
-			let path = args.source.path;
-			if (this.isSSH) {
-				// convert local path to ssh path
-				path = this.sourceFileMap.toRemotePath(path);
-			}
+		let path = args.source.path;
+		if (this.isSSH) {
+			// convert local path to ssh path
+			path = this.sourceFileMap.toRemotePath(path);
+		}
+		this.miDebugger.clearBreakPoints(path).then(() => {
 			const all = args.breakpoints.map(brk => {
 				return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
 			});
