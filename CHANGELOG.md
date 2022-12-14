@@ -1,5 +1,6 @@
 # [Unreleased]
 ## Fixed
+* Fixes #382 - Breakpoints not always cleared over SSH - PR #383 (@abussy-aldebaran)
 * Fixes #346 - Case-sensitivity not respected in SSH path mapping - PR #352 (@brownts)
 * Fixes #342 - Local variables not displayed more than 2 stack frames deep - PR #345 (@brownts)
 * Fixes #332 - "go to cursor location" does not work with ssh sourceFileMap (after @brownts)
