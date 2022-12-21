@@ -8,16 +8,18 @@ interface Mapping {
 export class SourceFileMap {
 	private sortedMappings: { [key in keyof Mapping]: Mapping[] } = {remote: [], local: []};
 	private nativePath: PathKind;
+	private remoteCwd: string|undefined;
 
-	constructor (map: { [index: string]: string }) {
+	constructor (map: { [index: string]: string }, remoteCwd?: string) {
 		const mappings: Mapping[] = [];
+		this.remoteCwd = remoteCwd;
 		this.nativePath = this.getNativePath();
 		for (let [remotePrefix, localPrefix] of Object.entries(map)) {
 			// Normalize local path, adding trailing separator if missing.
 			localPrefix = this.nativePath.normalizeDir(localPrefix);
 
 			// Try to detect remote path.
-			const debuggerPath: PathKind = SourceFileMap.toPathKind(remotePrefix);
+			const debuggerPath: PathKind = this.toPathKind(remotePrefix);
 			// Normalize remote path, adding trailing separator if missing.
 			remotePrefix = debuggerPath.normalizeDir(remotePrefix);
 
@@ -42,10 +44,17 @@ export class SourceFileMap {
 			return PathPosix.getInstance();
 	}
 
-	private static toPathKind(unknownPath: string): PathKind {
+	private toPathKind(unknownPath: string): PathKind {
 		const pathPosix: PathKind = PathPosix.getInstance();
 		const pathWin32: PathKind = PathWin32.getInstance();
-		return pathPosix.isAbsolute(unknownPath) ? pathPosix : pathWin32;
+
+		if (pathPosix.isAbsolute(unknownPath) ||
+			(this.remoteCwd && pathPosix.isAbsolute(this.remoteCwd)))
+		{
+			return pathPosix;
+		} else {
+			return pathWin32;
+		}
 	}
 
 	private pathMatch(key: keyof Mapping, caseSensitive: boolean, path: string): Mapping | undefined {
@@ -66,7 +75,7 @@ export class SourceFileMap {
 
 	public toLocalPath(remotePath: string): string {
 		// Try to detect remote path.
-		const debuggerPath: PathKind = SourceFileMap.toPathKind(remotePath);
+		const debuggerPath: PathKind = this.toPathKind(remotePath);
 		const normalizedRemotePath: string = debuggerPath.normalize(remotePath);
 		const mapping: Mapping | undefined =
 			this.pathMatch("remote", debuggerPath.caseSensitive, normalizedRemotePath);
@@ -88,7 +97,7 @@ export class SourceFileMap {
 		if (mapping) {
 			const pathSuffix = normalizedLocalPath.substring(mapping.local.length);
 			// Try to detect remote path.
-			const debuggerPath = SourceFileMap.toPathKind(mapping.remote);
+			const debuggerPath = this.toPathKind(mapping.remote);
 			return debuggerPath.join(mapping.remote, pathSuffix);
 		}
 

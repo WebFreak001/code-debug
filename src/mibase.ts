@@ -734,7 +734,7 @@ export class MI2DebugSession extends DebugSession {
 		if (configMap === undefined) {
 			this.sourceFileMap = new SourceFileMap({[fallbackGDB]: fallbackIDE});
 		} else {
-			this.sourceFileMap = new SourceFileMap(configMap);
+			this.sourceFileMap = new SourceFileMap(configMap, fallbackGDB);
 		}
 	}
 
