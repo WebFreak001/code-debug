@@ -1,5 +1,6 @@
 # [Unreleased]
 ## Fixed
+* Fixes #236 - Documentation indicates that multi-threaded debugging is not supported (@brownts)
 * Fixes #381 - POSIX relative paths in SSH `sourceFileMap` were not properly formatted (@brownts)
 * Fixes #348 - Not waiting for `autorun` commands to complete before continuing execution (@brownts).
 * Fixes #382 - Breakpoints not always cleared over SSH - PR #383 (@abussy-aldebaran)

@@ -42,10 +42,9 @@ or specify a custom one. Note that it must support the `-e` argument.
 
 Before debugging you need to compile your application first, then you can run it using
 the green start button in the debug sidebar. For this you could use the `preLaunchTask`
-argument vscode allows you to do. Debugging multithreaded applications is currently not
-implemented. Adding breakpoints while the program runs will not interrupt it immediately.
-For that you need to pause & resume the program once first. However adding breakpoints
-while its paused works as expected.
+argument vscode allows you to do. Adding breakpoints while the program runs will not
+interrupt it immediately. For that you need to pause & resume the program once first.
+However adding breakpoints while its paused works as expected.
 
 Extending variables is very limited as it does not support child values of variables.
 Watching expressions works partially but the result does not get properly parsed and
