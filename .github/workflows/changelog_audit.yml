@@ -1,0 +1,23 @@
+name: Changelog Audit
+on:
+  push:
+    paths:
+      - ./CHANGELOG.md
+  pull_request:
+    paths:
+      - ./CHANGELOG.md
+jobs:
+  # Linting, stylechecking and spellchecking are covered by the general document
+  # linting job, so this only checks that the changelog is conformant with the
+  # "Keep a Changelog" format.
+  changelog_audit:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Validate Changelog
+      uses: mindsers/changelog-reader-action@v2
+      with:
+        validation_level: error
+        path: ./CHANGELOG.md

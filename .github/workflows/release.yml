@@ -36,7 +36,7 @@ jobs:
     - name: Query Latest Changelog Version
       id: changelog
       shell: bash
-      run: echo ::set-output name=version::$(grep --perl-regexp "^# " --max-count=1 CHANGELOG.md | awk '{print $2}')
+      run: echo ::set-output name=version::$(grep --perl-regexp "^## " --max-count=1 CHANGELOG.md | tr --delete [] | awk '{print $2}')
 
     - name: Audit package.json/package-lock.json/CHANGELOG.md/git tag Version Consistency
       shell: bash

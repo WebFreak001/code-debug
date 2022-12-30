@@ -9,6 +9,7 @@ PPA
 prepended
 TCP
 theia
+UI
 VM
 VSIX
 VSX
