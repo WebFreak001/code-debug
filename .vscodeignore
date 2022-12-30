@@ -1,7 +1,10 @@
 # List of paths and files to exclude from the packaged extension.
 .github/**
+.nyc_output/**
 .vscode/**
+coverage/**
 typings/**
+node_modules/**/build
 out/src/test/**
 test/**
 src/**
@@ -13,6 +16,7 @@ src/**
 .nycrc.yml
 .prettierignore
 .prettierrc
+.secrets
 cspell.json
 cspell-dict.txt
 HACKING.md

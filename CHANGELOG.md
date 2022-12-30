@@ -8,7 +8,7 @@ Versioning].
 [keep a changelog]: https://keepachangelog.com/en/1.0.0
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
-## [Unreleased]
+## [0.26.1] - 2022-12-31
 
 ### Fixed
 
@@ -33,7 +33,7 @@ Versioning].
 - Fixes #342 - Local variables not displayed more than 2 stack frames deep - PR
   #345 ([@brownts])
 
-[unreleased]: https://github.com/WebFreak001/code-debug/compare/v0.26.0...HEAD
+[0.26.1]: https://github.com/WebFreak001/code-debug/compare/v0.26.0...v0.26.1
 
 ## [0.26.0] - 2022-04-16
 
