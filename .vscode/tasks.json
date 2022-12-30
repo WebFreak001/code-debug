@@ -80,6 +80,14 @@
 			"problemMatcher": "$markdownlint"
 		},
 		{
+			"label": "npm:link-check",
+			"detail": "Link Check Project Documentation",
+			"type": "shell",
+			"command": "npm",
+			"group": "build",
+			"args": ["run", "link-check"]
+		},
+		{
 			"label": "npm:spellcheck-docs",
 			"detail": "Spellcheck Project Documentation",
 			"type": "shell",

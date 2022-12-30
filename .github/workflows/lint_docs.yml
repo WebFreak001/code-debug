@@ -29,3 +29,6 @@ jobs:
 
     - name: Lint Project Documentation
       run: npm run lint-docs
+
+    - name: Lint Documentation Links
+      run: npm run link-check
