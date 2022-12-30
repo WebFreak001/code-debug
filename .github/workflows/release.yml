@@ -55,12 +55,12 @@ jobs:
     # be released.
     #
     # NOTE:
-    # Use the `--no-optional` switch to prevent installation of the `ssh2` optional dependency
+    # Use the `--omit=optional` switch to prevent installation of the `ssh2` optional dependency
     # (i.e., `cpu-features`) package which is used to provide accelerated crypto functionality,
     # but which is a native add-on and would require platform specific packages.
     #
     - name: Install Module Dependencies
-      run: npm clean-install --no-optional
+      run: npm clean-install --omit=optional
 
     #
     # Package and Upload Extension

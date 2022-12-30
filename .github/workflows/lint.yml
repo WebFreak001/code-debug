@@ -15,7 +15,7 @@ jobs:
         node-version: 16.x
 
     - name: Install Module Dependencies
-      run: npm clean-install --no-optional
+      run: npm clean-install --omit=optional
 
     - name: Lint Project
       run: npm run lint

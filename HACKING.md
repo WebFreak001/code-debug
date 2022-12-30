@@ -235,7 +235,7 @@ updating package-lock.json as a result of the divergence. Using
 version of the modules, which helps to eliminate any potential variability in
 observed behavior.
 
-In addition, you should also use the `--no-optional` switch as part of the
+In addition, you should also use the `--omit=optional` switch as part of the
 package installation command. There are some modules (e.g., SSH2) which include
 optional functionality that utilizes native code specific to the platform.
 Currently, this extension does not require these platform-specific modules and
@@ -251,7 +251,7 @@ released extension.
 ```shell
 git clone https://github.com/WebFreak001/code-debug
 cd code-debug
-npm clean-install --no-optional
+npm clean-install --omit=optional
 ```
 
 ## Optional VSCode Extensions (for development)
