@@ -155,6 +155,16 @@ Because some builds requires one or more environment files to be sourced before 
 command, you can use the `ssh.bootstrap` option to add some extra commands which will be prepended
 to the debugger call (using `&&` to join both).
 
+### Debugging a process from a different user (especially root/system processes)
+
+To debug a program that needs additional privileges you may use one of the two approaches:
+
+1. start vscode with the necessary rights (so both the program and the started debugger instance will
+   have root rights) - `sudo code` / `sudo codium` or "start as admin".  
+   Note that this has a lot of security implications and will have the user settings of vscode for this user.
+3. preferred: use a small wrapper script that calls `sudo gdb $*` / `runas /profile /user:admin-user`
+   (or the debugger of your choice) and configure this extension to use it (for example with `gdbpath`)
+
 ### Extra Debugger Arguments
 
 Additional arguments can be supplied to the debugger if needed.  These will be added when
