@@ -101,6 +101,9 @@
 			},
 			{
 				"language": "zig"
+			},
+			{
+				"language": "riscv"
 			}
 		],
 		"debuggers": [
@@ -129,7 +132,8 @@
 					"vala",
 					"crystal",
 					"kotlin",
-					"zig"
+					"zig",
+					"riscv"
 				],
 				"variables": {
 					"FileBasenameNoExt": "code-debug.getFileBasenameNoExt",
@@ -595,7 +599,8 @@
 					"vala",
 					"crystal",
 					"kotlin",
-					"zig"
+					"zig",
+					"riscv"
 				],
 				"variables": {
 					"FileBasenameNoExt": "code-debug.getFileBasenameNoExt",
