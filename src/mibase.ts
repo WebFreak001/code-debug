@@ -5,6 +5,7 @@ import { Breakpoint, IBackend, Variable, VariableObject, ValuesFormattingMode, M
 import { MINode } from './backend/mi_parse';
 import { expandValue, isExpandable } from './backend/gdb_expansion';
 import { MI2 } from './backend/mi2/mi2';
+import { execSync } from 'child_process';
 import * as systemPath from "path";
 import * as net from "net";
 import * as os from "os";
@@ -17,10 +18,10 @@ class ExtendedVariable {
 }
 
 class VariableScope {
-	constructor (public readonly name: string, public readonly threadId: number, public readonly level: number) {
+	constructor(public readonly name: string, public readonly threadId: number, public readonly level: number) {
 	}
 
-	public static variableName (handle: number, name: string): string {
+	public static variableName(handle: number, name: string): string {
 		return `var_${handle}_${name}`;
 	}
 }
@@ -89,6 +90,17 @@ export class MI2DebugSession extends DebugSession {
 		} catch (e) {
 			if (process.platform != "win32")
 				this.handleMsg("stderr", "Code-Debug WARNING: Utility Command Server: Failed to start " + e.toString() + "\nCode-Debug WARNING: The examine memory location command won't work");
+		}
+	}
+
+	// verifies that the specified command can be executed
+	protected checkCommand(debuggerName: string): boolean {
+		try {
+			const command = process.platform === 'win32' ? 'where' : 'command -v';
+			execSync(`${command} ${scriptName}`, { stdio: 'ignore' });
+			return true;
+		} catch (error) {
+			return false;
 		}
 	}
 
@@ -728,7 +740,7 @@ export class MI2DebugSession extends DebugSession {
 					id: 1,
 					label: args.source.name,
 					column: args.column,
-					line : args.line
+					line: args.line
 				}]
 			};
 			this.sendResponse(response);
@@ -743,7 +755,7 @@ export class MI2DebugSession extends DebugSession {
 
 	protected setSourceFileMap(configMap: { [index: string]: string }, fallbackGDB: string, fallbackIDE: string): void {
 		if (configMap === undefined) {
-			this.sourceFileMap = new SourceFileMap({[fallbackGDB]: fallbackIDE});
+			this.sourceFileMap = new SourceFileMap({ [fallbackGDB]: fallbackIDE });
 		} else {
 			this.sourceFileMap = new SourceFileMap(configMap, fallbackGDB);
 		}
