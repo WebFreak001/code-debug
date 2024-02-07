@@ -405,8 +405,8 @@ export class MI2DebugSession extends DebugSession {
 			return new Scope(scopeName, handle, expensive);
 		};
 
-		scopes.push(createScope("Registers", false));
 		scopes.push(createScope("Locals", false));
+		scopes.push(createScope("Registers", false));
 
 		response.body = {
 			scopes: scopes
