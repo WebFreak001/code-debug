@@ -135,6 +135,10 @@ export class MI2 extends EventEmitter implements IBackend {
 				connectionArgs.password = args.password;
 			}
 
+			if (args.algorithms) {
+				connectionArgs.algorithms = args.algorithms;
+			}
+
 			this.sshConn.on("ready", () => {
 				this.log("stdout", "Running " + this.application + " over ssh...");
 				const execArgs: any = {};

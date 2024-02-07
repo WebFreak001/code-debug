@@ -122,7 +122,7 @@ Debugging using ssh automatically converts all paths between client & server and
 redirects X11 output from the server to the client.  
 Simply add a `ssh` object in your `launch` request.
 
-```
+```jsonc
 "request": "launch",
 "target": "./executable",
 "cwd": "${workspaceRoot}",
@@ -137,7 +137,11 @@ Simply add a `ssh` object in your `launch` request.
 	// x11port may also be specified as string containing only numbers (useful to use configuration variables)
 	"x11port": 6000,
 	// Optional, content will be executed on the SSH host before the debugger call.
-	"bootstrap": "source /home/remoteUser/some-env"
+	"bootstrap": "source /home/remoteUser/some-env",
+	// Optional, override the default transport layer algorithms used for the connection
+	"algorithms": {
+		"kex" : [ "diffie-hellman-group-exchange-sha1" ]
+  }
 }
 ```
 
@@ -150,6 +154,9 @@ if the newer `ssh.sourceFileMap` is not configured.
 For X11 forwarding to work you first need to enable it in your Display Manager and allow the
 connections. To allow connections you can either add an entry for applications or run `xhost +`
 in the console while you are debugging and turn it off again when you are done using `xhost -`.
+
+
+SSH algorithms used by some old embedded devices may be out of date, there is a compatible method using `algorithms`. `kex`, `cipher`,`compress`, `hmac`, `serverHostKey` are known to be supported in algorithms. The data format of these keys is array. Supported values can be found in [`msc/ssh`](https://github.com/mscdex/ssh2/blob/master/README.md#client-methods) (Client methods->connect->algorithms).
 
 Because some builds requires one or more environment files to be sourced before running any
 command, you can use the `ssh.bootstrap` option to add some extra commands which will be prepended
