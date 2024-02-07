@@ -33,6 +33,11 @@ export interface Variable {
 	raw?: any;
 }
 
+export interface RegisterValue {
+	index: number;
+	value: string;
+}
+
 export interface SSHArguments {
 	forwardX11: boolean;
 	host: string;

@@ -1,4 +1,4 @@
-import { Breakpoint, IBackend, Thread, Stack, SSHArguments, Variable, VariableObject, MIError } from "../backend";
+import { Breakpoint, IBackend, Thread, Stack, SSHArguments, Variable, RegisterValue, VariableObject, MIError } from "../backend";
 import * as ChildProcess from "child_process";
 import { EventEmitter } from "events";
 import { parseMI, MINode } from '../mi_parse';
@@ -755,6 +755,57 @@ export class MI2 extends EventEmitter implements IBackend {
 				raw: element
 			});
 		}
+		return ret;
+	}
+
+	async getRegisters(): Promise<Variable[]> {
+		if (trace)
+			this.log("stderr", "getRegisters");
+
+		// Getting register names and values are separate GDB commands.
+		// We first retrieve the register names and then the values.
+		// The register names should never change, so we could cache and reuse them,
+		// but for now we just retrieve them every time to keep it simple.
+		const names = await this.getRegisterNames();
+		const values = await this.getRegisterValues();
+		const ret: Variable[] = [];
+		for (const val of values) {
+			const key = names[val.index];
+			const value = val.value;
+			const type = "string";
+			ret.push({
+				name: key,
+				valueStr: value,
+				type: type
+			});
+		}
+		return ret;
+	}
+
+	async getRegisterNames(): Promise<string[]> {
+		if (trace)
+			this.log("stderr", "getRegisterNames");
+		const result = await this.sendCommand("data-list-register-names");
+		const names = result.result('register-names');
+		if (!Array.isArray(names)) {
+			throw new Error('Failed to retrieve register names.');
+		}
+		return names.map(name => name.toString());
+	}
+
+	async getRegisterValues(): Promise<RegisterValue[]> {
+		if (trace)
+			this.log("stderr", "getRegisterValues");
+		const result = await this.sendCommand("data-list-register-values N");
+		const nodes = result.result('register-values');
+		if (!Array.isArray(nodes)) {
+			throw new Error('Failed to retrieve register values.');
+		}
+		const ret: RegisterValue[] = nodes.map(node => {
+			const index = parseInt(MINode.valueOf(node, "number"));
+			const value = MINode.valueOf(node, "value");
+			return {index: index, value: value};
+		});
 		return ret;
 	}
 

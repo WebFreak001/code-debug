@@ -405,7 +405,8 @@ export class MI2DebugSession extends DebugSession {
 			return new Scope(scopeName, handle, expensive);
 		};
 
-		scopes.push(createScope("Local", false));
+		scopes.push(createScope("Registers", false));
+		scopes.push(createScope("Locals", false));
 
 		response.body = {
 			scopes: scopes
@@ -436,64 +437,74 @@ export class MI2DebugSession extends DebugSession {
 		};
 
 		if (id instanceof VariableScope) {
-			let stack: Variable[];
 			try {
-				stack = await this.miDebugger.getStackVariables(id.threadId, id.level);
-				for (const variable of stack) {
-					if (this.useVarObjects) {
-						try {
-							const varObjName = VariableScope.variableName(args.variablesReference, variable.name);
-							let varObj: VariableObject;
+				if (id.name == "Registers") {
+					const registers = await this.miDebugger.getRegisters();
+					for (const reg of registers) {
+						variables.push({
+							name: reg.name,
+							value: reg.valueStr,
+							variablesReference: 0
+						});
+					}
+				} else {
+					const stack: Variable[] = await this.miDebugger.getStackVariables(id.threadId, id.level);
+					for (const variable of stack) {
+						if (this.useVarObjects) {
 							try {
-								const changes = await this.miDebugger.varUpdate(varObjName);
-								const changelist = changes.result("changelist");
-								changelist.forEach((change) => {
-									const name = MINode.valueOf(change, "name");
-									const vId = this.variableHandlesReverse[name];
-									const v = this.variableHandles.get(vId) as any;
-									v.applyChanges(change);
-								});
-								const varId = this.variableHandlesReverse[varObjName];
-								varObj = this.variableHandles.get(varId) as any;
-							} catch (err) {
-								if (err instanceof MIError && err.message == "Variable object not found") {
-									varObj = await this.miDebugger.varCreate(variable.name, varObjName);
-									const varId = findOrCreateVariable(varObj);
-									varObj.exp = variable.name;
-									varObj.id = varId;
-								} else {
-									throw err;
+								const varObjName = VariableScope.variableName(args.variablesReference, variable.name);
+								let varObj: VariableObject;
+								try {
+									const changes = await this.miDebugger.varUpdate(varObjName);
+									const changelist = changes.result("changelist");
+									changelist.forEach((change) => {
+										const name = MINode.valueOf(change, "name");
+										const vId = this.variableHandlesReverse[name];
+										const v = this.variableHandles.get(vId) as any;
+										v.applyChanges(change);
+									});
+									const varId = this.variableHandlesReverse[varObjName];
+									varObj = this.variableHandles.get(varId) as any;
+								} catch (err) {
+									if (err instanceof MIError && err.message == "Variable object not found") {
+										varObj = await this.miDebugger.varCreate(variable.name, varObjName);
+										const varId = findOrCreateVariable(varObj);
+										varObj.exp = variable.name;
+										varObj.id = varId;
+									} else {
+										throw err;
+									}
 								}
+								variables.push(varObj.toProtocolVariable());
+							} catch (err) {
+								variables.push({
+									name: variable.name,
+									value: `<${err}>`,
+									variablesReference: 0
+								});
 							}
-							variables.push(varObj.toProtocolVariable());
-						} catch (err) {
-							variables.push({
-								name: variable.name,
-								value: `<${err}>`,
-								variablesReference: 0
-							});
+						} else {
+							if (variable.valueStr !== undefined) {
+								let expanded = expandValue(createVariable, `{${variable.name}=${variable.valueStr})`, "", variable.raw);
+								if (expanded) {
+									if (typeof expanded[0] == "string")
+										expanded = [
+											{
+												name: "<value>",
+												value: prettyStringArray(expanded),
+												variablesReference: 0
+											}
+										];
+									variables.push(expanded[0]);
+								}
+							} else
+								variables.push({
+									name: variable.name,
+									type: variable.type,
+									value: "<unknown>",
+									variablesReference: createVariable(variable.name)
+								});
 						}
-					} else {
-						if (variable.valueStr !== undefined) {
-							let expanded = expandValue(createVariable, `{${variable.name}=${variable.valueStr})`, "", variable.raw);
-							if (expanded) {
-								if (typeof expanded[0] == "string")
-									expanded = [
-										{
-											name: "<value>",
-											value: prettyStringArray(expanded),
-											variablesReference: 0
-										}
-									];
-								variables.push(expanded[0]);
-							}
-						} else
-							variables.push({
-								name: variable.name,
-								type: variable.type,
-								value: "<unknown>",
-								variablesReference: createVariable(variable.name)
-							});
 					}
 				}
 				response.body = {
