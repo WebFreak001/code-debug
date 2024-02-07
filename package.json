@@ -10,7 +10,7 @@
 		"debug"
 	],
 	"license": "public domain",
-	"version": "0.27.0",
+	"version": "0.27.1",
 	"publisher": "webfreak",
 	"icon": "images/icon.png",
 	"engines": {

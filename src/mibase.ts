@@ -97,7 +97,7 @@ export class MI2DebugSession extends DebugSession {
 	protected checkCommand(debuggerName: string): boolean {
 		try {
 			const command = process.platform === 'win32' ? 'where' : 'command -v';
-			execSync(`${command} ${scriptName}`, { stdio: 'ignore' });
+			execSync(`${command} ${debuggerName}`, { stdio: 'ignore' });
 			return true;
 		} catch (error) {
 			return false;
