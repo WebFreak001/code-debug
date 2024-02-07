@@ -8,6 +8,13 @@ Versioning].
 [keep a changelog]: https://keepachangelog.com/en/1.0.0
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
+## Unreleased
+
+### Fixed
+
+- close invalid existing sockets from previous usage of this extension during
+  start of a new debugging session (@chenhaoyang2019, [@GitMensch])
+
 ## [0.27.0] - 2024-02-07
 
 ### Added
