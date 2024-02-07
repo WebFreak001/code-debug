@@ -9,6 +9,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	target: string;
 	gdbpath: string;
 	env: any;
+	envFile: string;
 	debugger_args: string[];
 	pathSubstitutions: { [index: string]: string };
 	arguments: string;
@@ -26,6 +27,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	target: string;
 	gdbpath: string;
 	env: any;
+	envFile: string;
 	debugger_args: string[];
 	pathSubstitutions: { [index: string]: string };
 	executable: string;
@@ -53,7 +55,7 @@ class GDBDebugSession extends MI2DebugSession {
 	}
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env);
+		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env, args.envFile);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
@@ -94,7 +96,7 @@ class GDBDebugSession extends MI2DebugSession {
 	}
 
 	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env);
+		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env, args.envFile);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;

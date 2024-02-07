@@ -172,6 +172,11 @@
 								"description": "Environment overriding the gdb (and in turn also the process) environment",
 								"default": null
 							},
+							"envFile": {
+								"type": "string",
+								"description": "path to a file containing environment variable definitions",
+								"default": null
+							},
 							"debugger_args": {
 								"type": "array",
 								"description": "Additional arguments to pass to GDB",
@@ -344,6 +349,11 @@
 							"env": {
 								"type": "object",
 								"description": "Environment overriding the gdb (and in turn also the process) environment",
+								"default": null
+							},
+							"envFile": {
+								"type": "string",
+								"description": "path to a file containing environment variable definitions",
 								"default": null
 							},
 							"debugger_args": {
@@ -634,6 +644,11 @@
 								"description": "Environment overriding the lldb-mi (and in turn also the process) environment",
 								"default": null
 							},
+							"envFile": {
+								"type": "string",
+								"description": "path to a file containing environment variable definitions",
+								"default": null
+							},
 							"debugger_args": {
 								"type": "array",
 								"description": "Additional arguments to pass to LLDB",
@@ -802,6 +817,11 @@
 								"description": "Environment overriding the lldb-mi (and in turn also the process) environment",
 								"default": null
 							},
+							"envFile": {
+								"type": "string",
+								"description": "path to a file containing environment variable definitions",
+								"default": null
+							},
 							"debugger_args": {
 								"type": "array",
 								"description": "Additional arguments to pass to LLDB",
@@ -953,6 +973,11 @@
 								"description": "Environment overriding the mago-mi (and in turn also the process) environment",
 								"default": null
 							},
+							"envFile": {
+								"type": "string",
+								"description": "path to a file containing environment variable definitions",
+								"default": null
+							},
 							"debugger_args": {
 								"type": "array",
 								"description": "Additional arguments to pass to mago",
@@ -1026,6 +1051,11 @@
 							"env": {
 								"type": "object",
 								"description": "Environment overriding the mago-mi (and in turn also the process) environment",
+								"default": null
+							},
+							"envFile": {
+								"type": "string",
+								"description": "path to a file containing environment variable definitions",
 								"default": null
 							},
 							"debugger_args": {
