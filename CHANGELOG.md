@@ -22,6 +22,8 @@ Versioning].
 - Added registers view ([@nomtats]) #242
 - Enabled breakpoints inside `riscv` files ([@William-An]) #404
 
+[0.27.0]: https://github.com/WebFreak001/code-debug/compare/v0.26.1...v0.27.0
+
 ## [0.26.1] - 2022-12-31
 
 ### Fixed
