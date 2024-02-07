@@ -8,6 +8,13 @@ Versioning].
 [keep a changelog]: https://keepachangelog.com/en/1.0.0
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.27.0] - 2024-02-07
+
+### Added
+
+- Added registers view ([@nomtats]) #242
+- Enabled breakpoints inside `riscv` files ([@William-An]) #404
+
 ## [0.26.1] - 2022-12-31
 
 ### Fixed
@@ -238,6 +245,7 @@ Versioning].
 [@reznikmm]: https://github.com/reznikmm
 [@simark]: https://github.com/simark
 [@webfreak001]: https://github.com/WebFreak001
+[@William-An]: https://github.com/William-An
 [@yanpas]: https://github.com/Yanpas
 
 <!-- markdownlint-configure-file { "MD024": { "siblings_only": true } } -->
