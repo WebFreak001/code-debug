@@ -8,6 +8,13 @@ Versioning].
 [keep a changelog]: https://keepachangelog.com/en/1.0.0
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 
+## Unreleased
+
+### Added
+
+- check for configured debugger before start to provide a nicer error message
+  ([@GitMensch])
+
 ## [0.27.0] - 2024-02-07
 
 ### Added

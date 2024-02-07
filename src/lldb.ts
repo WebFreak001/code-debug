@@ -48,7 +48,12 @@ class LLDBDebugSession extends MI2DebugSession {
 	}
 
 	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
+		const dbgCommand = args.lldbmipath || "lldb-mi";
+		if (this.checkCommand(dbgCommand)) {
+			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
+			return;
+		}
+		this.miDebugger = new MI2_LLDB(dbgCommand, [], args.debugger_args, args.env);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
@@ -89,7 +94,12 @@ class LLDBDebugSession extends MI2DebugSession {
 	}
 
 	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		this.miDebugger = new MI2_LLDB(args.lldbmipath || "lldb-mi", [], args.debugger_args, args.env);
+		const dbgCommand = args.lldbmipath || "lldb-mi";
+		if (this.checkCommand(dbgCommand)) {
+			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
+			return;
+		}
+		this.miDebugger = new MI2_LLDB(dbgCommand, [], args.debugger_args, args.env);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
