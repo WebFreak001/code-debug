@@ -254,7 +254,7 @@ Versioning].
 [@reznikmm]: https://github.com/reznikmm
 [@simark]: https://github.com/simark
 [@webfreak001]: https://github.com/WebFreak001
-[@William-An]: https://github.com/William-An
+[@william-an]: https://github.com/William-An
 [@yanpas]: https://github.com/Yanpas
 
 <!-- markdownlint-configure-file { "MD024": { "siblings_only": true } } -->
