@@ -603,6 +603,15 @@ export class MI2DebugSession extends DebugSession {
 										variablesReference: 0
 									});
 									addOne();
+								} else if (expanded instanceof Array) {
+									expanded.forEach(x => {
+										strArr.push({
+											name: x.name,
+											value: x.value,
+											variablesReference: 0
+										});
+									});
+									submit();
 								} else {
 									strArr.push({
 										name: "[err]",
