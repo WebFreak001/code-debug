@@ -187,7 +187,7 @@
 							"valuesFormatting": {
 								"type": "string",
 								"description": "Set the way of showing variable values. 'disabled' - show value as is, 'parseText' - parse debuggers output text into structure, 'prettyPrinters' - enable debuggers custom pretty-printers if there are any",
-								"default": "parseText",
+								"default": "prettyPrinters",
 								"enum": [
 									"disabled",
 									"parseText",

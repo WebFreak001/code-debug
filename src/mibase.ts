@@ -283,7 +283,11 @@ export class MI2DebugSession extends DebugSession {
 				response.body.threads.push(new Thread(thread.id, thread.id + ":" + threadName));
 			}
 			this.sendResponse(response);
-		}).catch(error => {
+		}).catch((error: MIError) => {
+			if (error.message === 'Selected thread is running.') {
+				console.error(error);
+				return;
+			}
 			this.sendErrorResponse(response, 17, `Could not get threads: ${error}`);
 		});
 	}
@@ -479,7 +483,7 @@ export class MI2DebugSession extends DebugSession {
 									varObj = this.variableHandles.get(varId) as any;
 								} catch (err) {
 									if (err instanceof MIError && err.message == "Variable object not found") {
-										varObj = await this.miDebugger.varCreate(variable.name, varObjName);
+										varObj = await this.miDebugger.varCreate(id.threadId, id.level, variable.name, varObjName);
 										const varId = findOrCreateVariable(varObj);
 										varObj.exp = variable.name;
 										varObj.id = varId;
