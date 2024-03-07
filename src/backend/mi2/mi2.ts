@@ -314,14 +314,14 @@ export class MI2 extends EventEmitter implements IBackend {
 		}
 	}
 
-	onOutputStderr(lines) {
-		lines = <string[]> lines.split('\n');
+	onOutputStderr(str: string) {
+		let lines = str.split('\n');
 		lines.forEach(line => {
 			this.log("stderr", line);
 		});
 	}
 
-	onOutputPartial(line) {
+	onOutputPartial(line: string) {
 		if (couldBeOutput(line)) {
 			this.logNoNewLine("stdout", line);
 			return true;
@@ -329,8 +329,8 @@ export class MI2 extends EventEmitter implements IBackend {
 		return false;
 	}
 
-	onOutput(lines) {
-		lines = <string[]> lines.split('\n');
+	onOutput(str: string) {
+		let lines = str.split('\n');
 		lines.forEach(line => {
 			if (couldBeOutput(line)) {
 				if (!gdbMatch.exec(line))
@@ -391,13 +391,13 @@ export class MI2 extends EventEmitter implements IBackend {
 											case "solib-event":
 											case "syscall-entry":
 											case "syscall-return":
-											// TODO: inform the user
+												// TODO: inform the user
 												this.emit("step-end", parsed);
 												break;
 											case "fork":
 											case "vfork":
 											case "exec":
-											// TODO: inform the user, possibly add second inferior
+												// TODO: inform the user, possibly add second inferior
 												this.emit("step-end", parsed);
 												break;
 											case "signal-received":
@@ -410,10 +410,10 @@ export class MI2 extends EventEmitter implements IBackend {
 												this.log("stderr", "Program exited with code " + parsed.record("exit-code"));
 												this.emit("exited-normally", parsed);
 												break;
-												// case "exited-signalled":	// consider handling that explicit possible
-												// 	this.log("stderr", "Program exited because of signal " + parsed.record("signal"));
-												// 	this.emit("stopped", parsed);
-												// 	break;
+											// case "exited-signalled":	// consider handling that explicit possible
+											// 	this.log("stderr", "Program exited because of signal " + parsed.record("signal"));
+											// 	this.emit("stopped", parsed);
+											// 	break;
 
 											default:
 												this.log("console", "Not implemented stop reason (assuming exception): " + reason);
@@ -570,7 +570,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		return Promise.all(promisses);
 	}
 
-	setBreakPointCondition(bkptNum, condition): Thenable<any> {
+	setBreakPointCondition(bkptNum: number, condition: string): Thenable<any> {
 		if (trace)
 			this.log("stderr", "setBreakPointCondition");
 		return this.sendCommand("break-condition " + bkptNum + " " + condition);
@@ -802,7 +802,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		const ret: RegisterValue[] = nodes.map(node => {
 			const index = parseInt(MINode.valueOf(node, "number"));
 			const value = MINode.valueOf(node, "value");
-			return {index: index, value: value};
+			return { index: index, value: value };
 		});
 		return ret;
 	}
