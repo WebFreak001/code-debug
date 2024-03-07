@@ -315,7 +315,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	onOutputStderr(str: string) {
-		let lines = str.split('\n');
+		const lines = str.split('\n');
 		lines.forEach(line => {
 			this.log("stderr", line);
 		});
@@ -330,7 +330,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	onOutput(str: string) {
-		let lines = str.split('\n');
+		const lines = str.split('\n');
 		lines.forEach(line => {
 			if (couldBeOutput(line)) {
 				if (!gdbMatch.exec(line))
@@ -835,7 +835,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.log("stderr", "varCreate");
 		let miCommand = "var-create ";
 		if (threadId != 0) {
-			miCommand += `--thread ${threadId} --frame ${frameLevel}`
+			miCommand += `--thread ${threadId} --frame ${frameLevel}`;
 		}
 		const res = await this.sendCommand(`${miCommand} ${this.quote(name)} ${frame} "${expression}"`);
 		return new VariableObject(res.result(""));
