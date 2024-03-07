@@ -678,11 +678,9 @@ export class MI2 extends EventEmitter implements IBackend {
 		return threads.map(element => {
 			const ret: Thread = {
 				id: parseInt(MINode.valueOf(element, "id")),
-				targetId: MINode.valueOf(element, "target-id")
+				targetId: MINode.valueOf(element, "target-id"),
+				name: MINode.valueOf(element, "name") || MINode.valueOf(element, "details")
 			};
-
-			ret.name = MINode.valueOf(element, "details")
-				|| undefined;
 
 			return ret;
 		});
@@ -832,10 +830,14 @@ export class MI2 extends EventEmitter implements IBackend {
 		return await this.sendCommand(command);
 	}
 
-	async varCreate(expression: string, name: string = "-", frame: string = "@"): Promise<VariableObject> {
+	async varCreate(threadId: number, frameLevel: number, expression: string, name: string = "-", frame: string = "@"): Promise<VariableObject> {
 		if (trace)
 			this.log("stderr", "varCreate");
-		const res = await this.sendCommand(`var-create ${this.quote(name)} ${frame} "${expression}"`);
+		let miCommand = "var-create ";
+		if (threadId != 0) {
+			miCommand += `--thread ${threadId} --frame ${frameLevel}`
+		}
+		const res = await this.sendCommand(`${miCommand} ${this.quote(name)} ${frame} "${expression}"`);
 		return new VariableObject(res.result(""));
 	}
 
