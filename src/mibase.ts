@@ -285,7 +285,6 @@ export class MI2DebugSession extends DebugSession {
 			this.sendResponse(response);
 		}).catch((error: MIError) => {
 			if (error.message === 'Selected thread is running.') {
-				console.error(error.message);
 				this.sendResponse(response);
 				return;
 			}
