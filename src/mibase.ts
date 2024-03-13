@@ -482,7 +482,7 @@ export class MI2DebugSession extends DebugSession {
 									const varId = this.variableHandlesReverse[varObjName];
 									varObj = this.variableHandles.get(varId) as any;
 								} catch (err) {
-									if (err instanceof MIError && err.message == "Variable object not found") {
+									if (err instanceof MIError && (err.message == "Variable object not found" || err.message.endsWith("does not exist"))) {
 										varObj = await this.miDebugger.varCreate(id.threadId, id.level, variable.name, varObjName);
 										const varId = findOrCreateVariable(varObj);
 										varObj.exp = variable.name;

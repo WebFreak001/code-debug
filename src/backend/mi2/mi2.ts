@@ -675,6 +675,9 @@ export class MI2 extends EventEmitter implements IBackend {
 		const result = await this.sendCommand(command);
 		const threads = result.result("threads");
 		const ret: Thread[] = [];
+		if (!Array.isArray(threads)) { // workaround for lldb-mi bug: `'^done,threads="[]"'`
+			return ret;
+		}
 		return threads.map(element => {
 			const ret: Thread = {
 				id: parseInt(MINode.valueOf(element, "id")),
