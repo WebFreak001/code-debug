@@ -37,7 +37,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 }
 
 class LLDBDebugSession extends MI2DebugSession {
-	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
+	protected override initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 		response.body.supportsGotoTargetsRequest = true;
 		response.body.supportsHitConditionalBreakpoints = true;
 		response.body.supportsConfigurationDoneRequest = true;
@@ -47,7 +47,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.sendResponse(response);
 	}
 
-	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
+	protected override launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		const dbgCommand = args.lldbmipath || "lldb-mi";
 		if (this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
@@ -93,7 +93,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		}
 	}
 
-	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
+	protected override attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
 		const dbgCommand = args.lldbmipath || "lldb-mi";
 		if (this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);

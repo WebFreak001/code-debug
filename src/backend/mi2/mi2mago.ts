@@ -3,7 +3,7 @@ import { Stack } from "../backend";
 import { MINode } from "../mi_parse";
 
 export class MI2_Mago extends MI2_LLDB {
-	getStack(startFrame: number, maxLevels: number, thread: number): Promise<Stack[]> {
+	override getStack(startFrame: number, maxLevels: number, thread: number): Promise<Stack[]> {
 		return new Promise((resolve, reject) => {
 			const command = "stack-list-frames";
 			this.sendCommand(command).then((result) => {
