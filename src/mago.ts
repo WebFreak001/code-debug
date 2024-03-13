@@ -36,7 +36,7 @@ class MagoDebugSession extends MI2DebugSession {
 		super(debuggerLinesStartAt1, isServer);
 	}
 
-	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
+	protected override initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 		response.body.supportsHitConditionalBreakpoints = true;
 		response.body.supportsConfigurationDoneRequest = true;
 		response.body.supportsConditionalBreakpoints = true;
@@ -49,7 +49,7 @@ class MagoDebugSession extends MI2DebugSession {
 		return 0;
 	}
 
-	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
+	protected override launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		const dbgCommand = args.magomipath || "mago-mi";
 		if (this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
@@ -73,7 +73,7 @@ class MagoDebugSession extends MI2DebugSession {
 		});
 	}
 
-	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
+	protected override attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
 		const dbgCommand = args.magomipath || "mago-mi";
 		if (this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);

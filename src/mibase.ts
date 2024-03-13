@@ -182,7 +182,7 @@ export class MI2DebugSession extends DebugSession {
 		this.quitEvent();
 	}
 
-	protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
+	protected override disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
 		if (this.attached)
 			this.miDebugger.detach();
 		else
@@ -192,7 +192,7 @@ export class MI2DebugSession extends DebugSession {
 		this.sendResponse(response);
 	}
 
-	protected async setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): Promise<void> {
+	protected override async setVariableRequest(response: DebugProtocol.SetVariableResponse, args: DebugProtocol.SetVariableArguments): Promise<void> {
 		try {
 			if (this.useVarObjects) {
 				let name = args.name;
@@ -219,7 +219,7 @@ export class MI2DebugSession extends DebugSession {
 		}
 	}
 
-	protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
+	protected override setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
 		const all = [];
 		args.breakpoints.forEach(brk => {
 			all.push(this.miDebugger.addBreakPoint({ raw: brk.name, condition: brk.condition, countCondition: brk.hitCondition }));
@@ -239,7 +239,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
+	protected override setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
 		let path = args.source.path;
 		if (this.isSSH) {
 			// convert local path to ssh path
@@ -269,7 +269,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
+	protected override threadsRequest(response: DebugProtocol.ThreadsResponse): void {
 		if (!this.miDebugger) {
 			this.sendResponse(response);
 			return;
@@ -300,7 +300,7 @@ export class MI2DebugSession extends DebugSession {
 		return [frameId & 0xffff, frameId >> 16];
 	}
 
-	protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
+	protected override stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments): void {
 		this.miDebugger.getStack(args.startFrame, args.levels, args.threadId).then(stack => {
 			const ret: StackFrame[] = [];
 			stack.forEach(element => {
@@ -334,7 +334,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
+	protected override configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
 		const promises: Thenable<any>[] = [];
 		let entryPoint: string | undefined = undefined;
 		let runToStart: boolean = false;
@@ -403,7 +403,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
+	protected override scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments): void {
 		const scopes = new Array<Scope>();
 		const [threadId, level] = this.frameIdToThreadAndLevel(args.frameId);
 
@@ -430,7 +430,7 @@ export class MI2DebugSession extends DebugSession {
 		this.sendResponse(response);
 	}
 
-	protected async variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): Promise<void> {
+	protected override async variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): Promise<void> {
 		const variables: DebugProtocol.Variable[] = [];
 		const id: VariableScope | string | VariableObject | ExtendedVariable = this.variableHandles.get(args.variablesReference);
 
@@ -649,7 +649,7 @@ export class MI2DebugSession extends DebugSession {
 		}
 	}
 
-	protected pauseRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
+	protected override pauseRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
 		this.miDebugger.interrupt().then(done => {
 			this.sendResponse(response);
 		}, msg => {
@@ -657,7 +657,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected reverseContinueRequest(response: DebugProtocol.ReverseContinueResponse, args: DebugProtocol.ReverseContinueArguments): void {
+	protected override reverseContinueRequest(response: DebugProtocol.ReverseContinueResponse, args: DebugProtocol.ReverseContinueArguments): void {
 		this.miDebugger.continue(true).then(done => {
 			this.sendResponse(response);
 		}, msg => {
@@ -665,7 +665,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
+	protected override continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments): void {
 		this.miDebugger.continue().then(done => {
 			this.sendResponse(response);
 		}, msg => {
@@ -673,7 +673,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected stepBackRequest(response: DebugProtocol.StepBackResponse, args: DebugProtocol.StepBackArguments): void {
+	protected override stepBackRequest(response: DebugProtocol.StepBackResponse, args: DebugProtocol.StepBackArguments): void {
 		this.miDebugger.step(true).then(done => {
 			this.sendResponse(response);
 		}, msg => {
@@ -681,7 +681,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected stepInRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+	protected override stepInRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
 		this.miDebugger.step().then(done => {
 			this.sendResponse(response);
 		}, msg => {
@@ -689,7 +689,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected stepOutRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+	protected override stepOutRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
 		this.miDebugger.stepOut().then(done => {
 			this.sendResponse(response);
 		}, msg => {
@@ -697,7 +697,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
+	protected override nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments): void {
 		this.miDebugger.next().then(done => {
 			this.sendResponse(response);
 		}, msg => {
@@ -705,7 +705,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
+	protected override evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
 		const [threadId, level] = this.frameIdToThreadAndLevel(args.frameId);
 		if (args.context == "watch" || args.context == "hover") {
 			this.miDebugger.evalExpression(args.expression, threadId, level).then((res) => {
@@ -736,7 +736,7 @@ export class MI2DebugSession extends DebugSession {
 		}
 	}
 
-	protected gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
+	protected override gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
 		const path: string = this.isSSH ? this.sourceFileMap.toRemotePath(args.source.path) : args.source.path;
 		this.miDebugger.goto(path, args.line).then(done => {
 			response.body = {
@@ -753,7 +753,7 @@ export class MI2DebugSession extends DebugSession {
 		});
 	}
 
-	protected gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
+	protected override gotoRequest(response: DebugProtocol.GotoResponse, args: DebugProtocol.GotoArguments): void {
 		this.sendResponse(response);
 	}
 
