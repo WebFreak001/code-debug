@@ -1112,6 +1112,7 @@
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@types/mocha": "^5.2.6",
 		"@types/node": "^11.11.3",
+		"@types/ssh2": "^1.15.0",
 		"@types/vscode": "^1.55.0",
 		"@typescript-eslint/eslint-plugin": "^5.22.0",
 		"@typescript-eslint/parser": "^5.22.0",

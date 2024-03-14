@@ -60,8 +60,8 @@ export interface IBackend {
 	attach(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any>;
 	connect(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any>;
 	start(runToStart: boolean): Thenable<boolean>;
-	stop();
-	detach();
+	stop(): void;
+	detach(): void;
 	interrupt(): Thenable<boolean>;
 	continue(): Thenable<boolean>;
 	next(): Thenable<boolean>;
