@@ -1,8 +1,9 @@
 import * as assert from 'assert';
 import { expandValue, isExpandable } from '../../backend/gdb_expansion';
+import { VariableObject } from '../../backend/backend';
 
 suite("GDB Value Expansion", () => {
-	const variableCreate = (variable) => { return { expanded: variable }; };
+	const variableCreate = (variable: string) => ({ expanded: variable });
 	test("Various values", () => {
 		assert.strictEqual(isExpandable(`false`), 0);
 		assert.strictEqual(expandValue(variableCreate, `false`), "false");

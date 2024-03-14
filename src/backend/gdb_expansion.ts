@@ -1,3 +1,4 @@
+import { VariableObject } from "./backend";
 import { MINode } from "./mi_parse";
 
 const resultRegex = /^([a-zA-Z_\-][a-zA-Z0-9_\-]*|\[\d+\])\s*=\s*/;
@@ -29,7 +30,7 @@ export function isExpandable(value: string): number {
 	else return 0;
 }
 
-export function expandValue(variableCreate: Function, value: string, root: string = "", extra: any = undefined): any {
+export function expandValue(variableCreate: (arg: VariableObject | string, options?: any) => any, value: string, root: string = "", extra: any = undefined): any {
 	const parseCString = () => {
 		value = value.trim();
 		if (value[0] != '"' && value[0] != '\'')
@@ -56,10 +57,10 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 	};
 
 	const stack = [root];
-	let parseValue, parseCommaResult, parseCommaValue, parseResult, createValue;
+	let parseValue: () => any, parseCommaResult: (pushToStack: boolean) => any, parseCommaValue: () => any, parseResult: (pushToStack: boolean) => any, createValue: (name: string, val: any) => any;
 	let variable = "";
 
-	const getNamespace = (variable) => {
+	const getNamespace = (variable: string) => {
 		let namespace = "";
 		let prefix = "";
 		stack.push(variable);
@@ -209,7 +210,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		return createValue(name, val);
 	};
 
-	createValue = (name, val) => {
+	createValue = (name: string, val: any) => {
 		let ref = 0;
 		if (typeof val == "object") {
 			ref = variableCreate(val);
@@ -223,7 +224,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 				val = "Object@" + val;
 			}
 		} else if (typeof val == "string" && val.startsWith("@0x")) {
-			ref = variableCreate(getNamespace("*&" + name.substr));
+			ref = variableCreate(getNamespace("*&" + name.substring(1)));
 			val = "Ref" + val;
 		} else if (typeof val == "string" && val.startsWith("<...>")) {
 			ref = variableCreate(getNamespace(name));

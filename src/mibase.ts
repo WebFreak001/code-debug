@@ -13,7 +13,7 @@ import * as fs from "fs";
 import { SourceFileMap } from "./source_file_map";
 
 class ExtendedVariable {
-	constructor(public name, public options) {
+	constructor(public name: string, public options: { "arg": any }) {
 	}
 }
 
@@ -75,7 +75,7 @@ export class MI2DebugSession extends DebugSession {
 						func = rawCmd.substring(0, spaceIndex);
 						args = JSON.parse(rawCmd.substring(spaceIndex + 1));
 					}
-					Promise.resolve(this.miDebugger[func].apply(this.miDebugger, args)).then(data => {
+					Promise.resolve((this.miDebugger as any)[func].apply(this.miDebugger, args)).then(data => {
 						c.write(data.toString());
 					});
 				});
@@ -220,15 +220,15 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected override setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
-		const all = [];
+		const all: Thenable<[boolean, Breakpoint]>[] = [];
 		args.breakpoints.forEach(brk => {
 			all.push(this.miDebugger.addBreakPoint({ raw: brk.name, condition: brk.condition, countCondition: brk.hitCondition }));
 		});
 		Promise.all(all).then(brkpoints => {
-			const finalBrks = [];
+			const finalBrks: DebugProtocol.Breakpoint[] = [];
 			brkpoints.forEach(brkp => {
 				if (brkp[0])
-					finalBrks.push({ line: brkp[1].line });
+					finalBrks.push({ line: brkp[1].line, verified: true });
 			});
 			response.body = {
 				breakpoints: finalBrks
@@ -250,7 +250,7 @@ export class MI2DebugSession extends DebugSession {
 				return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
 			});
 			Promise.all(all).then(brkpoints => {
-				const finalBrks = [];
+				const finalBrks: DebugProtocol.Breakpoint[] = [];
 				brkpoints.forEach(brkp => {
 					// TODO: Currently all breakpoints returned are marked as verified,
 					// which leads to verified breakpoints on a broken lldb.
@@ -434,9 +434,9 @@ export class MI2DebugSession extends DebugSession {
 		const variables: DebugProtocol.Variable[] = [];
 		const id: VariableScope | string | VariableObject | ExtendedVariable = this.variableHandles.get(args.variablesReference);
 
-		const createVariable = (arg, options?) => {
+		const createVariable = (arg: string | VariableObject, options?: any) => {
 			if (options)
-				return this.variableHandles.create(new ExtendedVariable(arg, options));
+				return this.variableHandles.create(new ExtendedVariable(typeof arg === 'string' ? arg : arg.name, options));
 			else
 				return this.variableHandles.create(arg);
 		};
@@ -473,7 +473,7 @@ export class MI2DebugSession extends DebugSession {
 								try {
 									const changes = await this.miDebugger.varUpdate(varObjName);
 									const changelist = changes.result("changelist");
-									changelist.forEach((change) => {
+									changelist.forEach((change: any) => {
 										const name = MINode.valueOf(change, "name");
 										const vId = this.variableHandlesReverse[name];
 										const v = this.variableHandles.get(vId) as any;
@@ -582,7 +582,7 @@ export class MI2DebugSession extends DebugSession {
 			} else if (id instanceof ExtendedVariable) {
 				const varReq = id;
 				if (varReq.options.arg) {
-					const strArr = [];
+					const strArr: DebugProtocol.Variable[] = [];
 					let argsPart = true;
 					let arrIndex = 0;
 					const submit = () => {
@@ -767,7 +767,7 @@ export class MI2DebugSession extends DebugSession {
 
 }
 
-function prettyStringArray(strings) {
+function prettyStringArray(strings: any) {
 	if (typeof strings == "object") {
 		if (strings.length !== undefined)
 			return strings.join(", ");

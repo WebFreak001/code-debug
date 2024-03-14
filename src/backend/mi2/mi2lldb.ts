@@ -41,8 +41,8 @@ export class MI2_LLDB extends MI2 {
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
-			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
+			this.process.on("exit", () => this.emit("quit"));
+			this.process.on("error", err => this.emit("launcherror", err));
 			const promises = this.initCommands(target, cwd, true);
 			promises.push(this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""));
 			promises.push(this.sendCommand("target-attach " + target));
