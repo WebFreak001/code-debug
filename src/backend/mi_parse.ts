@@ -1,7 +1,17 @@
+type MIOutOfBandRecord = {
+	isStream: boolean;
+	type: string;
+	asyncClass: string;
+	output: [string, any][];
+	content: string;
+};
+type MIResultClass = "done" | "running" | "connected" | "error" | "exit";
+type MIResultRecord = { resultClass: MIResultClass, results: [string, any][] } | undefined;
+
 export interface MIInfo {
-	token: number;
-	outOfBandRecord: { isStream: boolean, type: string, asyncClass: string, output: [string, any][], content: string }[];
-	resultRecords: { resultClass: string, results: [string, any][] };
+	token: number | undefined;
+	outOfBandRecord: MIOutOfBandRecord[];
+	resultRecords: MIResultRecord;
 }
 
 const octalMatch = /^[0-7]{3}/;
@@ -55,11 +65,11 @@ function parseString(str: string): string {
 }
 
 export class MINode implements MIInfo {
-	token: number;
-	outOfBandRecord: { isStream: boolean, type: string, asyncClass: string, output: [string, any][], content: string }[];
-	resultRecords: { resultClass: string, results: [string, any][] };
+	token: number | undefined;
+	outOfBandRecord: MIOutOfBandRecord[];
+	resultRecords: MIResultRecord;
 
-	constructor(token: number, info: { isStream: boolean, type: string, asyncClass: string, output: [string, any][], content: string }[], result: { resultClass: string, results: [string, any][] }) {
+	constructor(token: number | undefined, info: MIOutOfBandRecord[], result: MIResultRecord) {
 		this.token = token;
 		this.outOfBandRecord = info;
 		this.resultRecords = result;
@@ -150,8 +160,8 @@ export function parseMI(output: string): MINode {
 	*/
 
 	let token = undefined;
-	const outOfBandRecord: { isStream: boolean, type: string, asyncClass: string, output: [string, any][], content: string }[] = [];
-	let resultRecords = undefined;
+	const outOfBandRecord: MIOutOfBandRecord[] = [];
+	let resultRecords: MIResultRecord = undefined;
 
 	const asyncRecordType = {
 		"*": "exec",
@@ -271,11 +281,11 @@ export function parseMI(output: string): MINode {
 
 		if (match[2]) {
 			const classMatch = asyncClassRegex.exec(output);
-			output = output.substring(classMatch[0].length);
+			output = output.substring(classMatch?.[0].length ?? 0);
 			const asyncRecord = {
 				isStream: false,
 				type: asyncRecordType[match[2] as keyof typeof asyncRecordType],
-				asyncClass: classMatch[0],
+				asyncClass: classMatch?.[0] ?? "",
 				output: [] as any,
 				content: ""
 			};
@@ -303,7 +313,7 @@ export function parseMI(output: string): MINode {
 			token = parseInt(match[1]);
 		}
 		resultRecords = {
-			resultClass: match[2],
+			resultClass: match[2] as MIResultClass,
 			results: []
 		};
 		let result;

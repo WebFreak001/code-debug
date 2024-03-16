@@ -69,8 +69,8 @@ suite("MI Parse", () => {
 		assert.strictEqual(parsed.token, 1);
 		assert.strictEqual(parsed.outOfBandRecord.length, 0);
 		assert.notStrictEqual(parsed.resultRecords, undefined);
-		assert.strictEqual(parsed.resultRecords.resultClass, "running");
-		assert.strictEqual(parsed.resultRecords.results.length, 0);
+		assert.strictEqual(parsed.resultRecords?.resultClass, "running");
+		assert.strictEqual(parsed.resultRecords?.results.length, 0);
 	});
 	test("Advanced out of band record (Breakpoint hit)", () => {
 		const parsed = parseMI(`*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",frame={addr="0x00000000004e807f",func="D main",args=[{name="args",value="..."}],file="source/app.d",fullname="/path/to/source/app.d",line="157"},thread-id="1",stopped-threads="all",core="0"`);
@@ -103,7 +103,7 @@ suite("MI Parse", () => {
 		assert.strictEqual(parsed.token, 2);
 		assert.strictEqual(parsed.outOfBandRecord.length, 0);
 		assert.notStrictEqual(parsed.resultRecords, undefined);
-		assert.strictEqual(parsed.resultRecords.resultClass, "done");
+		assert.strictEqual(parsed.resultRecords?.resultClass, "done");
 		assert.strictEqual(parsed.resultRecords.results.length, 1);
 		const asmInsns = [
 			"asm_insns",

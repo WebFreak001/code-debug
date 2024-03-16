@@ -1,9 +1,9 @@
 import * as DebugAdapter from 'vscode-debugadapter';
 import { DebugSession, InitializedEvent, TerminatedEvent, StoppedEvent, ThreadEvent, OutputEvent, ContinuedEvent, Thread, StackFrame, Scope, Source, Handles } from 'vscode-debugadapter';
 import { DebugProtocol } from 'vscode-debugprotocol';
-import { Breakpoint, IBackend, Variable, VariableObject, ValuesFormattingMode, MIError } from './backend/backend';
+import { Breakpoint, Variable, VariableObject, ValuesFormattingMode, MIError, ResultBreakpoint } from './backend/backend';
 import { MINode } from './backend/mi_parse';
-import { expandValue, isExpandable } from './backend/gdb_expansion';
+import { expandValue } from './backend/gdb_expansion';
 import { MI2 } from './backend/mi2/mi2';
 import { execSync } from 'child_process';
 import * as systemPath from "path";
@@ -13,7 +13,7 @@ import * as fs from "fs";
 import { SourceFileMap } from "./source_file_map";
 
 class ExtendedVariable {
-	constructor(public name: string, public options: { "arg": any }) {
+	constructor(public name: string, public options: { "arg": boolean }) {
 	}
 }
 
@@ -141,9 +141,9 @@ export class MI2DebugSession extends DebugSession {
 		this.sendEvent(event);
 	}
 
-	protected handlePause(info: MINode) {
-		const event = new StoppedEvent("user request", parseInt(info.record("thread-id")));
-		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info.record("stopped-threads") == "all";
+	protected handlePause(info?: MINode) {
+		const event = new StoppedEvent("user request", info ? parseInt(info.record("thread-id")) : 1);
+		(event as DebugProtocol.StoppedEvent).body.allThreadsStopped = info ? info.record("stopped-threads") == "all" : true;
 		this.sendEvent(event);
 	}
 
@@ -188,7 +188,6 @@ export class MI2DebugSession extends DebugSession {
 		else
 			this.miDebugger.stop();
 		this.commandServer.close();
-		this.commandServer = undefined;
 		this.sendResponse(response);
 	}
 
@@ -220,7 +219,7 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected override setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
-		const all: Thenable<[boolean, Breakpoint]>[] = [];
+		const all: Thenable<ResultBreakpoint>[] = [];
 		args.breakpoints.forEach(brk => {
 			all.push(this.miDebugger.addBreakPoint({ raw: brk.name, condition: brk.condition, countCondition: brk.hitCondition }));
 		});
@@ -243,12 +242,12 @@ export class MI2DebugSession extends DebugSession {
 		let path = args.source.path;
 		if (this.isSSH) {
 			// convert local path to ssh path
-			path = this.sourceFileMap.toRemotePath(path);
+			path = path && this.sourceFileMap.toRemotePath(path);
 		}
 		this.miDebugger.clearBreakPoints(path).then(() => {
-			const all = args.breakpoints.map(brk => {
+			const all = args.breakpoints ? args.breakpoints.map(brk => {
 				return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
-			});
+			}) : [];
 			Promise.all(all).then(brkpoints => {
 				const finalBrks: DebugProtocol.Breakpoint[] = [];
 				brkpoints.forEach(brkp => {
@@ -434,7 +433,7 @@ export class MI2DebugSession extends DebugSession {
 		const variables: DebugProtocol.Variable[] = [];
 		const id: VariableScope | string | VariableObject | ExtendedVariable = this.variableHandles.get(args.variablesReference);
 
-		const createVariable = (arg: string | VariableObject, options?: any) => {
+		const createVariable = (arg: string | VariableObject, options?: { "arg": boolean }) => {
 			if (options)
 				return this.variableHandles.create(new ExtendedVariable(typeof arg === 'string' ? arg : arg.name, options));
 			else
@@ -476,11 +475,11 @@ export class MI2DebugSession extends DebugSession {
 									changelist.forEach((change: any) => {
 										const name = MINode.valueOf(change, "name");
 										const vId = this.variableHandlesReverse[name];
-										const v = this.variableHandles.get(vId) as any;
+										const v = this.variableHandles.get(vId) as VariableObject;
 										v.applyChanges(change);
 									});
 									const varId = this.variableHandlesReverse[varObjName];
-									varObj = this.variableHandles.get(varId) as any;
+									varObj = this.variableHandles.get(varId) as VariableObject;
 								} catch (err) {
 									if (err instanceof MIError && (err.message == "Variable object not found" || err.message.endsWith("does not exist"))) {
 										varObj = await this.miDebugger.varCreate(id.threadId, id.level, variable.name, varObjName);
@@ -706,6 +705,15 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected override evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments): void {
+		// TODO: evaluate the expression in the global scope
+		if (!args.frameId) {
+			response.body = {
+				variablesReference: 0,
+				result: ""
+			};
+			this.sendErrorResponse(response, 7, "Can not evaluate in global scope");
+			return;
+		}
 		const [threadId, level] = this.frameIdToThreadAndLevel(args.frameId);
 		if (args.context == "watch" || args.context == "hover") {
 			this.miDebugger.evalExpression(args.expression, threadId, level).then((res) => {
@@ -737,12 +745,16 @@ export class MI2DebugSession extends DebugSession {
 	}
 
 	protected override gotoTargetsRequest(response: DebugProtocol.GotoTargetsResponse, args: DebugProtocol.GotoTargetsArguments): void {
-		const path: string = this.isSSH ? this.sourceFileMap.toRemotePath(args.source.path) : args.source.path;
+		const path: string | undefined = this.isSSH ? args.source.path && this.sourceFileMap.toRemotePath(args.source.path) : args.source.path;
+		if (!path) {
+			this.sendErrorResponse(response, 16, "Could not jump: path is undefined");
+			return;
+		}
 		this.miDebugger.goto(path, args.line).then(done => {
 			response.body = {
 				targets: [{
 					id: 1,
-					label: args.source.name,
+					label: args.source.name ?? "",
 					column: args.column,
 					line: args.line
 				}]

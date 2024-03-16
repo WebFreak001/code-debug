@@ -7,7 +7,7 @@ export class MI2_Mago extends MI2_LLDB {
 		return new Promise((resolve, reject) => {
 			const command = "stack-list-frames";
 			this.sendCommand(command).then((result) => {
-				const stack = result.resultRecords.results;
+				const stack = result.resultRecords?.results;
 				const ret: Stack[] = [];
 				const remaining: any = [];
 				const addToStack = (element: any) => {
@@ -30,7 +30,7 @@ export class MI2_Mago extends MI2_LLDB {
 						line: line
 					});
 				};
-				stack.forEach(element => {
+				stack && stack.forEach(element => {
 					if (element)
 						if (element[0] == "stack") {
 							addToStack(element[1]);

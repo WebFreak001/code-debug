@@ -30,7 +30,7 @@ export function isExpandable(value: string): number {
 	else return 0;
 }
 
-export function expandValue(variableCreate: (arg: VariableObject | string, options?: any) => any, value: string, root: string = "", extra: any = undefined): any {
+export function expandValue(variableCreate: (arg: VariableObject | string, options?: { "arg": boolean }) => any, value: string, root: string = "", extra: any = undefined): any {
 	const parseCString = () => {
 		value = value.trim();
 		if (value[0] != '"' && value[0] != '\'')

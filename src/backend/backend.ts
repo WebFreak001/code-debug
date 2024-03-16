@@ -7,7 +7,7 @@ export interface Breakpoint {
 	file?: string;
 	line?: number;
 	raw?: string;
-	condition: string;
+	condition?: string;
 	countCondition?: string;
 }
 
@@ -54,6 +54,8 @@ export interface SSHArguments {
 	sourceFileMap: { [index: string]: string };
 }
 
+export type ResultBreakpoint = [true, Breakpoint] | [false, undefined];
+
 export interface IBackend {
 	load(cwd: string, target: string, procArgs: string, separateConsole: string, autorun: string[]): Thenable<any>;
 	ssh(args: SSHArguments, cwd: string, target: string, procArgs: string, separateConsole: string, attach: boolean, autorun: string[]): Thenable<any>;
@@ -67,8 +69,8 @@ export interface IBackend {
 	next(): Thenable<boolean>;
 	step(): Thenable<boolean>;
 	stepOut(): Thenable<boolean>;
-	loadBreakPoints(breakpoints: Breakpoint[]): Thenable<[boolean, Breakpoint][]>;
-	addBreakPoint(breakpoint: Breakpoint): Thenable<[boolean, Breakpoint]>;
+	loadBreakPoints(breakpoints: Breakpoint[]): Thenable<ResultBreakpoint[]>;
+	addBreakPoint(breakpoint: Breakpoint): Thenable<ResultBreakpoint>;
 	removeBreakPoint(breakpoint: Breakpoint): Thenable<boolean>;
 	clearBreakPoints(source?: string): Thenable<any>;
 	getThreads(): Thenable<Thread[]>;
@@ -162,5 +164,5 @@ export const MIError: MIErrorConstructor = class MIError {
 		return `${this.message} (from ${this._source})`;
 	}
 };
-Object.setPrototypeOf(MIError as any, Object.create(Error.prototype));
+Object.setPrototypeOf(MIError, Object.create(Error.prototype));
 MIError.prototype.constructor = MIError;

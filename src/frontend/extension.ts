@@ -71,14 +71,14 @@ function examineMemory() {
 				return vscode.window.showErrorMessage("No debugging sessions available");
 		}
 		const pickedFile = (file: string) => {
-			vscode.window.showInputBox({ placeHolder: "Memory Location or Range", validateInput: range => getMemoryRange(range) === undefined ? "Range must either be in format 0xF00-0xF01, 0xF100+32 or 0xABC154" : "" }).then(range => {
-				vscode.window.showTextDocument(vscode.Uri.parse("debugmemory://" + file + "?" + getMemoryRange(range)));
+			vscode.window.showInputBox({ placeHolder: "Memory Location or Range", validateInput: range => getMemoryRange(range) === undefined ? "Range must either be in format 0xF00-0xF01, 0xF100+32 or 0xABC154" : "" }).then((range: string | undefined) => {
+				range && vscode.window.showTextDocument(vscode.Uri.parse("debugmemory://" + file + "?" + getMemoryRange(range)));
 			});
 		};
 		if (files.length == 1)
 			pickedFile(files[0]);
 		else if (files.length > 0)
-			vscode.window.showQuickPick(files, { placeHolder: "Running debugging instance" }).then(file => pickedFile(file));
+			vscode.window.showQuickPick(files, { placeHolder: "Running debugging instance" }).then(file => file && pickedFile(file));
 		else if (process.platform == "win32")
 			return vscode.window.showErrorMessage("This command is not available on windows");
 		else
