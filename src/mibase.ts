@@ -565,7 +565,7 @@ export class MI2DebugSession extends DebugSession {
 				// Variable members
 				let children: VariableObject[];
 				try {
-					children = await this.miDebugger.varListChildren(id.name);
+					children = await this.miDebugger.varListChildren(id.name, args.start, args.count);
 					const vars = children.map(child => {
 						const varId = findOrCreateVariable(child);
 						child.id = varId;
