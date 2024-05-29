@@ -24,6 +24,50 @@ function couldBeOutput(line: string) {
 
 const trace = false;
 
+class LogMessage {
+	protected logMsgVar = "";
+	protected logMsgVarProcess = "";
+	protected logMsgRplNum = 0;
+	protected logMsgRplItem: string[] = [];
+	protected logMsgMatch = /(^\$[0-9]*[\ ]*=[\ ]*)(.*)/;
+	protected logReplaceTest = /{([^}]*)}/g;
+	public logMsgBrkList: Breakpoint[] = [];
+
+	logMsgOutput(record){
+		if ((record.type === 'console')) {
+			if(record.content.startsWith("$")){
+				const content = record.content;
+				const variableMatch = this.logMsgMatch.exec(content);
+				if (variableMatch) {
+					const value = content.substr(variableMatch[1].length).trim();
+					this.logMsgRplItem.push(value);
+					this.logMsgRplNum--;
+					if(this.logMsgRplNum == 0){
+						for(let i = 0; i < this.logMsgRplItem.length; i++){
+							this.logMsgVarProcess = this.logMsgVarProcess.replace("placeHolderForVariable", this.logMsgRplItem[i]);
+						}
+						return "Log Message:"  + this.logMsgVarProcess;
+					}
+				}
+			}
+			return null
+		}
+	}
+
+	logMsgProcess(parsed){
+		this.logMsgBrkList.forEach((brk)=>{
+			if(parsed.outOfBandRecord[0].output[0][1] == "breakpoint-hit" && parsed.outOfBandRecord[0].output[2][1] == brk.id){
+				this.logMsgVar = brk?.logMessage;
+				const matches = this.logMsgVar.match(this.logReplaceTest);
+				const count = matches ? matches.length : 0;
+				this.logMsgRplNum = count;
+				this.logMsgVarProcess = this.logMsgVar.replace(this.logReplaceTest, "placeHolderForVariable");
+				this.logMsgRplItem = [];
+			}
+		});
+	}
+}
+
 export class MI2 extends EventEmitter implements IBackend {
 	constructor(public application: string, public preargs: string[], public extraargs: string[], procEnv: any, public extraCommands: string[] = []) {
 		super();
@@ -47,6 +91,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.procEnv = env;
 		}
 	}
+	protected logMessage:LogMessage = new LogMessage;
 
 	load(cwd: string, target: string, procArgs: string, separateConsole: string, autorun: string[]): Thenable<any> {
 		if (!path.isAbsolute(target))
@@ -354,6 +399,10 @@ export class MI2 extends EventEmitter implements IBackend {
 					parsed.outOfBandRecord.forEach(record => {
 						if (record.isStream) {
 							this.log(record.type, record.content);
+							const logOutput = this.logMessage.logMsgOutput(record);
+							if(logOutput){
+								this.log("console", logOutput);
+							}
 						} else {
 							if (record.type == "exec") {
 								this.emit("exec-async-output", parsed);
@@ -373,6 +422,7 @@ export class MI2 extends EventEmitter implements IBackend {
 										switch (reason) {
 											case "breakpoint-hit":
 												this.emit("breakpoint", parsed);
+												this.logMessage.logMsgProcess(parsed);
 												break;
 											case "watchpoint-trigger":
 											case "read-watchpoint-trigger":
@@ -576,6 +626,23 @@ export class MI2 extends EventEmitter implements IBackend {
 		return this.sendCommand("break-condition " + bkptNum + " " + condition);
 	}
 
+	setLogPoint(bkptNum, command): Thenable<any> {
+		const regex = /{([a-z0-9A-Z-_\.\>\&\*\[\]]*)}/gm;
+		let m:RegExpExecArray;
+		let commands:string = "";
+
+		while ((m = regex.exec(command))) {
+			if (m.index === regex.lastIndex) {
+				regex.lastIndex++;
+			}
+			if (m[1]) {
+				commands += `\"print ${m[1]}\" `;
+			}
+		}
+		commands += "\"continue\"";
+		return this.sendCommand("break-commands " + bkptNum + " " + commands);
+	}
+
 	setEntryBreakPoint(entryPoint: string): Thenable<any> {
 		return this.sendCommand("break-insert -t -f " + entryPoint);
 	}
@@ -607,15 +674,29 @@ export class MI2 extends EventEmitter implements IBackend {
 				if (result.resultRecords.resultClass == "done") {
 					const bkptNum = parseInt(result.result("bkpt.number"));
 					const newBrk = {
+						id: bkptNum,
 						file: breakpoint.file ? breakpoint.file : result.result("bkpt.file"),
 						raw: breakpoint.raw,
 						line: parseInt(result.result("bkpt.line")),
-						condition: breakpoint.condition
+						condition: breakpoint.condition,
+						logMessage: breakpoint?.logMessage,
 					};
 					if (breakpoint.condition) {
 						this.setBreakPointCondition(bkptNum, breakpoint.condition).then((result) => {
 							if (result.resultRecords.resultClass == "done") {
 								this.breakpoints.set(newBrk, bkptNum);
+								resolve([true, newBrk]);
+							} else {
+								resolve([false, undefined]);
+							}
+						}, reject);
+					} else if (breakpoint.logMessage) {
+						this.setLogPoint(bkptNum, breakpoint.logMessage).then((result) => {
+							if (result.resultRecords.resultClass == "done") {
+								breakpoint.id = newBrk.id;
+								this.breakpoints.set(newBrk, bkptNum);
+								this.logMessage.logMsgBrkList.push(breakpoint);
+
 								resolve([true, newBrk]);
 							} else {
 								resolve([false, undefined]);

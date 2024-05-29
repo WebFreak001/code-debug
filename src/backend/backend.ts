@@ -4,11 +4,13 @@ import { DebugProtocol } from "vscode-debugprotocol/lib/debugProtocol";
 export type ValuesFormattingMode = "disabled" | "parseText" | "prettyPrinters";
 
 export interface Breakpoint {
+	id?:number;
 	file?: string;
 	line?: number;
 	raw?: string;
 	condition: string;
 	countCondition?: string;
+	logMessage?: string;
 }
 
 export interface Thread {

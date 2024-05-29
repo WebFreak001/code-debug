@@ -247,7 +247,7 @@ export class MI2DebugSession extends DebugSession {
 		}
 		this.miDebugger.clearBreakPoints(path).then(() => {
 			const all = args.breakpoints.map(brk => {
-				return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition });
+				return this.miDebugger.addBreakPoint({ file: path, line: brk.line, condition: brk.condition, countCondition: brk.hitCondition, logMessage: brk.logMessage });
 			});
 			Promise.all(all).then(brkpoints => {
 				const finalBrks: DebugProtocol.Breakpoint[] = [];

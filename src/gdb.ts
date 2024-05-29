@@ -49,6 +49,7 @@ class GDBDebugSession extends MI2DebugSession {
 		response.body.supportsEvaluateForHovers = true;
 		response.body.supportsSetVariable = true;
 		response.body.supportsStepBack = true;
+		response.body.supportsLogPoints = true;
 		this.sendResponse(response);
 	}
 
