@@ -50,7 +50,7 @@ class LogMessage {
 					}
 				}
 			}
-			return null
+			return undefined;
 		}
 	}
 
@@ -639,7 +639,6 @@ export class MI2 extends EventEmitter implements IBackend {
 				commands += `\"print ${m[1]}\" `;
 			}
 		}
-		commands += "\"continue\"";
 		return this.sendCommand("break-commands " + bkptNum + " " + commands);
 	}
 
@@ -696,7 +695,6 @@ export class MI2 extends EventEmitter implements IBackend {
 								breakpoint.id = newBrk.id;
 								this.breakpoints.set(newBrk, bkptNum);
 								this.logMessage.logMsgBrkList.push(breakpoint);
-
 								resolve([true, newBrk]);
 							} else {
 								resolve([false, undefined]);

@@ -213,4 +213,10 @@ differently based on whether the remote system is a POSIX or a Windows system.
 You may need to experiment to find the correct escaping necessary for the command to be
 sent to the debugger as you intended.
 
+### LogMessage
+
+LogMessage will print a message in the debug console when breakpoint is hit. Expressions within {} are interpolated.
+
+![LogMessage](images/logMessage.gif)
+
 ## [Issues](https://github.com/WebFreak001/code-debug)
