@@ -55,7 +55,7 @@ class GDBDebugSession extends MI2DebugSession {
 
 	protected override launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		const dbgCommand = args.gdbpath || "gdb";
-		if (this.checkCommand(dbgCommand)) {
+		if (!this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
 			return;
 		}
@@ -101,7 +101,7 @@ class GDBDebugSession extends MI2DebugSession {
 
 	protected override attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
 		const dbgCommand = args.gdbpath || "gdb";
-		if (this.checkCommand(dbgCommand)) {
+		if (!this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
 			return;
 		}
