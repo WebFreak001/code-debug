@@ -1202,11 +1202,10 @@
 				"initialConfigurations": [
 					{
 						"name": "Debug",
-						"type": "mago-mi",
+						"type": "aliceserver-mi",
 						"request": "launch",
 						"target": "./bin/executable",
-						"cwd": "${workspaceRoot}",
-						"valuesFormatting": "parseText"
+						"cwd": "${workspaceRoot}"
 					}
 				],
 				"configurationSnippets": [
