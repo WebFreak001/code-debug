@@ -1090,7 +1090,7 @@
 			},
 			{
 				"type": "aliceserver-mi",
-				"program": "./out/src/aliceserver-mi.js",
+				"program": "./out/src/aliceserver.js",
 				"runtime": "node",
 				"label": "Aliceserver",
 				"languages": [
@@ -1129,7 +1129,7 @@
 							"debugger_args": {
 								"type": "array",
 								"description": "Additional arguments to pass to aliceserver",
-								"default": [ "-a", "mi" ]
+								"default": []
 							}
 						}
 					},
