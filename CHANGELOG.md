@@ -12,6 +12,8 @@ Versioning].
 
 ### Added
 
+- fix gdb check error when debug beginning ([@henryriley0])
+- fix implicitly type error in log message when build vsix ([@henryriley0])
 - check for configured debugger before start to provide a nicer error message
   ([@GitMensch])
 
@@ -242,6 +244,7 @@ Versioning].
 [@gentoo90]: https://github.com/gentoo90
 [@gitmensch]: https://github.com/GitMensch
 [@haronk]: https://github.com/HaronK
+[@henryriley0]: https://github.com/HenryRiley0
 [@jelleroets]: https://github.com/JelleRoets
 [@karljs]: https://github.com/karljs
 [@kvinwang]: https://github.com/kvinwang

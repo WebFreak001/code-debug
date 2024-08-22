@@ -33,7 +33,7 @@ class LogMessage {
 	protected logReplaceTest = /{([^}]*)}/g;
 	public logMsgBrkList: Breakpoint[] = [];
 
-	logMsgOutput(record: { isStream?: boolean; type: any; asyncClass?: string; output?: [string, any][]; content: any; }){
+	logMsgOutput(record:any){
 		if ((record.type === 'console')) {
 			if(record.content.startsWith("$")){
 				const content = record.content;
@@ -54,7 +54,7 @@ class LogMessage {
 		}
 	}
 
-	logMsgProcess(parsed: MINode){
+	logMsgProcess(parsed:MINode){
 		this.logMsgBrkList.forEach((brk)=>{
 			if(parsed.outOfBandRecord[0].output[0][1] == "breakpoint-hit" && parsed.outOfBandRecord[0].output[2][1] == brk.id){
 				this.logMsgVar = brk?.logMessage;
@@ -626,7 +626,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		return this.sendCommand("break-condition " + bkptNum + " " + condition);
 	}
 
-	setLogPoint(bkptNum: number, command: string): Thenable<any> {
+	setLogPoint(bkptNum:number, command:string): Thenable<any> {
 		const regex = /{([a-z0-9A-Z-_\.\>\&\*\[\]]*)}/gm;
 		let m:RegExpExecArray;
 		let commands:string = "";
