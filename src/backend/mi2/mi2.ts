@@ -54,7 +54,7 @@ class LogMessage {
 		}
 	}
 
-	logMsgProcess(parsed:any){
+	logMsgProcess(parsed:MINode){
 		this.logMsgBrkList.forEach((brk)=>{
 			if(parsed.outOfBandRecord[0].output[0][1] == "breakpoint-hit" && parsed.outOfBandRecord[0].output[2][1] == brk.id){
 				this.logMsgVar = brk?.logMessage;
@@ -264,6 +264,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
 		if (this.prettyPrint)
 			cmds.push(this.sendCommand("enable-pretty-printing"));
+		if (this.frameFilters)
+			cmds.push(this.sendCommand("enable-frame-filters"));
 		for (const cmd of this.extraCommands) {
 			cmds.push(this.sendCommand(cmd));
 		}
@@ -794,6 +796,11 @@ export class MI2 extends EventEmitter implements IBackend {
 			const func = MINode.valueOf(element, "@frame.func");
 			const filename = MINode.valueOf(element, "@frame.file");
 			let file: string = MINode.valueOf(element, "@frame.fullname");
+			if (!file) {
+				// Fallback to using `file` if `fullname` is not provided.
+				// GDB does this for some reason when frame filters are used.
+				file = MINode.valueOf(element, "@frame.file");
+			}
 			if (file) {
 				if (this.isSSH)
 					file = path.posix.normalize(file);
@@ -1012,6 +1019,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	prettyPrint: boolean = true;
+	frameFilters: boolean = true;
 	printCalls: boolean;
 	debugOutput: boolean;
 	features: string[];
