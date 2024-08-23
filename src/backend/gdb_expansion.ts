@@ -197,6 +197,7 @@ export function expandValue(variableCreate: (arg: VariableObject | string, optio
 
 	parseResult = (pushToStack: boolean = false) => {
 		value = value.trim();
+		value = value.replace(/^static /, "");
 		const variableMatch = resultRegex.exec(value);
 		if (!variableMatch)
 			return undefined;
