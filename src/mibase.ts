@@ -715,7 +715,12 @@ export class MI2DebugSession extends DebugSession {
 				};
 				this.sendResponse(response);
 			}, msg => {
-				this.sendErrorResponse(response, 7, msg.toString());
+				if (args.context == "hover") {
+					// suppress error for hover as the user may just play with the mouse
+					this.sendResponse(response);
+				} else {
+					this.sendErrorResponse(response, 7, msg.toString());
+				}
 			});
 		} else {
 			this.miDebugger.sendUserInput(args.expression, threadId, level).then(output => {
