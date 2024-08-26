@@ -48,13 +48,18 @@ class AliceserverDebugSession extends MI2DebugSession {
 	}
 
 	protected override launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		const dbgCommand = args.aliceserverpath || "lldb-mi";
-		if (this.checkCommand(dbgCommand)) {
+		const dbgCommand = args.aliceserverpath || "aliceserver";
+		// NOTE: checkCommand
+		//       On non-Win32 platforms, this uses `command -v`, which only confirms if
+		//       commands, including full paths, are within PATH.
+		//       This fix bypasses this check.
+		//       Temporary fix.
+		if (args.aliceserverpath === undefined && this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
 			return;
 		}
-		this.miDebugger = new MI2_ALICE(dbgCommand, [], args.debugger_args, args.env);
-		this.setPathSubstitutions(args.pathSubstitutions);
+		this.miDebugger = new MI2_ALICE(dbgCommand, ["-a", "mi"], args.debugger_args, args.env);
+		//this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
 		this.attached = false;
@@ -62,7 +67,7 @@ class AliceserverDebugSession extends MI2DebugSession {
 		this.isSSH = false;
 		this.started = false;
 		this.crashed = false;
-		this.setValuesFormattingMode(args.valuesFormatting);
+		//this.setValuesFormattingMode(args.valuesFormatting);
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		this.stopAtEntry = args.stopAtEntry;
@@ -94,12 +99,13 @@ class AliceserverDebugSession extends MI2DebugSession {
 	}
 
 	protected override attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		const dbgCommand = args.aliceserverpath || "lldb-mi";
-		if (this.checkCommand(dbgCommand)) {
+		const dbgCommand = args.aliceserverpath || "aliceserver";
+		// See NOTE in launchRequest
+		if (args.aliceserverpath === undefined && this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
 			return;
 		}
-		this.miDebugger = new MI2_ALICE(dbgCommand, [], args.debugger_args, args.env);
+		this.miDebugger = new MI2_ALICE(dbgCommand, ["-a", "mi"], args.debugger_args, args.env);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;

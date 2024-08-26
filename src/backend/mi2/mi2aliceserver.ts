@@ -27,7 +27,8 @@ export class MI2_ALICE extends MI2 {
 					this.features = [];
 					resolve(undefined);
 				});
-			}) as Thenable<MINode>
+			}) as Thenable<MINode>,
+			//this.sendCommand("environment-directory \"" + escape(cwd) + "\"", true)
 		];
 		if (!attach)
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
