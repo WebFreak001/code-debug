@@ -12,6 +12,7 @@ Versioning].
 
 ### Added
 
+- add static variable support ([@henryriley0])
 - fix gdb check error when debug beginning ([@henryriley0])
 - fix implicitly type error in log message when build vsix ([@henryriley0])
 - check for configured debugger before start to provide a nicer error message
