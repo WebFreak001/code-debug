@@ -320,7 +320,7 @@ export class MI2DebugSession extends DebugSession {
 
 				ret.push(new StackFrame(
 					this.threadAndLevelToFrameId(args.threadId, element.level),
-					element.function + "@" + element.address,
+					element.function + (element.address ? "@" + element.address : ""),
 					source,
 					element.line,
 					0));

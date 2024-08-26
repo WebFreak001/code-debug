@@ -17,6 +17,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	stopAtEntry: boolean | string;
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
+	frameFilters: boolean;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
 }
@@ -35,6 +36,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	stopAtEntry: boolean | string;
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
+	frameFilters: boolean;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
 }
@@ -55,7 +57,7 @@ class GDBDebugSession extends MI2DebugSession {
 
 	protected override launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
 		const dbgCommand = args.gdbpath || "gdb";
-		if (this.checkCommand(dbgCommand)) {
+		if (!this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
 			return;
 		}
@@ -69,6 +71,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.started = false;
 		this.crashed = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
+		this.miDebugger.frameFilters = !!args.frameFilters;
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		this.stopAtEntry = args.stopAtEntry;
@@ -101,7 +104,7 @@ class GDBDebugSession extends MI2DebugSession {
 
 	protected override attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
 		const dbgCommand = args.gdbpath || "gdb";
-		if (this.checkCommand(dbgCommand)) {
+		if (!this.checkCommand(dbgCommand)) {
 			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
 			return;
 		}
@@ -113,6 +116,7 @@ class GDBDebugSession extends MI2DebugSession {
 		this.initialRunCommand = args.stopAtConnect ? RunCommand.NONE : RunCommand.CONTINUE;
 		this.isSSH = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
+		this.miDebugger.frameFilters = !!args.frameFilters;
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		this.stopAtEntry = args.stopAtEntry;

@@ -194,6 +194,11 @@
 									"prettyPrinters"
 								]
 							},
+							"frameFilters": {
+								"type": "boolean",
+								"description": "Use frame filters registered in GDB",
+								"default": true
+							},
 							"printCalls": {
 								"type": "boolean",
 								"description": "Prints all GDB calls to the console",
@@ -321,6 +326,11 @@
 									"parseText",
 									"prettyPrinters"
 								]
+							},
+							"frameFilters": {
+								"type": "boolean",
+								"description": "Use frame filters registered in GDB",
+								"default": true
 							},
 							"printCalls": {
 								"type": "boolean",
