@@ -1130,6 +1130,16 @@
 								"type": "array",
 								"description": "Additional arguments to pass to aliceserver",
 								"default": []
+							},
+							"printCalls": {
+								"type": "boolean",
+								"description": "Prints all aliceserver calls to the console",
+								"default": false
+							},
+							"showDevDebugOutput": {
+								"type": "boolean",
+								"description": "Prints all aliceserver responses to the console",
+								"default": false
 							}
 						}
 					},
