@@ -1,3 +1,5 @@
+// Directly manages an Aliceserver instance by managing MI requests.
+
 import { MI2, escape } from "./mi2";
 import { Breakpoint } from "../backend";
 import * as ChildProcess from "child_process";
@@ -19,6 +21,8 @@ export class MI2_ALICE extends MI2 {
 		const cmds = [
 			// Aliceserver is already async by default
 			//this.sendCommand("gdb-set target-async on"),
+
+			/* Format unknown since I'm too lazy to compile lldb-mi
 			new Promise(resolve => {
 				this.sendCommand("list-features").then(done => {
 					this.features = done.result("features");
@@ -28,14 +32,34 @@ export class MI2_ALICE extends MI2 {
 					resolve(undefined);
 				});
 			}) as Thenable<MINode>,
+			*/
+
+			// TODO: environment-directory
+			// Command not currently supported
 			//this.sendCommand("environment-directory \"" + escape(cwd) + "\"", true)
-		];
-		if (!attach)
+		] as Thenable<MINode>[];
+		if (!attach) // When launching
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
-		for (const cmd of this.extraCommands) {
+		for (const cmd of this.extraCommands) // For the target process
 			cmds.push(this.sendCliCommand(cmd));
-		}
 		return cmds;
+	}
+
+	// Start debugging target
+	override start(runToStart: boolean): Thenable<boolean> {
+		const options: string[] = [];
+		if (runToStart)
+			options.push("--start");
+		const startCommand: string = ["exec-run"].concat(options).join(" ");
+		return new Promise((resolve, reject) => {
+			this.log("console", "Running executable");
+			this.sendCommand(startCommand).then((info) => {
+				if (info.resultRecords.resultClass == "running")
+					resolve(undefined);
+				else
+					reject();
+			}, reject);
+		});
 	}
 
 	override attach(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any> {

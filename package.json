@@ -1126,7 +1126,7 @@
 								"type": "string",
 								"description": "project path"
 							},
-							"aliceserverpath": {
+							"aliceserver_path": {
 								"type": "string",
 								"description": "Path to the aliceserver executable or the command if in PATH",
 								"default": "aliceserver"
@@ -1138,7 +1138,7 @@
 							},
 							"debugger_args": {
 								"type": "array",
-								"description": "Additional arguments to pass to aliceserver specifically",
+								"description": "Additional arguments to pass to specifically to aliceserver",
 								"default": []
 							},
 							"printCalls": {
