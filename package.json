@@ -1133,12 +1133,12 @@
 							},
 							"env": {
 								"type": "object",
-								"description": "Environment overriding the aliceserver (and in turn also the process) environment",
+								"description": "Environment overriding the aliceserver environment variables",
 								"default": null
 							},
 							"debugger_args": {
 								"type": "array",
-								"description": "Additional arguments to pass to aliceserver",
+								"description": "Additional arguments to pass to aliceserver specifically",
 								"default": []
 							},
 							"printCalls": {
@@ -1174,26 +1174,26 @@
 							},
 							"printCalls": {
 								"type": "boolean",
-								"description": "Prints all mago calls to the console",
+								"description": "Prints all aliceserver calls to the console",
 								"default": false
 							},
 							"showDevDebugOutput": {
 								"type": "boolean",
-								"description": "Prints all mago responses to the console",
+								"description": "Prints all aliceserver responses to the console",
 								"default": false
 							},
 							"executable": {
 								"type": "string",
 								"description": "Path of executable for debugging symbols"
 							},
-							"magomipath": {
+							"aliceserverpath": {
 								"type": "string",
-								"description": "Path to the mago-mi executable or the command if in PATH",
-								"default": "mago-mi"
+								"description": "Path to the aliceserver executable or the command if in PATH",
+								"default": "aliceservere"
 							},
 							"env": {
 								"type": "object",
-								"description": "Environment overriding the mago-mi (and in turn also the process) environment",
+								"description": "Environment overriding the aliceserver environment variables",
 								"default": null
 							},
 							"debugger_args": {
@@ -1208,7 +1208,7 @@
 							},
 							"autorun": {
 								"type": "array",
-								"description": "mago commands to run when starting to debug",
+								"description": "aliceserver commands to run when starting to debug",
 								"default": []
 							},
 							"stopAtConnect": {
