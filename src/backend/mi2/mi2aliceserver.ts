@@ -81,6 +81,39 @@ export class MI2_ALICE extends MI2 {
 		});
 	}
 
+	override stop(): void {
+		this.sendRaw("-gdb-exit");
+		if (this.isSSH) {
+			const proc = this.stream;
+			const to = setTimeout(() => {
+				proc.signal("KILL");
+			}, 1000);
+			this.stream.on("exit", function (code) {
+				clearTimeout(to);
+			});
+		} else {
+			const proc = this.process;
+			const to = setTimeout(() => {
+				// When tinkering with Aliceserver:
+				// - the proc.pid field might be undefined (when exited too early)
+				// - the process could no longer be found after sending requests (crashed or exited)
+				try
+				{
+					process.kill(-proc.pid);
+				}
+				catch (error)
+				{
+					// Warning, since it does not prevent the intent of
+					// continuing to shut down the server.
+					console.warn("Failed to terminate process: " + error);
+				}
+			}, 1000);
+			this.process.on("exit", function (code) {
+				clearTimeout(to);
+			});
+		}
+	}
+
 	override setBreakPointCondition(bkptNum: number, condition: string): Thenable<any> {
 		return this.sendCommand("break-condition " + bkptNum + " \"" + escape(condition) + "\" 1");
 	}
