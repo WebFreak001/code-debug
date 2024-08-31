@@ -715,3 +715,50 @@ release which compares the previously released version against HEAD.
 Additionally, it might be helpful to bump the version number, possibly by
 incrementing the patch-version and adding "-alpha.1" (the marketplaces don't
 support that, but for a local checkout and build this is quite useful).
+
+# Adding a Debugger
+
+Native Debug (code-debug) is an extension that interfaces with VSCode's
+debugging interface by taking requests (DAP object representations) and interfaces with debuggers using the MI protocol.
+
+```text
++--------------------+
+| VSCode             |
+| Debug UI           |
+| ^   +--------------|     +----------+     +---------+
+| +-> | Native Debug | <-> | Debugger | <-> | Process |
+|     +--------------|     +----------+     +---------+
++--------------------+
+```
+
+The extension relies on these MI features:
+- MI version 2
+- mi-async (optional if the debugger is already asynchronous)
+- Numbered tokens (requests are prepended with a number identifying it)
+
+Command names can be customized in your module that emits the MI commands.
+
+## Adding Modules
+
+By default, Native Debug launches GDB (using `-i mi2 --quiet`) and expects
+GDB specific behavior. To implement a new debugger, you will likely need
+to override these behaviors. You can take the LLDB-MI implementation as base.
+
+To simplify, you will need to create:
+- `src/NAME.ts`: debug session class that extends `MI2DebugSession`
+  - Manages debugging sessions
+- `src/backend/mi2/mi2NAME.ts`
+  - Manages sending MI requests from the session handler
+
+## Debugging
+
+In the debug launch parameters (`.vscode/launch.json`), it is recommended
+that in the `code-debug server` launch configuration, the `program` parameter
+needs to be set to the implementation that handles requests.
+
+For example, instead of `"program": "${workspaceRoot}/src/gdb.ts",`,
+it could be `"program": "${workspaceRoot}/src/newdebugger.ts",`.
+
+Then, selecting `Extension Debugging (Extension + Debug Server)` and hitting
+Run (F5) will launch a new instead VSCode window with an instance of the debug
+server running (code-debug, not the targetted debugger).
