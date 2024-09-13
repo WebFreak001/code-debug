@@ -517,7 +517,7 @@ export class MI2DebugSession extends DebugSession {
 								variables.push({
 									name: variable.name,
 									type: variable.type,
-									value: "<unknown>",
+									value: variable.type,
 									variablesReference: createVariable(variable.name)
 								});
 						}

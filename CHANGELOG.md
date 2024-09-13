@@ -12,6 +12,7 @@ Versioning].
 
 ### Added
 
+- fix missing output of variable type for structure ([@henryriley0])
 - add static variable support ([@henryriley0])
 - fix gdb check error when debug beginning ([@henryriley0])
 - fix implicitly type error in log message when build vsix ([@henryriley0])
