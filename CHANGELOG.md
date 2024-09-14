@@ -20,6 +20,7 @@ Versioning].
   ([@GitMensch])
 - New `frameFilters` option for GDB that allows using custom frame filters,
   enabled by default ([@JacquesLucke])
+- Suppress error for hover as the user may just play with the mouse ([@oltolm]).
 
 ## [0.27.0] - 2024-02-07
 
