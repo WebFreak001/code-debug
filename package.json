@@ -299,6 +299,11 @@
 										"description": "Content will be executed on the SSH host before the debugger call."
 									}
 								}
+							},
+							"registerLimit": {
+								"type": "string",
+								"description": "List of numbers specifying the registers to display. An empty string indicates that the contents of all the registers must be returned.",
+								"default": ""
 							}
 						}
 					},
@@ -468,6 +473,11 @@
 										"description": "Content will be executed on the SSH host before the debugger call."
 									}
 								}
+							},
+							"registerLimit": {
+								"type": "string",
+								"description": "List of numbers specifying the registers to display. An empty string indicates that the contents of all the registers must be returned.",
+								"default": ""
 							}
 						}
 					}
@@ -766,6 +776,11 @@
 										"description": "Content will be executed on the SSH host before the debugger call."
 									}
 								}
+							},
+							"registerLimit": {
+								"type": "string",
+								"description": "List of numbers specifying the registers to display. An empty string indicates that the contents of all the registers must be returned.",
+								"default": ""
 							}
 						}
 					},
@@ -846,6 +861,11 @@
 								],
 								"description": "Whether debugger should stop at application entry point",
 								"default": false
+							},
+							"registerLimit": {
+								"type": "string",
+								"description": "List of numbers specifying the registers to display. An empty string indicates that the contents of all the registers must be returned.",
+								"default": ""
 							}
 						}
 					}
@@ -992,6 +1012,11 @@
 								"type": "array",
 								"description": "mago commands to run when starting to debug",
 								"default": []
+							},
+							"registerLimit": {
+								"type": "string",
+								"description": "List of numbers specifying the registers to display. An empty string indicates that the contents of all the registers must be returned.",
+								"default": ""
 							}
 						}
 					},
@@ -1057,6 +1082,11 @@
 								"type": "boolean",
 								"description": "Whether debugger should stop after connecting to target",
 								"default": false
+							},
+							"registerLimit": {
+								"type": "string",
+								"description": "List of numbers specifying the registers to display. An empty string indicates that the contents of all the registers must be returned.",
+								"default": ""
 							}
 						}
 					}

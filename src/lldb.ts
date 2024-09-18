@@ -18,6 +18,7 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
+	registerLimit: string;
 }
 
 export interface AttachRequestArguments extends DebugProtocol.AttachRequestArguments {
@@ -34,6 +35,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	valuesFormatting: ValuesFormattingMode;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
+	registerLimit: string;
 }
 
 class LLDBDebugSession extends MI2DebugSession {
@@ -66,6 +68,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		this.stopAtEntry = args.stopAtEntry;
+		this.miDebugger.registerLimit = args.registerLimit ?? "";
 		if (args.ssh !== undefined) {
 			if (args.ssh.forwardX11 === undefined)
 				args.ssh.forwardX11 = true;
@@ -110,6 +113,7 @@ class LLDBDebugSession extends MI2DebugSession {
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		this.stopAtEntry = args.stopAtEntry;
+		this.miDebugger.registerLimit = args.registerLimit ?? "";
 		this.miDebugger.attach(args.cwd, args.executable, args.target, args.autorun || []).then(() => {
 			this.sendResponse(response);
 		}, err => {
