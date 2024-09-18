@@ -22,6 +22,7 @@ Versioning].
   enabled by default ([@JacquesLucke])
 - Suppress error for hover as the user may just play with the mouse ([@oltolm]).
 - solve the problem of failed parsing of containers ([@henryriley0])
+- Resolves #421 - Added `registerLimit` option to specify the registers to display to avoid corrupting the whole registers view - PR #444 ([@chenzhiy2001])
 
 ## [0.27.0] - 2024-02-07
 

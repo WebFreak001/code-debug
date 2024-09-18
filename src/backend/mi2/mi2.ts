@@ -883,7 +883,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	async getRegisterValues(): Promise<RegisterValue[]> {
 		if (trace)
 			this.log("stderr", "getRegisterValues");
-		const result = await this.sendCommand("data-list-register-values N");
+		const result = await this.sendCommand("data-list-register-values --skip-unavailable N " + this.registerLimit);
 		const nodes = result.result('register-values');
 		if (!Array.isArray(nodes)) {
 			throw new Error('Failed to retrieve register values.');
@@ -1024,6 +1024,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	debugOutput: boolean;
 	features: string[];
 	public procEnv: any;
+	public registerLimit: string;
 	protected isSSH: boolean;
 	protected sshReady: boolean;
 	protected currentToken: number = 1;
