@@ -22,6 +22,8 @@ Versioning].
   enabled by default ([@JacquesLucke])
 - Suppress error for hover as the user may just play with the mouse ([@oltolm]).
 - solve the problem of failed parsing of containers ([@henryriley0])
+- Fixes #421 - Added `registerLimit` option to specify the registers to
+  display - PR #444 ([@chenzhiy2001])
 
 ## [0.27.0] - 2024-02-07
 
@@ -243,6 +245,7 @@ Versioning].
 [@abussy-aldebaran]: https://github.com/abussy-aldebaran
 [@anshulrouthu]: https://github.com/anshulrouthu
 [@brownts]: https://github.com/brownts
+[@chenzhiy2001]: https://github.com/chenzhiy2001
 [@coldencullen]: https://github.com/ColdenCullen
 [@eamousing]: https://github.com/eamousing
 [@evangrayk]: https://github.com/evangrayk
