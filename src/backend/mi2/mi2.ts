@@ -936,11 +936,12 @@ export class MI2 extends EventEmitter implements IBackend {
 		return this.sendCommand(`var-evaluate-expression ${this.quote(name)}`);
 	}
 
-	async varListChildren(name: string): Promise<VariableObject[]> {
+	async varListChildren(name: string, start?: number, count?: number): Promise<VariableObject[]> {
 		if (trace)
 			this.log("stderr", "varListChildren");
-		//TODO: add `from` and `to` arguments
-		const res = await this.sendCommand(`var-list-children --all-values ${this.quote(name)}`);
+		start ??= 0;
+		const range = count ? ` ${start} ${start + count}` : "";
+		const res = await this.sendCommand(`var-list-children --all-values ${this.quote(name)}${range}`);
 		const children = res.result("children") || [];
 		const omg: VariableObject[] = children.map((child: any) => new VariableObject(child[1]));
 		return omg;
