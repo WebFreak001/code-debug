@@ -537,7 +537,14 @@ export class MI2DebugSession extends DebugSession {
 				// TODO: this evaluates on an (effectively) unknown thread for multithreaded programs.
 				variable = await this.miDebugger.evalExpression(JSON.stringify(id), 0, 0);
 				try {
-					let expanded = expandValue(createVariable, variable.result("value"), id, variable);
+					let variableValue = variable.result("value");
+					const pattern = /'([^']*)' <repeats (\d+) times>/g;
+					variableValue = variableValue.replace(pattern, (_: any, char: string, count: string) => {
+						const repeatCount = parseInt(count, 10) + 1;
+						const repeatedArray = Array(repeatCount).fill(char);
+						return `{${repeatedArray.map(item => `'${item}'`).join(', ')}}`;
+					});
+					let expanded = expandValue(createVariable, variableValue, id, variable);
 					if (!expanded) {
 						this.sendErrorResponse(response, 2, `Could not expand variable`);
 					} else {
