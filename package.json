@@ -297,6 +297,32 @@
 									"bootstrap": {
 										"type": "string",
 										"description": "Content will be executed on the SSH host before the debugger call."
+									},
+									"algorithms": {
+										"type": "object",
+										"description": "This option allows you to explicitly override the default transport layer algorithms used for the connection.",
+										"properties": {
+											"cipher": {
+												"type": "array",
+												"description": "Ciphers."
+											},
+											"compress": {
+												"type": "array",
+												"description": "Compression algorithms."
+											},
+											"hmac": {
+												"type": "array",
+												"description": "(H)MAC algorithms."
+											},
+											"kex": {
+												"type": "array",
+												"description": "Key exchange algorithms."
+											},
+											"serverHostKey": {
+												"type": "array",
+												"description": "Server host key formats."
+											}
+										}
 									}
 								}
 							},
