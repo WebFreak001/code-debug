@@ -44,6 +44,7 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 }
 
 class GDBDebugSession extends MI2DebugSession {
+	protected supportsRunInTerminalRequest = false;
 	protected override initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 		response.body.supportsGotoTargetsRequest = true;
 		response.body.supportsHitConditionalBreakpoints = true;
@@ -54,6 +55,7 @@ class GDBDebugSession extends MI2DebugSession {
 		response.body.supportsSetVariable = true;
 		response.body.supportsStepBack = true;
 		response.body.supportsLogPoints = true;
+		args.supportsRunInTerminalRequest = true;
 		this.sendResponse(response);
 	}
 
@@ -98,6 +100,20 @@ class GDBDebugSession extends MI2DebugSession {
 			});
 		} else {
 			this.miDebugger.load(args.cwd, args.target, args.arguments, args.terminal, args.autorun || []).then(() => {
+				if(this.miDebugger.application.includes('gdb')){
+					if(args.terminal === 'integrated' || args.terminal === '' || args.terminal === undefined){
+						const terminalRequestArgs:DebugProtocol.RunInTerminalRequestArguments = {
+							kind: "integrated",
+							title: this.miDebugger.application,
+							cwd: args.cwd || '',
+							args: [],
+						};
+						if(process.platform != "win32"){
+							this.createIntegratedTerminalLinux(terminalRequestArgs);
+							this.emit("debug-ready");
+						}
+					}
+				}
 				this.sendResponse(response);
 			}, err => {
 				this.sendErrorResponse(response, 103, `Failed to load MI Debugger: ${err.toString()}`);
