@@ -776,7 +776,80 @@ export class MI2DebugSession extends DebugSession {
 			this.sourceFileMap = new SourceFileMap(configMap, fallbackGDB);
 		}
 	}
+	public async createIntegratedTerminalLinux(args:DebugProtocol.RunInTerminalRequestArguments) {
+		const mkdirAsync = fs.promises.mkdir;
+		const mkdtempAsync = async (tempDir: string, prefix: string): Promise<string> => {
+			const name = `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
+			const newDirPath = `${tempDir}/${name}`;
 
+			try {
+				await mkdirAsync(newDirPath, { recursive: true });
+				return newDirPath;
+			} catch (err) {
+				throw new Error(`Error creating temp directory: ${err.message}`);
+			}
+		};
+		const ttyTmpDir = await mkdtempAsync(os.tmpdir(), 'debug');
+
+		(async () => {
+			try {
+				fs.writeFileSync(
+					`${ttyTmpDir}/get-tty`,
+					`#!/usr/bin/env sh
+					# reset terminal to clear any previous states
+					reset
+					echo "The input and output of program will be here."
+					echo "Warning of set controlling terminal fail can be ignored."
+					tty > ${ttyTmpDir}/ttynameTmp
+					mv ${ttyTmpDir}/ttynameTmp ${ttyTmpDir}/ttyname
+					# wait for debug to finish
+					# prefer using tail to detect PID exit, but that requires GNU tail
+					tail -f --pid=${process.pid} /dev/null 2>/dev/null || while kill -s 0 ${process.pid} 2>/dev/null; do sleep 1s; done
+					# cleanup
+					rm ${ttyTmpDir}/ttyname
+					rm ${ttyTmpDir}/get-tty
+					rmdir ${ttyTmpDir}
+					`
+				);
+
+				let watcher: fs.FSWatcher | undefined;
+				const ttyNamePromise = new Promise<string>((resolve) => {
+					watcher = fs.watch(ttyTmpDir, (_eventType, filename) => {
+						if (filename === 'ttyname') {
+							watcher?.close();
+							resolve(
+								fs.readFileSync(`${ttyTmpDir}/ttyname`).toString().trim()
+							);
+						}
+					});
+				});
+
+				args.args = ['/bin/sh', `${ttyTmpDir}/get-tty`];
+				const response = await new Promise<DebugProtocol.Response>(
+					(resolve) =>
+						this.sendRequest(
+							'runInTerminal',
+							args,
+							10000,
+							resolve
+						)
+				);
+				if (response.success) {
+					const tty = await ttyNamePromise;
+					await this.miDebugger.sendCommand(`inferior-tty-set ${tty}`).then(done => {
+						this.miDebugger.emit("debug-ready");
+					});
+					return;
+				} else {
+					watcher?.close();
+					const message = `could not start the terminal on the client: ${response.message}`;
+					throw new Error(message);
+				}
+			} catch (err) {
+				throw new Error(`Error createIntegratedTerminalLinux: ${err.message}`);
+			}
+		})();
+	}
 }
 
 function prettyStringArray(strings: any) {
