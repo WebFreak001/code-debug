@@ -12,7 +12,8 @@
 			{
 				"name": "tslint-language-service"
 			}
-		]
+		],
+		"noImplicitAny": true
 	},
 	"exclude": [
 		"node_modules",

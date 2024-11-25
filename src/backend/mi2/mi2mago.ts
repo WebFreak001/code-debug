@@ -3,14 +3,14 @@ import { Stack } from "../backend";
 import { MINode } from "../mi_parse";
 
 export class MI2_Mago extends MI2_LLDB {
-	getStack(startFrame: number, maxLevels: number, thread: number): Promise<Stack[]> {
+	override getStack(startFrame: number, maxLevels: number, thread: number): Promise<Stack[]> {
 		return new Promise((resolve, reject) => {
 			const command = "stack-list-frames";
 			this.sendCommand(command).then((result) => {
 				const stack = result.resultRecords.results;
 				const ret: Stack[] = [];
-				const remaining = [];
-				const addToStack = (element) => {
+				const remaining: any = [];
+				const addToStack = (element: any) => {
 					const level = MINode.valueOf(element, "frame.level");
 					const addr = MINode.valueOf(element, "frame.addr");
 					const func = MINode.valueOf(element, "frame.func");

@@ -17,8 +17,10 @@ export interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArgum
 	stopAtEntry: boolean | string;
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
+	frameFilters: boolean;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
+	registerLimit: string;
 }
 
 export interface AttachRequestArguments extends DebugProtocol.AttachRequestArguments {
@@ -35,12 +37,14 @@ export interface AttachRequestArguments extends DebugProtocol.AttachRequestArgum
 	stopAtEntry: boolean | string;
 	ssh: SSHArguments;
 	valuesFormatting: ValuesFormattingMode;
+	frameFilters: boolean;
 	printCalls: boolean;
 	showDevDebugOutput: boolean;
+	registerLimit: string;
 }
 
 class GDBDebugSession extends MI2DebugSession {
-	protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
+	protected override initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
 		response.body.supportsGotoTargetsRequest = true;
 		response.body.supportsHitConditionalBreakpoints = true;
 		response.body.supportsConfigurationDoneRequest = true;
@@ -49,11 +53,17 @@ class GDBDebugSession extends MI2DebugSession {
 		response.body.supportsEvaluateForHovers = true;
 		response.body.supportsSetVariable = true;
 		response.body.supportsStepBack = true;
+		response.body.supportsLogPoints = true;
 		this.sendResponse(response);
 	}
 
-	protected launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
-		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env);
+	protected override launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments): void {
+		const dbgCommand = args.gdbpath || "gdb";
+		if (!this.checkCommand(dbgCommand)) {
+			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
+			return;
+		}
+		this.miDebugger = new MI2(dbgCommand, ["-q", "--interpreter=mi2"], args.debugger_args, args.env);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
@@ -63,9 +73,11 @@ class GDBDebugSession extends MI2DebugSession {
 		this.started = false;
 		this.crashed = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
+		this.miDebugger.frameFilters = !!args.frameFilters;
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		this.stopAtEntry = args.stopAtEntry;
+		this.miDebugger.registerLimit = args.registerLimit ?? "";
 		if (args.ssh !== undefined) {
 			if (args.ssh.forwardX11 === undefined)
 				args.ssh.forwardX11 = true;
@@ -93,8 +105,13 @@ class GDBDebugSession extends MI2DebugSession {
 		}
 	}
 
-	protected attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
-		this.miDebugger = new MI2(args.gdbpath || "gdb", ["-q", "--interpreter=mi2"], args.debugger_args, args.env);
+	protected override attachRequest(response: DebugProtocol.AttachResponse, args: AttachRequestArguments): void {
+		const dbgCommand = args.gdbpath || "gdb";
+		if (!this.checkCommand(dbgCommand)) {
+			this.sendErrorResponse(response, 104, `Configured debugger ${dbgCommand} not found.`);
+			return;
+		}
+		this.miDebugger = new MI2(dbgCommand, ["-q", "--interpreter=mi2"], args.debugger_args, args.env);
 		this.setPathSubstitutions(args.pathSubstitutions);
 		this.initDebugger();
 		this.quit = false;
@@ -102,9 +119,11 @@ class GDBDebugSession extends MI2DebugSession {
 		this.initialRunCommand = args.stopAtConnect ? RunCommand.NONE : RunCommand.CONTINUE;
 		this.isSSH = false;
 		this.setValuesFormattingMode(args.valuesFormatting);
+		this.miDebugger.frameFilters = !!args.frameFilters;
 		this.miDebugger.printCalls = !!args.printCalls;
 		this.miDebugger.debugOutput = !!args.showDevDebugOutput;
 		this.stopAtEntry = args.stopAtEntry;
+		this.miDebugger.registerLimit = args.registerLimit ?? "";
 		if (args.ssh !== undefined) {
 			if (args.ssh.forwardX11 === undefined)
 				args.ssh.forwardX11 = true;

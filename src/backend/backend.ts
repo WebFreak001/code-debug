@@ -4,11 +4,13 @@ import { DebugProtocol } from "vscode-debugprotocol/lib/debugProtocol";
 export type ValuesFormattingMode = "disabled" | "parseText" | "prettyPrinters";
 
 export interface Breakpoint {
+	id?:number;
 	file?: string;
 	line?: number;
 	raw?: string;
 	condition: string;
 	countCondition?: string;
+	logMessage?: string;
 }
 
 export interface Thread {
@@ -60,8 +62,8 @@ export interface IBackend {
 	attach(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any>;
 	connect(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any>;
 	start(runToStart: boolean): Thenable<boolean>;
-	stop();
-	detach();
+	stop(): void;
+	detach(): void;
 	interrupt(): Thenable<boolean>;
 	continue(): Thenable<boolean>;
 	next(): Thenable<boolean>;
@@ -141,29 +143,25 @@ export interface MIError extends Error {
 	readonly source: string;
 }
 export interface MIErrorConstructor {
-	new (message: string, source: string): MIError;
+	new(message: string, source: string): MIError;
 	readonly prototype: MIError;
 }
 
-export const MIError: MIErrorConstructor = <any> class MIError {
-	readonly name: string;
-	readonly message: string;
-	readonly source: string;
+export const MIError: MIErrorConstructor = class MIError {
+	private readonly _message: string;
+	private readonly _source: string;
 	public constructor(message: string, source: string) {
-		Object.defineProperty(this, 'name', {
-			get: () => (this.constructor as any).name,
-		});
-		Object.defineProperty(this, 'message', {
-			get: () => message,
-		});
-		Object.defineProperty(this, 'source', {
-			get: () => source,
-		});
+		this._message = message;
+		this._source = source;
 		Error.captureStackTrace(this, this.constructor);
 	}
 
+	get name() { return this.constructor.name; }
+	get message() { return this._message; }
+	get source() { return this._source; }
+
 	public toString() {
-		return `${this.message} (from ${this.source})`;
+		return `${this.message} (from ${this._source})`;
 	}
 };
 Object.setPrototypeOf(MIError as any, Object.create(Error.prototype));

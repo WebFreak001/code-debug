@@ -6,7 +6,7 @@ import * as linuxTerm from '../linux/console';
 import * as net from "net";
 import * as fs from "fs";
 import * as path from "path";
-import { Client } from "ssh2";
+import { Client, ClientChannel, ExecOptions } from "ssh2";
 
 export function escape(str: string) {
 	return str.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
@@ -24,12 +24,56 @@ function couldBeOutput(line: string) {
 
 const trace = false;
 
+class LogMessage {
+	protected logMsgVar = "";
+	protected logMsgVarProcess = "";
+	protected logMsgRplNum = 0;
+	protected logMsgRplItem: string[] = [];
+	protected logMsgMatch = /(^\$[0-9]*[\ ]*=[\ ]*)(.*)/;
+	protected logReplaceTest = /{([^}]*)}/g;
+	public logMsgBrkList: Breakpoint[] = [];
+
+	logMsgOutput(record:any){
+		if ((record.type === 'console')) {
+			if(record.content.startsWith("$")){
+				const content = record.content;
+				const variableMatch = this.logMsgMatch.exec(content);
+				if (variableMatch) {
+					const value = content.substr(variableMatch[1].length).trim();
+					this.logMsgRplItem.push(value);
+					this.logMsgRplNum--;
+					if(this.logMsgRplNum == 0){
+						for(let i = 0; i < this.logMsgRplItem.length; i++){
+							this.logMsgVarProcess = this.logMsgVarProcess.replace("placeHolderForVariable", this.logMsgRplItem[i]);
+						}
+						return "Log Message:"  + this.logMsgVarProcess;
+					}
+				}
+			}
+			return undefined;
+		}
+	}
+
+	logMsgProcess(parsed:MINode){
+		this.logMsgBrkList.forEach((brk)=>{
+			if(parsed.outOfBandRecord[0].output[0][1] == "breakpoint-hit" && parsed.outOfBandRecord[0].output[2][1] == brk.id){
+				this.logMsgVar = brk?.logMessage;
+				const matches = this.logMsgVar.match(this.logReplaceTest);
+				const count = matches ? matches.length : 0;
+				this.logMsgRplNum = count;
+				this.logMsgVarProcess = this.logMsgVar.replace(this.logReplaceTest, "placeHolderForVariable");
+				this.logMsgRplItem = [];
+			}
+		});
+	}
+}
+
 export class MI2 extends EventEmitter implements IBackend {
 	constructor(public application: string, public preargs: string[], public extraargs: string[], procEnv: any, public extraCommands: string[] = []) {
 		super();
 
 		if (procEnv) {
-			const env = {};
+			const env: { [key: string]: string } = {};
 			// Duplicate process.env so we don't override it
 			for (const key in process.env)
 				if (process.env.hasOwnProperty(key))
@@ -47,6 +91,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.procEnv = env;
 		}
 	}
+	protected logMessage:LogMessage = new LogMessage;
 
 	load(cwd: string, target: string, procArgs: string, separateConsole: string, autorun: string[]): Thenable<any> {
 		if (!path.isAbsolute(target))
@@ -57,8 +102,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
-			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
+			this.process.on("exit", () => this.emit("quit"));
+			this.process.on("error", err => this.emit("launcherror", err));
 			const promises = this.initCommands(target, cwd);
 			if (procArgs && procArgs.length)
 				promises.push(this.sendCommand("exec-arguments " + procArgs));
@@ -137,7 +182,7 @@ export class MI2 extends EventEmitter implements IBackend {
 
 			this.sshConn.on("ready", () => {
 				this.log("stdout", "Running " + this.application + " over ssh...");
-				const execArgs: any = {};
+				const execArgs: ExecOptions = {};
 				if (args.forwardX11) {
 					execArgs.x11 = {
 						single: false,
@@ -150,7 +195,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					if (err) {
 						this.log("stderr", "Could not run " + this.application + "(" + sshCMD + ") over ssh!");
 						if (err === undefined) {
-							err = "<reason unknown>";
+							err = new Error("<reason unknown>");
 						}
 						this.log("stderr", err.toString());
 						this.emit("quit");
@@ -161,10 +206,10 @@ export class MI2 extends EventEmitter implements IBackend {
 					this.stream = stream;
 					stream.on("data", this.stdout.bind(this));
 					stream.stderr.on("data", this.stderr.bind(this));
-					stream.on("exit", (() => {
+					stream.on("exit", () => {
 						this.emit("quit");
 						this.sshConn.end();
-					}).bind(this));
+					});
 					const promises = this.initCommands(target, cwd, attach);
 					promises.push(this.sendCommand("environment-cd \"" + escape(cwd) + "\""));
 					if (attach) {
@@ -181,7 +226,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			}).on("error", (err) => {
 				this.log("stderr", "Error running " + this.application + " over ssh!");
 				if (err === undefined) {
-					err = "<reason unknown>";
+					err = new Error("<reason unknown>");
 				}
 				this.log("stderr", err.toString());
 				this.emit("quit");
@@ -219,6 +264,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			cmds.push(this.sendCommand("file-exec-and-symbols \"" + escape(target) + "\""));
 		if (this.prettyPrint)
 			cmds.push(this.sendCommand("enable-pretty-printing"));
+		if (this.frameFilters)
+			cmds.push(this.sendCommand("enable-frame-filters"));
 		for (const cmd of this.extraCommands) {
 			cmds.push(this.sendCommand(cmd));
 		}
@@ -235,8 +282,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
-			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
+			this.process.on("exit", () => this.emit("quit"));
+			this.process.on("error", err => this.emit("launcherror", err));
 			const promises = this.initCommands(target, cwd, true);
 			if (target.startsWith("extended-remote")) {
 				promises.push(this.sendCommand("target-select " + target));
@@ -267,8 +314,8 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
-			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
+			this.process.on("exit", () => this.emit("quit"));
+			this.process.on("error", err => this.emit("launcherror", err));
 			const promises = this.initCommands(target, cwd, true);
 			promises.push(this.sendCommand("target-select remote " + target));
 			promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
@@ -279,7 +326,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		});
 	}
 
-	stdout(data) {
+	stdout(data: any) {
 		if (trace)
 			this.log("stderr", "stdout: " + data);
 		if (typeof data == "string")
@@ -298,7 +345,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		}
 	}
 
-	stderr(data) {
+	stderr(data: any) {
 		if (typeof data == "string")
 			this.errbuf += data;
 		else
@@ -314,14 +361,14 @@ export class MI2 extends EventEmitter implements IBackend {
 		}
 	}
 
-	onOutputStderr(lines) {
-		lines = <string[]> lines.split('\n');
+	onOutputStderr(str: string) {
+		const lines = str.split('\n');
 		lines.forEach(line => {
 			this.log("stderr", line);
 		});
 	}
 
-	onOutputPartial(line) {
+	onOutputPartial(line: string) {
 		if (couldBeOutput(line)) {
 			this.logNoNewLine("stdout", line);
 			return true;
@@ -329,8 +376,8 @@ export class MI2 extends EventEmitter implements IBackend {
 		return false;
 	}
 
-	onOutput(lines) {
-		lines = <string[]> lines.split('\n');
+	onOutput(str: string) {
+		const lines = str.split('\n');
 		lines.forEach(line => {
 			if (couldBeOutput(line)) {
 				if (!gdbMatch.exec(line))
@@ -354,6 +401,10 @@ export class MI2 extends EventEmitter implements IBackend {
 					parsed.outOfBandRecord.forEach(record => {
 						if (record.isStream) {
 							this.log(record.type, record.content);
+							const logOutput = this.logMessage.logMsgOutput(record);
+							if(logOutput){
+								this.log("console", logOutput);
+							}
 						} else {
 							if (record.type == "exec") {
 								this.emit("exec-async-output", parsed);
@@ -373,6 +424,7 @@ export class MI2 extends EventEmitter implements IBackend {
 										switch (reason) {
 											case "breakpoint-hit":
 												this.emit("breakpoint", parsed);
+												this.logMessage.logMsgProcess(parsed);
 												break;
 											case "watchpoint-trigger":
 											case "read-watchpoint-trigger":
@@ -391,13 +443,13 @@ export class MI2 extends EventEmitter implements IBackend {
 											case "solib-event":
 											case "syscall-entry":
 											case "syscall-return":
-											// TODO: inform the user
+												// TODO: inform the user
 												this.emit("step-end", parsed);
 												break;
 											case "fork":
 											case "vfork":
 											case "exec":
-											// TODO: inform the user, possibly add second inferior
+												// TODO: inform the user, possibly add second inferior
 												this.emit("step-end", parsed);
 												break;
 											case "signal-received":
@@ -563,17 +615,33 @@ export class MI2 extends EventEmitter implements IBackend {
 	loadBreakPoints(breakpoints: Breakpoint[]): Thenable<[boolean, Breakpoint][]> {
 		if (trace)
 			this.log("stderr", "loadBreakPoints");
-		const promisses = [];
+		const promisses: Thenable<[boolean, Breakpoint]>[] = [];
 		breakpoints.forEach(breakpoint => {
 			promisses.push(this.addBreakPoint(breakpoint));
 		});
 		return Promise.all(promisses);
 	}
 
-	setBreakPointCondition(bkptNum, condition): Thenable<any> {
+	setBreakPointCondition(bkptNum: number, condition: string): Thenable<any> {
 		if (trace)
 			this.log("stderr", "setBreakPointCondition");
 		return this.sendCommand("break-condition " + bkptNum + " " + condition);
+	}
+
+	setLogPoint(bkptNum:number, command:string): Thenable<any> {
+		const regex = /{([a-z0-9A-Z-_\.\>\&\*\[\]]*)}/gm;
+		let m:RegExpExecArray;
+		let commands:string = "";
+
+		while ((m = regex.exec(command))) {
+			if (m.index === regex.lastIndex) {
+				regex.lastIndex++;
+			}
+			if (m[1]) {
+				commands += `\"print ${m[1]}\" `;
+			}
+		}
+		return this.sendCommand("break-commands " + bkptNum + " " + commands);
 	}
 
 	setEntryBreakPoint(entryPoint: string): Thenable<any> {
@@ -607,15 +675,28 @@ export class MI2 extends EventEmitter implements IBackend {
 				if (result.resultRecords.resultClass == "done") {
 					const bkptNum = parseInt(result.result("bkpt.number"));
 					const newBrk = {
+						id: bkptNum,
 						file: breakpoint.file ? breakpoint.file : result.result("bkpt.file"),
 						raw: breakpoint.raw,
 						line: parseInt(result.result("bkpt.line")),
-						condition: breakpoint.condition
+						condition: breakpoint.condition,
+						logMessage: breakpoint?.logMessage,
 					};
 					if (breakpoint.condition) {
 						this.setBreakPointCondition(bkptNum, breakpoint.condition).then((result) => {
 							if (result.resultRecords.resultClass == "done") {
 								this.breakpoints.set(newBrk, bkptNum);
+								resolve([true, newBrk]);
+							} else {
+								resolve([false, undefined]);
+							}
+						}, reject);
+					} else if (breakpoint.logMessage) {
+						this.setLogPoint(bkptNum, breakpoint.logMessage).then((result) => {
+							if (result.resultRecords.resultClass == "done") {
+								breakpoint.id = newBrk.id;
+								this.breakpoints.set(newBrk, bkptNum);
+								this.logMessage.logMsgBrkList.push(breakpoint);
 								resolve([true, newBrk]);
 							} else {
 								resolve([false, undefined]);
@@ -651,7 +732,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		if (trace)
 			this.log("stderr", "clearBreakPoints");
 		return new Promise((resolve, reject) => {
-			const promises = [];
+			const promises: Thenable<void | MINode>[] = [];
 			const breakpoints = this.breakpoints;
 			this.breakpoints = new Map();
 			breakpoints.forEach((k, index) => {
@@ -675,14 +756,15 @@ export class MI2 extends EventEmitter implements IBackend {
 		const result = await this.sendCommand(command);
 		const threads = result.result("threads");
 		const ret: Thread[] = [];
+		if (!Array.isArray(threads)) { // workaround for lldb-mi bug: `'^done,threads="[]"'`
+			return ret;
+		}
 		return threads.map(element => {
 			const ret: Thread = {
 				id: parseInt(MINode.valueOf(element, "id")),
-				targetId: MINode.valueOf(element, "target-id")
+				targetId: MINode.valueOf(element, "target-id"),
+				name: MINode.valueOf(element, "name") || MINode.valueOf(element, "details")
 			};
-
-			ret.name = MINode.valueOf(element, "details")
-				|| undefined;
 
 			return ret;
 		});
@@ -708,12 +790,17 @@ export class MI2 extends EventEmitter implements IBackend {
 
 		const result = await this.sendCommand(["stack-list-frames"].concat(options).join(" "));
 		const stack = result.result("stack");
-		return stack.map(element => {
+		return stack.map((element: any) => {
 			const level = MINode.valueOf(element, "@frame.level");
 			const addr = MINode.valueOf(element, "@frame.addr");
 			const func = MINode.valueOf(element, "@frame.func");
 			const filename = MINode.valueOf(element, "@frame.file");
 			let file: string = MINode.valueOf(element, "@frame.fullname");
+			if (!file) {
+				// Fallback to using `file` if `fullname` is not provided.
+				// GDB does this for some reason when frame filters are used.
+				file = MINode.valueOf(element, "@frame.file");
+			}
 			if (file) {
 				if (this.isSSH)
 					file = path.posix.normalize(file);
@@ -796,7 +883,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	async getRegisterValues(): Promise<RegisterValue[]> {
 		if (trace)
 			this.log("stderr", "getRegisterValues");
-		const result = await this.sendCommand("data-list-register-values N");
+		const result = await this.sendCommand("data-list-register-values --skip-unavailable N " + this.registerLimit);
 		const nodes = result.result('register-values');
 		if (!Array.isArray(nodes)) {
 			throw new Error('Failed to retrieve register values.');
@@ -804,7 +891,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		const ret: RegisterValue[] = nodes.map(node => {
 			const index = parseInt(MINode.valueOf(node, "number"));
 			const value = MINode.valueOf(node, "value");
-			return {index: index, value: value};
+			return { index: index, value: value };
 		});
 		return ret;
 	}
@@ -832,10 +919,14 @@ export class MI2 extends EventEmitter implements IBackend {
 		return await this.sendCommand(command);
 	}
 
-	async varCreate(expression: string, name: string = "-", frame: string = "@"): Promise<VariableObject> {
+	async varCreate(threadId: number, frameLevel: number, expression: string, name: string = "-", frame: string = "@"): Promise<VariableObject> {
 		if (trace)
 			this.log("stderr", "varCreate");
-		const res = await this.sendCommand(`var-create ${this.quote(name)} ${frame} "${expression}"`);
+		let miCommand = "var-create ";
+		if (threadId != 0) {
+			miCommand += `--thread ${threadId} --frame ${frameLevel}`;
+		}
+		const res = await this.sendCommand(`${miCommand} ${this.quote(name)} ${frame} "${expression}"`);
 		return new VariableObject(res.result(""));
 	}
 
@@ -851,7 +942,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		//TODO: add `from` and `to` arguments
 		const res = await this.sendCommand(`var-list-children --all-values ${this.quote(name)}`);
 		const children = res.result("children") || [];
-		const omg: VariableObject[] = children.map(child => new VariableObject(child[1]));
+		const omg: VariableObject[] = children.map((child: any) => new VariableObject(child[1]));
 		return omg;
 	}
 
@@ -928,10 +1019,12 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	prettyPrint: boolean = true;
+	frameFilters: boolean = true;
 	printCalls: boolean;
 	debugOutput: boolean;
 	features: string[];
 	public procEnv: any;
+	public registerLimit: string;
 	protected isSSH: boolean;
 	protected sshReady: boolean;
 	protected currentToken: number = 1;
@@ -940,6 +1033,6 @@ export class MI2 extends EventEmitter implements IBackend {
 	protected buffer: string;
 	protected errbuf: string;
 	protected process: ChildProcess.ChildProcess;
-	protected stream;
-	protected sshConn;
+	protected stream: ClientChannel;
+	protected sshConn: Client;
 }

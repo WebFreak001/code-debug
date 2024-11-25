@@ -81,6 +81,20 @@ that location prior to continuing execution.  Note that stopping at the entry po
 attach configuration assumes that the entry point has not yet been entered at the time of
 attach, otherwise this will have no affect.
 
+There is a Registers view in the VARIABLES view. As we fetch all registers at once, there can
+be cases where a register that cannot be fetched causes the entire register request to fail,
+corrupting the entire Registers output. If this happens, you might need to set the
+`registerLimit` option to specify which registers you want the debugger to fetch
+automatically.
+
+For example, to display only registers `rax` and `rip` in an x64 debug session, send the
+command `-data-list-register-names` in the debug console of an active x64 debug session.
+You will then receive a response containing an array starting with `["rax","rbx" ...]`.
+In this array, the index of `rax` is 0 and `rip` is 16, so set the option as
+`"registerLimit": "0 16"`. If you find the response text hard to navigate, you can paste
+it into a browser's developer tools console and press enter to get an expandable response
+object with array elements' indices explicitly displayed.
+
 ### Attaching to existing processes
 
 Attaching to existing processes currently only works by specifying the PID in the
@@ -212,5 +226,11 @@ differently based on whether the remote system is a POSIX or a Windows system.
   ```
 You may need to experiment to find the correct escaping necessary for the command to be
 sent to the debugger as you intended.
+
+### LogMessage
+
+LogMessage will print a message in the debug console when breakpoint is hit. Expressions within {} are interpolated.
+
+![LogMessage](images/logMessage.gif)
 
 ## [Issues](https://github.com/WebFreak001/code-debug)

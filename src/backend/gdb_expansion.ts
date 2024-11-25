@@ -1,7 +1,8 @@
+import { VariableObject } from "./backend";
 import { MINode } from "./mi_parse";
 
-const resultRegex = /^([a-zA-Z_\-][a-zA-Z0-9_\-]*|\[\d+\])\s*=\s*/;
-const variableRegex = /^[a-zA-Z_\-][a-zA-Z0-9_\-]*/;
+const resultRegex = /^([a-zA-Z_\-][a-zA-Z0-9_\-<> :(),]*|\[\d+\])\s*=\s*/;
+const variableRegex = /^[a-zA-Z_\-\'\(][a-zA-Z0-9_\-\|\>\ \\\'\)\:]*/;
 const errorRegex = /^\<.+?\>/;
 const referenceStringRegex = /^(0x[0-9a-fA-F]+\s*)"/;
 const referenceRegex = /^0x[0-9a-fA-F]+/;
@@ -29,7 +30,7 @@ export function isExpandable(value: string): number {
 	else return 0;
 }
 
-export function expandValue(variableCreate: Function, value: string, root: string = "", extra: any = undefined): any {
+export function expandValue(variableCreate: (arg: VariableObject | string, options?: any) => any, value: string, root: string = "", extra: any = undefined): any {
 	const parseCString = () => {
 		value = value.trim();
 		if (value[0] != '"' && value[0] != '\'')
@@ -56,10 +57,10 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 	};
 
 	const stack = [root];
-	let parseValue, parseCommaResult, parseCommaValue, parseResult, createValue;
+	let parseValue: () => any, parseCommaResult: (pushToStack: boolean) => any, parseCommaValue: () => any, parseResult: (pushToStack: boolean) => any, createValue: (name: string, val: any) => any;
 	let variable = "";
 
-	const getNamespace = (variable) => {
+	const getNamespace = (variable: string) => {
 		let namespace = "";
 		let prefix = "";
 		stack.push(variable);
@@ -104,14 +105,18 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		const eqPos = value.indexOf("=");
 		const newValPos1 = value.indexOf("{");
 		const newValPos2 = value.indexOf(",");
+		const newValPos3 = value.indexOf("}");
 		let newValPos = newValPos1;
 		if (newValPos2 != -1 && newValPos2 < newValPos1)
 			newValPos = newValPos2;
-		if (newValPos != -1 && eqPos > newValPos || eqPos == -1) { // is value list
+		if (newValPos != -1 && eqPos > newValPos || eqPos == -1 || eqPos > newValPos3 && newValPos2 != -1 || value.startsWith("std::")) { // is value list
 			const values = [];
 			stack.push("[0]");
 			let val = parseValue();
 			stack.pop();
+			if(typeof val == "string" && val.endsWith('>')){
+				val = val.substring(0, val.length - 2);
+			}
 			values.push(createValue("[0]", val));
 			const remaining = value;
 			let i = 0;
@@ -190,17 +195,26 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 			return parseCString();
 		else if (value[0] == '{')
 			return parseTupleOrList();
+		else if(value.startsWith("std::")){
+			const eqPos = value.indexOf("=");
+			value = value.substring(eqPos + 2);
+			return parseValue();
+		}
 		else
 			return parsePrimitive();
 	};
 
 	parseResult = (pushToStack: boolean = false) => {
-		value = value.trim();
+		value = value.replace(/^</, "").trim().replace(/^static /, "");
 		const variableMatch = resultRegex.exec(value);
 		if (!variableMatch)
 			return undefined;
 		value = value.substring(variableMatch[0].length).trim();
-		const name = variable = variableMatch[1];
+		let name = variable = variableMatch[1].trim();
+		const tmpName = name.split(" ");
+		if(tmpName.length > 1 && !name.includes("anonymous union") && !name.includes(',')){
+			name = tmpName[tmpName.length - 1];
+		}
 		if (pushToStack)
 			stack.push(variable);
 		const val = parseValue();
@@ -209,7 +223,7 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 		return createValue(name, val);
 	};
 
-	createValue = (name, val) => {
+	createValue = (name: string, val: any) => {
 		let ref = 0;
 		if (typeof val == "object") {
 			ref = variableCreate(val);
@@ -223,12 +237,15 @@ export function expandValue(variableCreate: Function, value: string, root: strin
 				val = "Object@" + val;
 			}
 		} else if (typeof val == "string" && val.startsWith("@0x")) {
-			ref = variableCreate(getNamespace("*&" + name.substr));
+			ref = variableCreate(getNamespace("*&" + name.substring(1)));
 			val = "Ref" + val;
 		} else if (typeof val == "string" && val.startsWith("<...>")) {
 			ref = variableCreate(getNamespace(name));
 			val = "...";
 		}
+		value = value.trim();
+		value = value.replace(/^, <No data fields>/, "");
+
 		return {
 			name: name,
 			value: val,

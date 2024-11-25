@@ -4,7 +4,7 @@ import * as ChildProcess from "child_process";
 import * as path from "path";
 
 export class MI2_LLDB extends MI2 {
-	protected initCommands(target: string, cwd: string, attach: boolean = false) {
+	protected override initCommands(target: string, cwd: string, attach: boolean = false) {
 		// We need to account for the possibility of the path type used by the debugger being different
 		// than the path type where the extension is running (e.g., SSH from Linux to Windows machine).
 		// Since the CWD is expected to be an absolute path in the debugger's environment, we can test
@@ -35,14 +35,14 @@ export class MI2_LLDB extends MI2 {
 		return cmds;
 	}
 
-	attach(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any> {
+	override attach(cwd: string, executable: string, target: string, autorun: string[]): Thenable<any> {
 		return new Promise((resolve, reject) => {
 			const args = this.preargs.concat(this.extraargs || []);
 			this.process = ChildProcess.spawn(this.application, args, { cwd: cwd, env: this.procEnv });
 			this.process.stdout.on("data", this.stdout.bind(this));
 			this.process.stderr.on("data", this.stderr.bind(this));
-			this.process.on("exit", (() => { this.emit("quit"); }).bind(this));
-			this.process.on("error", ((err) => { this.emit("launcherror", err); }).bind(this));
+			this.process.on("exit", () => this.emit("quit"));
+			this.process.on("error", err => this.emit("launcherror", err));
 			const promises = this.initCommands(target, cwd, true);
 			promises.push(this.sendCommand("file-exec-and-symbols \"" + escape(executable) + "\""));
 			promises.push(this.sendCommand("target-attach " + target));
@@ -54,11 +54,11 @@ export class MI2_LLDB extends MI2 {
 		});
 	}
 
-	setBreakPointCondition(bkptNum, condition): Thenable<any> {
+	override setBreakPointCondition(bkptNum: number, condition: string): Thenable<any> {
 		return this.sendCommand("break-condition " + bkptNum + " \"" + escape(condition) + "\" 1");
 	}
 
-	goto(filename: string, line: number): Thenable<Boolean> {
+	override goto(filename: string, line: number): Thenable<Boolean> {
 		return new Promise((resolve, reject) => {
 			// LLDB parses the file differently than GDB...
 			// GDB doesn't allow quoting only the file but only the whole argument

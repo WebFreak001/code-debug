@@ -10,6 +10,21 @@ Versioning].
 
 ## Unreleased
 
+### Added
+
+- fix missing output of variable type for structure ([@henryriley0])
+- add static variable support ([@henryriley0])
+- fix gdb check error when debug beginning ([@henryriley0])
+- fix implicitly type error in log message when build vsix ([@henryriley0])
+- check for configured debugger before start to provide a nicer error message
+  ([@GitMensch])
+- New `frameFilters` option for GDB that allows using custom frame filters,
+  enabled by default ([@JacquesLucke])
+- Suppress error for hover as the user may just play with the mouse ([@oltolm]).
+- solve the problem of failed parsing of containers ([@henryriley0])
+- Fixes #421 - Added `registerLimit` option to specify the registers to
+  display - PR #444 ([@chenzhiy2001])
+
 ### Fixed
 
 - close invalid existing sockets from previous usage of this extension during
@@ -21,6 +36,8 @@ Versioning].
 
 - Added registers view ([@nomtats]) #242
 - Enabled breakpoints inside `riscv` files ([@William-An]) #404
+
+[0.27.0]: https://github.com/WebFreak001/code-debug/compare/v0.26.1...v0.27.0
 
 ## [0.26.1] - 2022-12-31
 
@@ -233,6 +250,7 @@ Versioning].
 [@abussy-aldebaran]: https://github.com/abussy-aldebaran
 [@anshulrouthu]: https://github.com/anshulrouthu
 [@brownts]: https://github.com/brownts
+[@chenzhiy2001]: https://github.com/chenzhiy2001
 [@coldencullen]: https://github.com/ColdenCullen
 [@eamousing]: https://github.com/eamousing
 [@evangrayk]: https://github.com/evangrayk
@@ -240,6 +258,8 @@ Versioning].
 [@gentoo90]: https://github.com/gentoo90
 [@gitmensch]: https://github.com/GitMensch
 [@haronk]: https://github.com/HaronK
+[@henryriley0]: https://github.com/HenryRiley0
+[@jacqueslucke]: https://github.com/JacquesLucke
 [@jelleroets]: https://github.com/JelleRoets
 [@karljs]: https://github.com/karljs
 [@kvinwang]: https://github.com/kvinwang
@@ -252,7 +272,7 @@ Versioning].
 [@reznikmm]: https://github.com/reznikmm
 [@simark]: https://github.com/simark
 [@webfreak001]: https://github.com/WebFreak001
-[@William-An]: https://github.com/William-An
+[@william-an]: https://github.com/William-An
 [@yanpas]: https://github.com/Yanpas
 
 <!-- markdownlint-configure-file { "MD024": { "siblings_only": true } } -->
