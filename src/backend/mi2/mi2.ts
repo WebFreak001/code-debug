@@ -155,7 +155,10 @@ export class MI2 extends EventEmitter implements IBackend {
 						const xclientsock = accept();
 						xclientsock.pipe(xserversock).pipe(xclientsock);
 					});
-					xserversock.connect(args.x11port, args.x11host);
+					if (args.x11host !== "")
+						xserversock.connect(args.x11port, args.x11host);
+					else
+						xserversock.connect(`/tmp/.X11-unix/X${args.x11port}`);
 				});
 			}
 

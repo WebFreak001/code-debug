@@ -281,12 +281,12 @@
 											"number",
 											"string"
 										],
-										"description": "Port to redirect X11 data to (by default port = display + 6000)",
+										"description": "TCP port to redirect X11 data to (by default port = display + 6000); raw display number for unix domain connection",
 										"default": 6000
 									},
 									"x11host": {
 										"type": "string",
-										"description": "Hostname/ip to redirect X11 data to",
+										"description": "Hostname/ip to redirect X11 data to; empty string for a unix domain connection",
 										"default": "localhost"
 									},
 									"remotex11screen": {
@@ -455,12 +455,12 @@
 											"number",
 											"string"
 										],
-										"description": "Port to redirect X11 data to (by default port = display + 6000)",
+										"description": "TCP port to redirect X11 data to (by default port = display + 6000); raw display number for unix domain connection",
 										"default": 6000
 									},
 									"x11host": {
 										"type": "string",
-										"description": "Hostname/ip to redirect X11 data to",
+										"description": "Hostname/ip to redirect X11 data to; empty string for a unix domain connection",
 										"default": "localhost"
 									},
 									"remotex11screen": {
@@ -755,7 +755,7 @@
 									},
 									"x11host": {
 										"type": "string",
-										"description": "Hostname/ip to redirect X11 data to",
+										"description": "Hostname/ip to redirect X11 data to; empty string for a unix domain connection",
 										"default": "localhost"
 									},
 									"x11port": {
@@ -763,7 +763,7 @@
 											"number",
 											"string"
 										],
-										"description": "Port to redirect X11 data to (by default port = display + 6000)",
+										"description": "TCP port to redirect X11 data to (by default port = display + 6000); raw display number for unix domain connection",
 										"default": 6000
 									},
 									"remotex11screen": {
