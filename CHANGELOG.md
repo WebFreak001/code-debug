@@ -25,6 +25,11 @@ Versioning].
 - Fixes #421 - Added `registerLimit` option to specify the registers to
   display - PR #444 ([@chenzhiy2001])
 
+### Fixed
+
+- close invalid existing sockets from previous usage of this extension during
+  start of a new debugging session (@chenhaoyang2019, [@GitMensch])
+
 ## [0.27.0] - 2024-02-07
 
 ### Added
