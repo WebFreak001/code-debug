@@ -38,7 +38,7 @@ export class SourceFileMap {
 	// allowing non-native path types to be tested by overriding this method in
 	// a subclass in the test harness.
 	protected getNativePath(): PathKind {
-		if (process.platform == "win32")
+		if (process.platform === "win32")
 			return PathWin32.getInstance();
 		else
 			return PathPosix.getInstance();

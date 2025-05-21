@@ -34,7 +34,7 @@ function getMemoryRange(range: string) {
 		return undefined;
 	range = range.replace(/\s+/g, "").toLowerCase();
 	let index;
-	if ((index = range.indexOf("+")) != -1) {
+	if ((index = range.indexOf("+")) !== -1) {
 		const from = range.substring(0, index);
 		let length = range.substring(index + 1);
 		if (!memoryLocationRegex.exec(from))
@@ -42,7 +42,7 @@ function getMemoryRange(range: string) {
 		if (memoryLocationRegex.exec(length))
 			length = parseInt(length.substring(2), 16).toString();
 		return "from=" + encodeURIComponent(from) + "&length=" + encodeURIComponent(length);
-	} else if ((index = range.indexOf("-")) != -1) {
+	} else if ((index = range.indexOf("-")) !== -1) {
 		const from = range.substring(0, index);
 		const to = range.substring(index + 1);
 		if (!memoryLocationRegex.exec(from))
@@ -58,14 +58,14 @@ function getMemoryRange(range: string) {
 function examineMemory() {
 	const socketlists = path.join(os.tmpdir(), "code-debug-sockets");
 	if (!fs.existsSync(socketlists)) {
-		if (process.platform == "win32")
+		if (process.platform === "win32")
 			return vscode.window.showErrorMessage("This command is not available on windows");
 		else
 			return vscode.window.showErrorMessage("No debugging sessions available");
 	}
 	fs.readdir(socketlists, (err, files) => {
 		if (err) {
-			if (process.platform == "win32")
+			if (process.platform === "win32")
 				return vscode.window.showErrorMessage("This command is not available on windows");
 			else
 				return vscode.window.showErrorMessage("No debugging sessions available");
@@ -75,11 +75,11 @@ function examineMemory() {
 				vscode.window.showTextDocument(vscode.Uri.parse("debugmemory://" + file + "?" + getMemoryRange(range)));
 			});
 		};
-		if (files.length == 1)
+		if (files.length === 1)
 			pickedFile(files[0]);
 		else if (files.length > 0)
 			vscode.window.showQuickPick(files, { placeHolder: "Running debugging instance" }).then(file => pickedFile(file));
-		else if (process.platform == "win32")
+		else if (process.platform === "win32")
 			return vscode.window.showErrorMessage("This command is not available on windows");
 		else
 			vscode.window.showErrorMessage("No debugging sessions available");
@@ -93,16 +93,16 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 			let from: number, to: number;
 			let highlightAt = -1;
 			const splits = uri.query.split("&");
-			if (splits[0].split("=")[0] == "at") {
+			if (splits[0].split("=")[0] === "at") {
 				const loc = parseInt(splits[0].split("=")[1].substring(2), 16);
 				highlightAt = 64;
 				from = Math.max(loc - 64, 0);
 				to = Math.max(loc + 768, 0);
-			} else if (splits[0].split("=")[0] == "from") {
+			} else if (splits[0].split("=")[0] === "from") {
 				from = parseInt(splits[0].split("=")[1].substring(2), 16);
-				if (splits[1].split("=")[0] == "to") {
+				if (splits[1].split("=")[0] === "to") {
 					to = parseInt(splits[1].split("=")[1].substring(2), 16);
-				} else if (splits[1].split("=")[0] == "length") {
+				} else if (splits[1].split("=")[0] === "length") {
 					to = from + parseInt(splits[1].split("=")[1]);
 				} else return reject("Invalid Range");
 			} else return reject("Invalid Range");
@@ -117,7 +117,7 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 				let asciiLine = "";
 				let byteNo = 0;
 				for (let i = 0; i < hexString.length; i += 2) {
-					if (x == 0) {
+					if (x === 0) {
 						let addr = index.toString(16);
 						while (addr.length < 16) addr = '0' + addr;
 						formattedCode += addr + "  ";
@@ -131,13 +131,13 @@ class MemoryContentProvider implements vscode.TextDocumentContentProvider {
 					else
 						asciiLine += ".";
 
-					if (highlightAt == byteNo) {
+					if (highlightAt === byteNo) {
 						formattedCode = formattedCode.slice(0, -1) + "[" + digit + "]";
 					} else {
 						formattedCode += digit + " ";
 					}
 
-					if (x == 7)
+					if (x === 7)
 						formattedCode += " ";
 
 					if (++x >= 16) {

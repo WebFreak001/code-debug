@@ -42,7 +42,7 @@ class LogMessage {
 					const value = content.substr(variableMatch[1].length).trim();
 					this.logMsgRplItem.push(value);
 					this.logMsgRplNum--;
-					if(this.logMsgRplNum == 0){
+					if(this.logMsgRplNum === 0){
 						for(let i = 0; i < this.logMsgRplItem.length; i++){
 							this.logMsgVarProcess = this.logMsgVarProcess.replace("placeHolderForVariable", this.logMsgRplItem[i]);
 						}
@@ -56,7 +56,7 @@ class LogMessage {
 
 	logMsgProcess(parsed:MINode){
 		this.logMsgBrkList.forEach((brk)=>{
-			if(parsed.outOfBandRecord[0].output[0][1] == "breakpoint-hit" && parsed.outOfBandRecord[0].output[2][1] == brk.id){
+			if(parsed.outOfBandRecord[0].output[0][1] === "breakpoint-hit" && parsed.outOfBandRecord[0].output[2][1] === brk.id){
 				this.logMsgVar = brk?.logMessage;
 				const matches = this.logMsgVar.match(this.logReplaceTest);
 				const count = matches ? matches.length : 0;
@@ -107,7 +107,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			const promises = this.initCommands(target, cwd);
 			if (procArgs && procArgs.length)
 				promises.push(this.sendCommand("exec-arguments " + procArgs));
-			if (process.platform == "win32") {
+			if (process.platform === "win32") {
 				if (separateConsole !== undefined)
 					promises.push(this.sendCommand("gdb-set new-console on"));
 				promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
@@ -332,12 +332,12 @@ export class MI2 extends EventEmitter implements IBackend {
 	stdout(data: any) {
 		if (trace)
 			this.log("stderr", "stdout: " + data);
-		if (typeof data == "string")
+		if (typeof data === "string")
 			this.buffer += data;
 		else
 			this.buffer += data.toString("utf8");
 		const end = this.buffer.lastIndexOf('\n');
-		if (end != -1) {
+		if (end !== -1) {
 			this.onOutput(this.buffer.substring(0, end));
 			this.buffer = this.buffer.substring(end + 1);
 		}
@@ -349,12 +349,12 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	stderr(data: any) {
-		if (typeof data == "string")
+		if (typeof data === "string")
 			this.errbuf += data;
 		else
 			this.errbuf += data.toString("utf8");
 		const end = this.errbuf.lastIndexOf('\n');
-		if (end != -1) {
+		if (end !== -1) {
 			this.onOutputStderr(this.errbuf.substring(0, end));
 			this.errbuf = this.errbuf.substring(end + 1);
 		}
@@ -397,7 +397,7 @@ export class MI2 extends EventEmitter implements IBackend {
 						handled = true;
 					}
 				}
-				if (!handled && parsed.resultRecords && parsed.resultRecords.resultClass == "error") {
+				if (!handled && parsed.resultRecords && parsed.resultRecords.resultClass === "error") {
 					this.log("stderr", parsed.result("msg") || line);
 				}
 				if (parsed.outOfBandRecord) {
@@ -409,11 +409,11 @@ export class MI2 extends EventEmitter implements IBackend {
 								this.log("console", logOutput);
 							}
 						} else {
-							if (record.type == "exec") {
+							if (record.type === "exec") {
 								this.emit("exec-async-output", parsed);
-								if (record.asyncClass == "running")
+								if (record.asyncClass === "running")
 									this.emit("running", parsed);
-								else if (record.asyncClass == "stopped") {
+								else if (record.asyncClass === "stopped") {
 									const reason = parsed.record("reason");
 									if (reason === undefined) {
 										if (trace)
@@ -461,7 +461,7 @@ export class MI2 extends EventEmitter implements IBackend {
 											case "exited-normally":
 												this.emit("exited-normally", parsed);
 												break;
-											case "exited": // exit with error code != 0
+											case "exited": // exit with error code !== 0
 												this.log("stderr", "Program exited with code " + parsed.record("exit-code"));
 												this.emit("exited-normally", parsed);
 												break;
@@ -478,10 +478,10 @@ export class MI2 extends EventEmitter implements IBackend {
 									}
 								} else
 									this.log("log", JSON.stringify(parsed));
-							} else if (record.type == "notify") {
-								if (record.asyncClass == "thread-created") {
+							} else if (record.type === "notify") {
+								if (record.asyncClass === "thread-created") {
 									this.emit("thread-created", parsed);
-								} else if (record.asyncClass == "thread-exited") {
+								} else if (record.asyncClass === "thread-exited") {
 									this.emit("thread-exited", parsed);
 								}
 							}
@@ -489,7 +489,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					});
 					handled = true;
 				}
-				if (parsed.token == undefined && parsed.resultRecords == undefined && parsed.outOfBandRecord.length == 0)
+				if (parsed.token === undefined && parsed.resultRecords === undefined && parsed.outOfBandRecord.length === 0)
 					handled = true;
 				if (!handled)
 					this.log("log", "Unhandled: " + JSON.stringify(parsed));
@@ -505,7 +505,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		return new Promise((resolve, reject) => {
 			this.log("console", "Running executable");
 			this.sendCommand(startCommand).then((info) => {
-				if (info.resultRecords.resultClass == "running")
+				if (info.resultRecords.resultClass === "running")
 					resolve(undefined);
 				else
 					reject();
@@ -551,7 +551,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.log("stderr", "interrupt");
 		return new Promise((resolve, reject) => {
 			this.sendCommand("exec-interrupt").then((info) => {
-				resolve(info.resultRecords.resultClass == "done");
+				resolve(info.resultRecords.resultClass === "done");
 			}, reject);
 		});
 	}
@@ -561,7 +561,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.log("stderr", "continue");
 		return new Promise((resolve, reject) => {
 			this.sendCommand("exec-continue" + (reverse ? " --reverse" : "")).then((info) => {
-				resolve(info.resultRecords.resultClass == "running");
+				resolve(info.resultRecords.resultClass === "running");
 			}, reject);
 		});
 	}
@@ -571,7 +571,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.log("stderr", "next");
 		return new Promise((resolve, reject) => {
 			this.sendCommand("exec-next" + (reverse ? " --reverse" : "")).then((info) => {
-				resolve(info.resultRecords.resultClass == "running");
+				resolve(info.resultRecords.resultClass === "running");
 			}, reject);
 		});
 	}
@@ -581,7 +581,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.log("stderr", "step");
 		return new Promise((resolve, reject) => {
 			this.sendCommand("exec-step" + (reverse ? " --reverse" : "")).then((info) => {
-				resolve(info.resultRecords.resultClass == "running");
+				resolve(info.resultRecords.resultClass === "running");
 			}, reject);
 		});
 	}
@@ -591,7 +591,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.log("stderr", "stepOut");
 		return new Promise((resolve, reject) => {
 			this.sendCommand("exec-finish" + (reverse ? " --reverse" : "")).then((info) => {
-				resolve(info.resultRecords.resultClass == "running");
+				resolve(info.resultRecords.resultClass === "running");
 			}, reject);
 		});
 	}
@@ -603,7 +603,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			const target: string = '"' + (filename ? escape(filename) + ":" : "") + line + '"';
 			this.sendCommand("break-insert -t " + target).then(() => {
 				this.sendCommand("exec-jump " + target).then((info) => {
-					resolve(info.resultRecords.resultClass == "running");
+					resolve(info.resultRecords.resultClass === "running");
 				}, reject);
 			}, reject);
 		});
@@ -659,14 +659,14 @@ export class MI2 extends EventEmitter implements IBackend {
 				return resolve([false, undefined]);
 			let location = "";
 			if (breakpoint.countCondition) {
-				if (breakpoint.countCondition[0] == ">")
+				if (breakpoint.countCondition[0] === ">")
 					location += "-i " + numRegex.exec(breakpoint.countCondition.substring(1))[0] + " ";
 				else {
 					const match = numRegex.exec(breakpoint.countCondition)[0];
-					if (match.length != breakpoint.countCondition.length) {
+					if (match.length !== breakpoint.countCondition.length) {
 						this.log("stderr", "Unsupported break count expression: '" + breakpoint.countCondition + "'. Only supports 'X' for breaking once after X times or '>X' for ignoring the first X breaks");
 						location += "-t ";
-					} else if (parseInt(match) != 0)
+					} else if (parseInt(match) !== 0)
 						location += "-t -i " + parseInt(match) + " ";
 				}
 			}
@@ -675,7 +675,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			else
 				location += '"' + escape(breakpoint.file) + ":" + breakpoint.line + '"';
 			this.sendCommand("break-insert -f " + location).then((result) => {
-				if (result.resultRecords.resultClass == "done") {
+				if (result.resultRecords.resultClass === "done") {
 					const bkptNum = parseInt(result.result("bkpt.number"));
 					const newBrk = {
 						id: bkptNum,
@@ -687,7 +687,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					};
 					if (breakpoint.condition) {
 						this.setBreakPointCondition(bkptNum, breakpoint.condition).then((result) => {
-							if (result.resultRecords.resultClass == "done") {
+							if (result.resultRecords.resultClass === "done") {
 								this.breakpoints.set(newBrk, bkptNum);
 								resolve([true, newBrk]);
 							} else {
@@ -696,7 +696,7 @@ export class MI2 extends EventEmitter implements IBackend {
 						}, reject);
 					} else if (breakpoint.logMessage) {
 						this.setLogPoint(bkptNum, breakpoint.logMessage).then((result) => {
-							if (result.resultRecords.resultClass == "done") {
+							if (result.resultRecords.resultClass === "done") {
 								breakpoint.id = newBrk.id;
 								this.breakpoints.set(newBrk, bkptNum);
 								this.logMessage.logMsgBrkList.push(breakpoint);
@@ -723,7 +723,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			if (!this.breakpoints.has(breakpoint))
 				return resolve(false);
 			this.sendCommand("break-delete " + this.breakpoints.get(breakpoint)).then((result) => {
-				if (result.resultRecords.resultClass == "done") {
+				if (result.resultRecords.resultClass === "done") {
 					this.breakpoints.delete(breakpoint);
 					resolve(true);
 				} else resolve(false);
@@ -741,7 +741,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			breakpoints.forEach((k, index) => {
 				if (index.file === source) {
 					promises.push(this.sendCommand("break-delete " + k).then((result) => {
-						if (result.resultRecords.resultClass == "done") resolve(true);
+						if (result.resultRecords.resultClass === "done") resolve(true);
 						else resolve(false);
 					}));
 				} else {
@@ -778,7 +778,7 @@ export class MI2 extends EventEmitter implements IBackend {
 
 		const options: string[] = [];
 
-		if (thread != 0)
+		if (thread !== 0)
 			options.push("--thread " + thread);
 
 		const depth: number = (await this.sendCommand(["stack-info-depth"].concat(options).join(" "))).result("depth").valueOf();
@@ -914,7 +914,7 @@ export class MI2 extends EventEmitter implements IBackend {
 			this.log("stderr", "evalExpression");
 
 		let command = "data-evaluate-expression ";
-		if (thread != 0) {
+		if (thread !== 0) {
 			command += `--thread ${thread} --frame ${frame} `;
 		}
 		command += name;
@@ -926,7 +926,7 @@ export class MI2 extends EventEmitter implements IBackend {
 		if (trace)
 			this.log("stderr", "varCreate");
 		let miCommand = "var-create ";
-		if (threadId != 0) {
+		if (threadId !== 0) {
 			miCommand += `--thread ${threadId} --frame ${frameLevel}`;
 		}
 		const res = await this.sendCommand(`${miCommand} ${this.quote(name)} ${frame} "${expression}"`);
@@ -966,7 +966,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	}
 
 	log(type: string, msg: string) {
-		this.emit("msg", type, msg[msg.length - 1] == '\n' ? msg : (msg + "\n"));
+		this.emit("msg", type, msg[msg.length - 1] === '\n' ? msg : (msg + "\n"));
 	}
 
 	sendUserInput(command: string, threadId: number = 0, frameLevel: number = 0): Thenable<MINode> {
@@ -988,7 +988,7 @@ export class MI2 extends EventEmitter implements IBackend {
 
 	sendCliCommand(command: string, threadId: number = 0, frameLevel: number = 0): Thenable<MINode> {
 		let miCommand = "interpreter-exec ";
-		if (threadId != 0) {
+		if (threadId !== 0) {
 			miCommand += `--thread ${threadId} --frame ${frameLevel} `;
 		}
 		miCommand += `console "${command.replace(/[\\"']/g, '\\$&')}"`;

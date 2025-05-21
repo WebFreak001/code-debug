@@ -25,7 +25,7 @@ suite("Source File Map", () => {
 			}
 		}
 		const fileMap: NativeSourceFileMap = new NativeSourceFileMap({});
-		if (process.platform == "win32")
+		if (process.platform === "win32")
 			assert.ok(fileMap.getNativePathTest() instanceof PathWin32);
 		else
 			assert.ok(fileMap.getNativePathTest() instanceof PathPosix);
