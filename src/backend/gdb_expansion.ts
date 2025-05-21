@@ -66,7 +66,7 @@ export function expandValue(variableCreate: (arg: VariableObject | string, optio
 		stack.push(variable);
 		stack.forEach(name => {
 			prefix = "";
-			if (name !== "") {
+			if (name != "") {
 				if (name.startsWith("["))
 					namespace = namespace + name;
 				else {
@@ -229,7 +229,7 @@ export function expandValue(variableCreate: (arg: VariableObject | string, optio
 			ref = variableCreate(val);
 			val = "Object";
 		} else if (typeof val === "string" && val.startsWith("*0x")) {
-			if (extra && MINode.valueOf(extra, "arg") === "1") {
+			if (extra && MINode.valueOf(extra, "arg") == "1") {
 				ref = variableCreate(getNamespace("*(" + name), { arg: true });
 				val = "<args>";
 			} else {
