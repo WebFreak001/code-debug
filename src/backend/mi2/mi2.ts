@@ -461,7 +461,7 @@ export class MI2 extends EventEmitter implements IBackend {
 											case "exited-normally":
 												this.emit("exited-normally", parsed);
 												break;
-											case "exited": // exit with error code !== 0
+											case "exited": // exit with error code != 0
 												this.log("stderr", "Program exited with code " + parsed.record("exit-code"));
 												this.emit("exited-normally", parsed);
 												break;
@@ -489,7 +489,7 @@ export class MI2 extends EventEmitter implements IBackend {
 					});
 					handled = true;
 				}
-				if (parsed.token === undefined && parsed.resultRecords === undefined && parsed.outOfBandRecord.length === 0)
+				if (parsed.token == undefined && parsed.resultRecords == undefined && parsed.outOfBandRecord.length === 0)
 					handled = true;
 				if (!handled)
 					this.log("log", "Unhandled: " + JSON.stringify(parsed));
