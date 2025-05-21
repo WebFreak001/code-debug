@@ -9,32 +9,32 @@ function parseString(str: string): string {
 	const ret = Buffer.alloc(str.length * 4);
 	let bufIndex = 0;
 
-	if (str[0] != '"' || str[str.length - 1] != '"')
+	if (str[0] !== '"' || str[str.length - 1] !== '"')
 		throw new Error("Not a valid string");
 	str = str.slice(1, -1);
 	let escaped = false;
 	for (let i = 0; i < str.length; i++) {
 		if (escaped) {
 			let m;
-			if (str[i] == '\\')
+			if (str[i] === '\\')
 				bufIndex += ret.write('\\', bufIndex);
-			else if (str[i] == '"')
+			else if (str[i] === '"')
 				bufIndex += ret.write('"', bufIndex);
-			else if (str[i] == '\'')
+			else if (str[i] === '\'')
 				bufIndex += ret.write('\'', bufIndex);
-			else if (str[i] == 'n')
+			else if (str[i] === 'n')
 				bufIndex += ret.write('\n', bufIndex);
-			else if (str[i] == 'r')
+			else if (str[i] === 'r')
 				bufIndex += ret.write('\r', bufIndex);
-			else if (str[i] == 't')
+			else if (str[i] === 't')
 				bufIndex += ret.write('\t', bufIndex);
-			else if (str[i] == 'b')
+			else if (str[i] === 'b')
 				bufIndex += ret.write('\b', bufIndex);
-			else if (str[i] == 'f')
+			else if (str[i] === 'f')
 				bufIndex += ret.write('\f', bufIndex);
-			else if (str[i] == 'v')
+			else if (str[i] === 'v')
 				bufIndex += ret.write('\v', bufIndex);
-			else if (str[i] == '0')
+			else if (str[i] === '0')
 				bufIndex += ret.write('\0', bufIndex);
 			else if (m = octalMatch.exec(str.substring(i))) {
 				ret.writeUInt8(parseInt(m[0], 8), bufIndex++);
@@ -43,9 +43,9 @@ function parseString(str: string): string {
 				bufIndex += ret.write(str[i], bufIndex);
 			escaped = false;
 		} else {
-			if (str[i] == '\\')
+			if (str[i] === '\\')
 				escaped = true;
-			else if (str[i] == '"')
+			else if (str[i] === '"')
 				throw new Error("Not a valid string");
 			else
 				bufIndex += ret.write(str[i], bufIndex);
@@ -90,20 +90,20 @@ export class MINode implements MIInfo {
 			let target = pathRegex.exec(path);
 			if (target) {
 				path = path.substring(target[0].length);
-				if (current.length && typeof current != "string") {
+				if (current.length && typeof current !== "string") {
 					const found = [];
 					for (const element of current) {
-						if (element[0] == target[1]) {
+						if (element[0] === target[1]) {
 							found.push(element[1]);
 						}
 					}
 					if (found.length > 1) {
 						current = found;
-					} else if (found.length == 1) {
+					} else if (found.length === 1) {
 						current = found[0];
 					} else return undefined;
 				} else return undefined;
-			} else if (path[0] == '@') {
+			} else if (path[0] === '@') {
 				current = [current];
 				path = path.substring(1);
 			} else {
@@ -111,9 +111,9 @@ export class MINode implements MIInfo {
 				if (target) {
 					path = path.substring(target[0].length);
 					const i = parseInt(target[1]);
-					if (current.length && typeof current != "string" && i >= 0 && i < current.length) {
+					if (current.length && typeof current !== "string" && i >= 0 && i < current.length) {
 						current = current[i];
-					} else if (i == 0) {
+					} else if (i === 0) {
 						// empty
 					} else return undefined;
 				} else return undefined;
@@ -165,7 +165,7 @@ export function parseMI(output: string): MINode {
 	} as const;
 
 	const parseCString = () => {
-		if (output[0] != '"')
+		if (output[0] !== '"')
 			return "";
 		let stringEnd = 1;
 		let inString = true;
@@ -174,9 +174,9 @@ export function parseMI(output: string): MINode {
 		while (inString) {
 			if (escaped)
 				escaped = false;
-			else if (remaining[0] == '\\')
+			else if (remaining[0] === '\\')
 				escaped = true;
-			else if (remaining[0] == '"')
+			else if (remaining[0] === '"')
 				inString = false;
 
 			remaining = remaining.substring(1);
@@ -195,12 +195,12 @@ export function parseMI(output: string): MINode {
 	let parseValue: () => any, parseCommaResult: () => any, parseCommaValue: () => any, parseResult: () => any;
 
 	const parseTupleOrList = () => {
-		if (output[0] != '{' && output[0] != '[')
+		if (output[0] !== '{' && output[0] !== '[')
 			return undefined;
 		const oldContent = output;
-		const canBeValueList = output[0] == '[';
+		const canBeValueList = output[0] === '[';
 		output = output.substring(1);
-		if (output[0] == '}' || output[0] == ']') {
+		if (output[0] === '}' || output[0] === ']') {
 			output = output.substring(1); // ] or }
 			return [];
 		}
@@ -230,9 +230,9 @@ export function parseMI(output: string): MINode {
 	};
 
 	parseValue = () => {
-		if (output[0] == '"')
+		if (output[0] === '"')
 			return parseCString();
-		else if (output[0] == '{' || output[0] == '[')
+		else if (output[0] === '{' || output[0] === '[')
 			return parseTupleOrList();
 		else
 			return undefined;
@@ -248,14 +248,14 @@ export function parseMI(output: string): MINode {
 	};
 
 	parseCommaValue = () => {
-		if (output[0] != ',')
+		if (output[0] !== ',')
 			return undefined;
 		output = output.substring(1);
 		return parseValue();
 	};
 
 	parseCommaResult = () => {
-		if (output[0] != ',')
+		if (output[0] !== ',')
 			return undefined;
 		output = output.substring(1);
 		return parseResult();

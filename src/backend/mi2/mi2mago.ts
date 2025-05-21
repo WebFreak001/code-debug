@@ -32,7 +32,7 @@ export class MI2_Mago extends MI2_LLDB {
 				};
 				stack.forEach(element => {
 					if (element)
-						if (element[0] == "stack") {
+						if (element[0] === "stack") {
 							addToStack(element[1]);
 						} else remaining.push(element);
 				});
