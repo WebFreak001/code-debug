@@ -852,15 +852,13 @@ export class MI2 extends EventEmitter implements IBackend {
 		if (trace)
 			this.log("stderr", "getRegisters");
 
-		// Getting register names and values are separate GDB commands.
-		// We first retrieve the register names and then the values.
-		// The register names should never change, so we could cache and reuse them,
-		// but for now we just retrieve them every time to keep it simple.
-		const names = await this.getRegisterNames();
+		if (!this.regNames) {
+			this.regNames = await this.getRegisterNames();
+		}
 		const values = await this.getRegisterValues();
 		const ret: Variable[] = [];
 		for (const val of values) {
-			const key = names[val.index];
+			const key = this.regNames[val.index];
 			const value = val.value;
 			const type = "string";
 			ret.push({
@@ -1026,6 +1024,7 @@ export class MI2 extends EventEmitter implements IBackend {
 	printCalls: boolean;
 	debugOutput: boolean;
 	features: string[];
+	regNames: string[];
 	public procEnv: any;
 	public registerLimit: string;
 	protected isSSH: boolean;
