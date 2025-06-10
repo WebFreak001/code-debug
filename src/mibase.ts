@@ -49,7 +49,7 @@ export class MI2DebugSession extends DebugSession {
 		super(debuggerLinesStartAt1, isServer);
 	}
 
-	protected initDebugger() {
+	protected async initDebugger() {
 		this.miDebugger.on("launcherror", this.launchError.bind(this));
 		this.miDebugger.on("quit", this.quitEvent.bind(this));
 		this.miDebugger.on("exited-normally", this.quitEvent.bind(this));
@@ -65,6 +65,10 @@ export class MI2DebugSession extends DebugSession {
 		this.miDebugger.on("thread-exited", this.threadExitedEvent.bind(this));
 		this.miDebugger.once("debug-ready", (() => this.sendEvent(new InitializedEvent())));
 		try {
+			const socketlists = systemPath.join(os.tmpdir(), "code-debug-sockets");
+			if (fs.existsSync(socketlists)) {
+				await cleanInvalidSocketPath(socketlists);
+			}
 			this.commandServer = net.createServer(c => {
 				c.on("data", data => {
 					const rawCmd = data.toString();
@@ -76,7 +80,7 @@ export class MI2DebugSession extends DebugSession {
 						args = JSON.parse(rawCmd.substring(spaceIndex + 1));
 					}
 					Promise.resolve((this.miDebugger as any)[func].apply(this.miDebugger, args)).then(data => {
-						c.write(data.toString());
+						c.write(data instanceof Object ? JSON.stringify(data).toString() :  data.toString());
 					});
 				});
 			});
@@ -532,10 +536,9 @@ export class MI2DebugSession extends DebugSession {
 			}
 		} else if (typeof id === "string") {
 			// Variable members
-			let variable;
 			try {
 				// TODO: this evaluates on an (effectively) unknown thread for multithreaded programs.
-				variable = await this.miDebugger.evalExpression(JSON.stringify(id), 0, 0);
+				const variable = await this.miDebugger.evalExpression(JSON.stringify(id), 0, 0);
 				try {
 					let variableValue = variable.result("value");
 					const pattern = /'([^']*)' <repeats (\d+) times>/g;
@@ -786,4 +789,39 @@ function prettyStringArray(strings: any) {
 		else
 			return JSON.stringify(strings);
 	} else return strings;
+}
+
+async function cleanInvalidSocketPath(socketlists:string){
+	return new Promise((resolve, reject) => {
+		fs.readdir(socketlists, (err, files) => {
+			if (!err) {
+				if (files.length == 0) resolve('');
+				files.forEach((file)=>{
+					try {
+						const conn = net.connect(systemPath.join(socketlists, file));
+						conn.setTimeout(200);
+						conn.on('error', ()=>{
+							fs.unlink(systemPath.join(socketlists, file), (err) => {
+								if (err)
+									// eslint-disable-next-line no-console
+									console.error("Failed to unlink invalid debug server");
+								resolve('');
+							});
+						});
+						conn.on('timeout', ()=>{
+							conn.destroy();
+						});
+					} catch {
+						fs.unlink(systemPath.join(socketlists, file), (err) => {
+							if (err)
+								// eslint-disable-next-line no-console
+								console.error("Failed to unlink invalid debug server");
+							resolve('');
+						});
+					}
+				});
+			}
+			resolve('');
+		});
+	});
 }
