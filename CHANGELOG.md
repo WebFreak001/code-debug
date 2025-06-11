@@ -24,6 +24,7 @@ Versioning].
 - solve the problem of failed parsing of containers ([@henryriley0])
 - Fixes #421 - Added `registerLimit` option to specify the registers to
   display - PR #444 ([@chenzhiy2001])
+- add qt nested structure unit test -PR #452([@henryriley0])
 
 ## [0.27.0] - 2024-02-07
 

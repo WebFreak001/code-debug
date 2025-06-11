@@ -224,6 +224,133 @@ suite("GDB Value Expansion", () => {
 			}
 		]);
 	});
+	test("QT nested structure", () => {
+		const node = `{{ref = {atomic = {_q_value = {<std::__atomic_base<int>> = {static _S_alignment = 4, _M_i = -1}, <No data fields>}}}, size = 0, static shared_null = <same type>}, {ref = {atomic = {_q_value = {<std::__atomic_base<int>> = {static _S_alignment = 4, _M_i = 0}, <No data fields>}}}, size = 0, static shared_null = <same type>}}`;
+		assert.strictEqual(isExpandable(node), 1);
+		const variables = expandValue(variableCreate, node);
+		assert.deepStrictEqual(variables, [
+			{
+				"name": "[0]",
+				"value": "Object",
+				"variablesReference": {
+					"expanded": [
+						{
+							"name": "ref",
+							"value": "Object",
+							"variablesReference": {
+								"expanded": [
+									{
+										"name": "atomic",
+										"value": "Object",
+										"variablesReference": {
+											"expanded": [
+												{
+													"name": "_q_value",
+													"value": "Object",
+													"variablesReference": {
+														"expanded": [
+															{
+																"name": "std::__atomic_base<int>>",
+																"value": "Object",
+																"variablesReference": {
+																	"expanded": [
+																		{
+																			"name": "_S_alignment",
+																			"value": "4",
+																			"variablesReference": 0
+																		},
+																		{
+																			"name": "_M_i",
+																			"value": "-1",
+																			"variablesReference": 0
+																		}
+																	]
+																}
+															}
+														]
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "size",
+							"value": "0",
+							"variablesReference": 0
+						},
+						{
+							"name": "shared_null",
+							"value": "<same type>",
+							"variablesReference": 0
+						}
+					]
+				}
+			},
+			{
+				"name": "[1]",
+				"value": "Object",
+				"variablesReference": {
+					"expanded": [
+						{
+							"name": "ref",
+							"value": "Object",
+							"variablesReference": {
+								"expanded": [
+									{
+										"name": "atomic",
+										"value": "Object",
+										"variablesReference": {
+											"expanded": [
+												{
+													"name": "_q_value",
+													"value": "Object",
+													"variablesReference": {
+														"expanded": [
+															{
+																"name": "std::__atomic_base<int>>",
+																"value": "Object",
+																"variablesReference": {
+																	"expanded": [
+																		{
+																			"name": "_S_alignment",
+																			"value": "4",
+																			"variablesReference": 0
+																		},
+																		{
+																			"name": "_M_i",
+																			"value": "0",
+																			"variablesReference": 0
+																		}
+																	]
+																}
+															}
+														]
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "size",
+							"value": "0",
+							"variablesReference": 0
+						},
+						{
+							"name": "shared_null",
+							"value": "<same type>",
+							"variablesReference": 0
+						}
+					]
+				}
+			}
+		]);
+	});
 	test("Simple node with errors", () => {
 		const node = `{_enableMipMaps = false, _minFilter = <incomplete type>, _magFilter = <incomplete type>, _wrapX = <incomplete type>, _wrapY = <incomplete type>, _inMode = 6408, _mode = 6408, _id = 1, _width = 1024, _height = 1024}`;
 		assert.strictEqual(isExpandable(node), 1);
