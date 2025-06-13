@@ -96,9 +96,16 @@ export class MI2DebugSession extends DebugSession {
 	// verifies that the specified command can be executed
 	protected checkCommand(debuggerName: string): boolean {
 		try {
-			const command = process.platform === 'win32' ? 'where' : 'command -v';
-			execSync(`${command} ${debuggerName}`, { stdio: 'ignore' });
-			return true;
+			if (process.platform === 'win32' && debuggerName.includes("\\")) {
+				const command = 'dir';
+				execSync(`${command} ${debuggerName}`, { stdio: 'ignore' });
+				return true;
+			}
+			else {
+				const command = process.platform === 'win32' ? 'where' : 'command -v';
+				execSync(`${command} ${debuggerName}`, { stdio: 'ignore' });
+				return true;
+			}
 		} catch (error) {
 			return false;
 		}
