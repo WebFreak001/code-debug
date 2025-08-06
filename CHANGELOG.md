@@ -246,7 +246,6 @@ Versioning].
 [@anshulrouthu]: https://github.com/anshulrouthu
 [@brownts]: https://github.com/brownts
 [@chenzhiy2001]: https://github.com/chenzhiy2001
-[@coldencullen]: https://github.com/ColdenCullen
 [@eamousing]: https://github.com/eamousing
 [@evangrayk]: https://github.com/evangrayk
 [@faustinoaq]: https://github.com/faustinoaq
