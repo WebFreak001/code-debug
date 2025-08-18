@@ -4,7 +4,7 @@ import * as fs from "fs";
 export function spawnTerminalEmulator(preferedEmulator: string): Thenable<string> {
 	return new Promise((resolve, reject) => {
 		const ttyFileOutput = "/tmp/vscode-gdb-tty-0" + Math.floor(Math.random() * 100000000).toString(36);
-		ChildProcess.spawn(preferedEmulator || "x-terminal-emulator", ["-e", "sh -c \"tty > " + ttyFileOutput + " && sleep 4294967294\""]);
+		ChildProcess.spawn("x-terminal-emulator", ["-e", "sh -c \"tty > " + ttyFileOutput + " && sleep 4294967294\""]);
 		let it = 0;
 		const interval = setInterval(() => {
 			if (fs.existsSync(ttyFileOutput)) {

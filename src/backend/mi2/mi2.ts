@@ -6,6 +6,7 @@ import * as linuxTerm from '../linux/console';
 import * as net from "net";
 import * as fs from "fs";
 import * as path from "path";
+import { DebugProtocol } from 'vscode-debugprotocol';
 import { Client, ClientChannel, ExecOptions } from "ssh2";
 
 export function escape(str: string) {
@@ -116,19 +117,20 @@ export class MI2 extends EventEmitter implements IBackend {
 					resolve(undefined);
 				}, reject);
 			} else {
-				if (separateConsole !== undefined) {
+				if (separateConsole == "external") {
 					linuxTerm.spawnTerminalEmulator(separateConsole).then(tty => {
 						promises.push(this.sendCommand("inferior-tty-set " + tty));
 						promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 						Promise.all(promises).then(() => {
-							this.emit("debug-ready");
+							if(this.application.includes('gdb')){
+								this.emit("debug-ready");
+							}
 							resolve(undefined);
 						}, reject);
 					});
 				} else {
 					promises.push(...autorun.map(value => { return this.sendUserInput(value); }));
 					Promise.all(promises).then(() => {
-						this.emit("debug-ready");
 						resolve(undefined);
 					}, reject);
 				}
