@@ -54,6 +54,7 @@ export interface SSHArguments {
 	x11host: string;
 	bootstrap: string;
 	sourceFileMap: { [index: string]: string };
+	algorithms: any;
 }
 
 export interface IBackend {
