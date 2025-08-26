@@ -1127,6 +1127,163 @@
 						}
 					}
 				]
+			},
+			{
+				"type": "aliceserver-mi",
+				"program": "./out/src/aliceserver.js",
+				"runtime": "node",
+				"label": "Aliceserver",
+				"languages": [
+					"c",
+					"cpp",
+					"d"
+				],
+				"configurationAttributes": {
+					"launch": {
+						"required": [
+							"target"
+						],
+						"properties": {
+							"target": {
+								"type": "string",
+								"description": "Path of executable"
+							},
+							"arguments": {
+								"type": "string",
+								"description": "Arguments to append after the executable"
+							},
+							"cwd": {
+								"type": "string",
+								"description": "project path"
+							},
+							"aliceserver_path": {
+								"type": "string",
+								"description": "Path to the aliceserver executable or the command if in PATH",
+								"default": "aliceserver"
+							},
+							"env": {
+								"type": "object",
+								"description": "Environment overriding the aliceserver environment variables",
+								"default": null
+							},
+							"debugger_args": {
+								"type": "array",
+								"description": "Additional arguments to pass to specifically to aliceserver",
+								"default": []
+							},
+							"printCalls": {
+								"type": "boolean",
+								"description": "Prints all aliceserver calls to the console",
+								"default": false
+							},
+							"showDevDebugOutput": {
+								"type": "boolean",
+								"description": "Prints all aliceserver responses to the console",
+								"default": false
+							}
+						}
+					},
+					"attach": {
+						"required": [
+							"target"
+						],
+						"properties": {
+							"target": {
+								"type": "string",
+								"description": "PID of running program or program name"
+							},
+							"valuesFormatting": {
+								"type": "string",
+								"description": "Set the way of showing variable values. 'disabled' - show value as is, 'parseText' - parse debuggers output text into structure, 'prettyPrinters' - enable debuggers custom pretty-printers if there are any",
+								"default": "parseText",
+								"enum": [
+									"disabled",
+									"parseText",
+									"prettyPrinters"
+								]
+							},
+							"printCalls": {
+								"type": "boolean",
+								"description": "Prints all aliceserver calls to the console",
+								"default": false
+							},
+							"showDevDebugOutput": {
+								"type": "boolean",
+								"description": "Prints all aliceserver responses to the console",
+								"default": false
+							},
+							"executable": {
+								"type": "string",
+								"description": "Path of executable for debugging symbols"
+							},
+							"aliceserverpath": {
+								"type": "string",
+								"description": "Path to the aliceserver executable or the command if in PATH",
+								"default": "aliceservere"
+							},
+							"env": {
+								"type": "object",
+								"description": "Environment overriding the aliceserver environment variables",
+								"default": null
+							},
+							"debugger_args": {
+								"type": "array",
+								"description": "Additional arguments to pass to mago",
+								"default": []
+							},
+							"cwd": {
+								"type": "string",
+								"description": "project path",
+								"default": "${workspaceRoot}"
+							},
+							"autorun": {
+								"type": "array",
+								"description": "aliceserver commands to run when starting to debug",
+								"default": []
+							},
+							"stopAtConnect": {
+								"type": "boolean",
+								"description": "Whether debugger should stop after connecting to target",
+								"default": false
+							}
+						}
+					}
+				},
+				"initialConfigurations": [
+					{
+						"name": "Debug",
+						"type": "aliceserver-mi",
+						"request": "launch",
+						"target": "./bin/executable",
+						"cwd": "${workspaceRoot}"
+					}
+				],
+				"configurationSnippets": [
+					{
+						"label": "Aliceserver: Launch Program",
+						"description": "Starts the program using aliceserver",
+						"body": {
+							"type": "aliceserver",
+							"request": "launch",
+							"name": "${2:Launch Program}",
+							"target": "${1:./executable}",
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
+						}
+					},
+					{
+						"label": "Aliceserver: Attach to PID",
+						"description": "Attaches to a running program pid using aliceserver",
+						"body": {
+							"type": "aliceserver",
+							"request": "attach",
+							"name": "${2:Attach to PID}",
+							"target": "${1:[PID]}",
+							"cwd": "^\"\\${workspaceRoot}\"",
+							"valuesFormatting": "parseText"
+						}
+					}
+				]
 			}
 		]
 	},
