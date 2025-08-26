@@ -26,6 +26,7 @@ Versioning].
   display - PR #444 ([@chenzhiy2001])
 - resolve the issue of not being able to set the GDB binary with a path on
   Windows - PR #448 ([@henryriley0])
+- add qt unit test ([@henryriley0])
 
 ## [0.27.0] - 2024-02-07
 
